@@ -1,0 +1,78 @@
+
+#
+# Makefile
+#
+# Copyright (C) 2005 Alexey Zaytsev
+#
+# Is distributed under the GPL 2 license.
+#
+
+#### CONFIGURATION SECTION START ####
+
+
+ARCH = i386
+
+
+#### CONFIGURATION SECTION END ####
+
+ASM ?= nasm
+ASM_FLAGS += -g
+CC ?= gcc
+CC_FLAGS += -Wall -g 
+LD ?= ld
+OBJCOPY ?= objcopy
+
+
+SRC = 	kernel/init.c \
+	kernel/textio.c \
+	kernel/klist.c \
+	kernel/klib.c \
+	kernel/thread.c \
+	kernel/scheduler.c \
+	arch/i386/asm.c \
+	arch/i386/pic.c \
+	arch/i386/serial_console.c \
+	arch/i386/vga_console.c \
+	arch/i386/console.c \
+	arch/i386/isr.c \
+	arch/i386/irq.c \
+	arch/i386/trap.c \
+	arch/i386/timer.c \
+	arch/i386/thread.c \
+	arch/i386/mm.c \
+	arch/i386/paging.c
+
+OBJ = $(SRC:.c=.o)
+
+OBJ +=	arch/i386/asm/isr.o \
+	arch/i386/asm/irq.o \
+	arch/i386/asm/context_switch.o
+
+all: kernel
+
+.c.o:
+	$(CC) $(CC_FLAGS) -Iinclude -ffreestanding -c $< -o $@
+
+.S.o:
+	$(ASM) $(ASM_FLAGS) -f aout  $< -o $@
+
+image:	kernel loader
+	$(MAKE) -C rootfs
+
+kernel-elf: $(OBJ) arch/i386/boot/multiboot.o
+	$(LD) -T arch/i386/kernel-elf.lds -o kuca-elf \
+		arch/i386/boot/multiboot.o $(OBJ)
+	
+kernel: kernel-elf
+	
+loader: arch/i386/boot/bootloader.S
+	$(ASM) -f bin arch/i386/boot/bootloader.S -o arch/i386/boot/bootloader.bin
+
+clean:
+	$(MAKE) clean -C rootfs
+	rm -f kernel/kernel.bin kuca-bin kuca-elf
+	rm -f arch/i386/boot/bootloader.bin
+	rm -fr arch/i386/*.o arch/i386/asm/*.o arch/i386/boot/*.o
+	rm -fr *.o kernel/*.o kernel/libs/*.o drivers/*.o 
+
+

@@ -1,0 +1,9 @@
+default		0
+timeout		2
+color cyan/blue white/blue
+title		KucaOS-CURRENT
+root		(fd0)
+kernel		/boot/kuca-elf
+savedefault
+boot
+
