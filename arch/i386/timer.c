@@ -14,6 +14,8 @@
 #include <textio.h>
 #include <arch/asm.h>
 
+u64 jiffies;
+
 #define TIMER_COMMAND_PORT 0x43
 #define TIMER_COUNTER_0_PORT 0x40
 #define TIMER_COUNTER_1_PORT 0x41
@@ -42,10 +44,17 @@ void timer_set_divisor(u16 divisor){
 	io_port_out(TIMER_COUNTER_0_PORT, divisor & 0xFF);
 	io_port_out(TIMER_COUNTER_0_PORT, divisor >> 8);
 
+	jiffies = 0;
 }
 
-void timer_interrupt_handler(){
-	//printf(".");
+extern void update_timers();
+/*
+ * First of all, we should maintain internal timer(s)
+ */
+static void timer_interrupt_handler()
+{
+	jiffies++;
+	update_timers();
 }
 
 int __init timer_init(){

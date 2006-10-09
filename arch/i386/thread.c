@@ -96,8 +96,10 @@ void thread_reschedule()
 	current = CURRENT();
 	next = scheduler_get_next_thread();
 
-	if(next && current && next != current)
+	if(/*next && current && */next != current)
 		thread_switch_context(current, next);
+	else
+		printf("ACHTUNG! Nowhere to reschedule!\n");
 
 }
 
