@@ -73,6 +73,12 @@ void __init kern_start(){
 
 }
 
+void idle_thread()
+{
+	for (;;)
+		__asm__ __volatile__("sti; hlt" : : : "memory");
+}
+
 void kernel_main_thread()
 {
 
@@ -175,6 +181,19 @@ void kernel_main_thread()
 
 	scheduler_start();
 
+        thread = thread_create(&idle_thread);
+        if(!thread){
+                printf("failed to create thread\n");
+		bug();
+        }
+        printf("Thread A created.\n");
+
+        if(scheduler_add_to_queue(thread)){
+                printf("failed to add thread to run queue\n");
+		bug();
+        }
+        printf("Idle thread created.\n");
+
 #if TEST_THREADS
         thread = thread_create(&func1);
         if(!thread){
@@ -214,54 +233,32 @@ void kernel_main_thread()
 #endif /* TEST_TIMER */
 
 
-	for(;;) {
-		__asm__ __volatile__("nop; nop; nop; nop");
-		//printf("M");
-	}
-
+	for(;;)
+		__asm__ __volatile__("sti; hlt");
 }
 
 
 #if TEST_THREADS
-void func1(){
-
-//	enable_interrupts();
-	int cnt = 0;
-	for(;;){
-		u32 i;
-
-		if (cnt < 50) {
-			printf("A");
-			cnt++;
-		}
-		for(i = 10000; i > 0; i--);
-		
-//		thread_reschedule();
+extern int tsleep(u32 delay);
+void func1()
+{
+	for(;;) {
+		printf("A");
+		tsleep(50);
 	}
-	
-//	for(;;)
-//		asm volatile ("hlt");
 }
 
 void func2(){
-	int cnt = 0;
-//	enable_interrupts();
-	for(;;){
-		u32 i;
-		
-		if (cnt < 50) {
-			printf("B");
-			cnt++;
-		}
-		for(i = 10000; i > 0; i--);
-//		thread_reschedule();
+	for(;;) {
+		printf("B");
+		tsleep(70);
 	}
 	
 }
 #endif /* TEST_THREADS */
 
 #if TEST_IRQS
-extern u32 kernel_stack;
+extern u64 jiffies;
 void keyboard_irq_handler(u32 number){
         unsigned char c;
 
@@ -270,7 +267,8 @@ void keyboard_irq_handler(u32 number){
 	if (c == 32) {
 		psod();
 		bug();
-	}
+	} else if (c == 33)
+		printf("Timer says %d\n", (u32)jiffies);
 }
 #endif /* TEST_IRQS */
 

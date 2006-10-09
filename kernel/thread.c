@@ -43,6 +43,7 @@ struct thread_t * thread_create(void (*func)())
 	thread_init_stack(thread, func);
 
 	thread->pid = get_free_pid();
+	thread->state = THREAD_RUNNABLE;
 
 	/* We place a reference to the thread_t on the bottom of the stack */ 
 
@@ -51,5 +52,10 @@ struct thread_t * thread_create(void (*func)())
 			(u32) (tctx(thread).esp), thread->pid);
 
 	return thread;
+}
+
+void thread_yield()
+{
+	thread_reschedule();
 }
 

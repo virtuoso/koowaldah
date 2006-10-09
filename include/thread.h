@@ -14,9 +14,10 @@
 #include <mm.h>
 
 /* thread state flags */
-#define THREAD_RUNNING (0x1) /* otherwise sleeping */
-#define THREAD_NEW     (0x2) /* being created */
-#define THREAD_ILL     (0x4) /* screwed up */
+#define THREAD_RUNNABLE (0x1) /* can be selected for execution */
+#define THREAD_NEW      (0x2) /* being created */
+#define THREAD_ILL      (0x4) /* screwed up */
+#define THREAD_WAIT     (0x8) /* sleeping on condition */
 
 struct thread_t {
 	union {

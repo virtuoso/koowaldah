@@ -40,7 +40,10 @@ int scheduler_add_to_queue(struct thread_t * thread)
 
 struct thread_t * scheduler_get_next_thread()
 {
-        klist_iter(&thread_list);
+	/* at least one thread should be runnable */
+	do {
+		klist_iter(&thread_list);
+	} while (!((struct thread_t *)thread_list->data)->state & THREAD_RUNNABLE);
 
         return thread_list->data;
 }
