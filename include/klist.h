@@ -55,14 +55,14 @@ struct klist {
 #define klist_iter_backeards(list) \
 	(*list) = (*list)->prev;
 
-struct klist * klist_new();
+struct klist *klist_new(u32 size);
 
-void klist_add(struct klist * new, struct klist ** list);
+void klist_add(struct klist *new, struct klist **list);
 
-void klist_add_tail(struct klist * new, struct klist ** list);
+void klist_add_tail(struct klist *new, struct klist **list);
 
-void klist_remove(struct klist * node, struct klist ** list);
+void klist_remove(struct klist *node, struct klist **list);
 
-void klist_del(struct klist * node, struct  klist ** list);
+void klist_del(struct klist *node, struct  klist **list);
 
 #endif /* __KLIST_H__ */
