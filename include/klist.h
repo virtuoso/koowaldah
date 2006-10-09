@@ -6,16 +6,30 @@
  *
  * Is distributed under the GPL 2 license.
  *
+ * Doubly-linked list implementation, take 1.5.
  */
 
 #ifndef __KLIST_H__
 #define __KLIST_H__
 
+/*
+ * A node (and silently, a list).
+ * This is also a container to underlying data.
+ */
 struct klist {
 	struct klist * next;
 	struct klist * prev;
-	void * data;
+	//void * data;
+	char data[0];
 };
+
+/*
+ * Accessor for data held within the node.
+ * @node -- list node ptr
+ * @type -- type of data within the node.
+ */
+#define klist_node(node, type) \
+		((type *)((char *)node + 2*sizeof(struct klist)))
 
 #if 0
 #define klist_do_for_each(pos, list) 	\
