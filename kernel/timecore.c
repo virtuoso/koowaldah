@@ -36,6 +36,7 @@ int register_timer(timer_fn func, u32 delay, void *data)
 	
 	timer = memory_alloc(sizeof(struct timer));
 	if (!timer) {
+		enable_interrupts();
 		/* XXX: kill a list entry */
 		return ERR_NOMEMORY;
 	}
