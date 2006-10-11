@@ -28,7 +28,6 @@
 
 #ifndef __KLIST0_H__
 #define __KLIST0_H__
-#include <stddef.h>
 
 /*
  * Simple as ever. This structure gets embedded into node objects, one per
