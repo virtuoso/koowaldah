@@ -100,4 +100,10 @@ struct klist0_node {
 #define klist0_for_each(node, list) \
 	for (node = (list)->next; node != (list); node = node->next)
 
+/*
+ * Check is list is empty (next/prev point to itself).
+ * @list -- the list
+ */
+#define klist0_empty(list) \
+	((list)->next == (list) ? 1 : 0)
 #endif
