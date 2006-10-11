@@ -58,6 +58,7 @@ struct list_test _node[MAX_NODES];
 
 int main() {
 	int i;
+	struct klist0_node *t;
 
 	/* test 1: klist0_append() */
 	TEST_DECLARE(1, "klist0_append()");
@@ -130,7 +131,23 @@ int main() {
 	else
 		TEST_PASSED(4);
 	separator();
-	printf("tests failed: %d, tests passed: %d\n", TESTS_FAILED, TESTS_PASSED);
+
+	/* test 5: klist0_for_each() */
+	TEST_DECLARE(5, "klist0_for_each()");
+	i = 1;
+	klist0_for_each(t, &_node[0].the_list) {
+		list_test_struct *l = klist0_entry(t, list_test_struct, the_list);
+		dump_node("t", l->the_list);
+		printf("   data=%d\n", l->data);
+		if (l->data != i++)
+			TEST_FAILURE(5);
+	}
+	if (i = 3)
+		TEST_PASSED(5);
+	separator();
+
+	printf("tests failed: %d, tests passed: %d\n",
+			TESTS_FAILED, TESTS_PASSED);
 
 	return TESTS_FAILED;
 }
