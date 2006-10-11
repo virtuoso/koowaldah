@@ -14,6 +14,7 @@
 #include <arch/types.h>
 #include <config.h>
 
+#define offsetof(TYPE, MEMBER) __builtin_offsetof(TYPE, MEMBER)
 #define __init __attribute__((section(".init")))
 
 #endif /* __KUCA_H_ */
