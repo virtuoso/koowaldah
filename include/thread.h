@@ -12,6 +12,7 @@
 #define __THREAD_H__
 #include <arch/thread.h>
 #include <mm.h>
+#include <klist0.h>
 
 /* thread state flags */
 #define THREAD_RUNNABLE (0x1) /* can be selected for execution */
@@ -20,6 +21,10 @@
 #define THREAD_WAIT     (0x8) /* sleeping on condition */
 
 struct thread_t {
+	/* all threads on the system */
+	struct klist0_node			kthreads;
+	/* threads in our runqueue */
+	struct klist0_node			krunq;
 	union {
 		struct x86_thread_context	x86;
 		/* whatever else thread_context */
