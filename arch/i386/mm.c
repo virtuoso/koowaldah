@@ -71,7 +71,7 @@ int page_is_allocated(u32 * page)
         if(!klist_is_empty(&used_page_list)){
                 tmp = used_page_list;
                 do{
-                        if(page == used_page_list->data)
+                        if(page == (u32 *)used_page_list->data)
 				return 1;
                         klist_iter(&used_page_list);
 
@@ -100,7 +100,7 @@ u32 * pages_get(u32 num)
 
 	tmp = page_list;
 	klist_remove(tmp, &page_list);
-	printf("We've allocated a page, tmp->data = %x\n", tmp->data);
+	printf("We've allocated a page, tmp->data = %x\n", (u32)tmp->data);
 	klist_add(tmp, &used_page_list);
 /*
 	printf("after allocation page_list looks like:\n");
@@ -108,7 +108,7 @@ u32 * pages_get(u32 num)
 	printf("and the used_page_list:\n");
 	show_list(used_page_list);
 */	
-	return tmp->data;
+	return (u32 *)tmp->data;
 }
 
 void pages_release(u32 * first_page){
@@ -128,7 +128,7 @@ void pages_release(u32 * first_page){
 	tmp = used_page_list;
 
 	do{
-		if(first_page == used_page_list->data){
+		if(first_page == (u32 *)used_page_list->data){
 			printf("Releasing page %x\n", (u32) first_page);
 			tmp = used_page_list;	
 			klist_remove(tmp, &used_page_list);
@@ -147,7 +147,7 @@ void pages_release(u32 * first_page){
 	tmp = used_page_list;
 	
 	do{
-		printf("%x\n", used_page_list->data);
+		printf("%x\n", (u32 *)used_page_list->data);
 		klist_iter(&used_page_list);
 	}while(tmp != used_page_list);	
 	
@@ -169,10 +169,10 @@ void fake_getpage_init()
                 bug();
 
         for(i = 0; i < MAX_PAGES; i++){
-                tmp = klist_new();
+                tmp = klist_new(sizeof(void *));
                 if(!tmp)
                         bug();
-                tmp->data = page_array + 0x1000 * i;
+                memory_copy(tmp->data, page_array + 0x1000 * i, sizeof(u32));
 
                 klist_add(tmp, &page_list);
 //              printf("added entry, tmp->data = %x\n", (u32) tmp->data);
