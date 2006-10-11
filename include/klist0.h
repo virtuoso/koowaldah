@@ -83,7 +83,21 @@ struct klist0_node {
 		(node)->prev = (node); \
 	} while (0);
 
+/*
+ * Access the container of the list node
+ * @node -- node of the list
+ * @type -- type of the container
+ * @list -- member of container's structure that is this node
+ */
 #define klist0_entry(node, type, list) \
 	( (type *)((char *)node - offsetof(type, list)) )
+
+/*
+ * Iterate through list nodes.
+ * @node -- roaming node pointer
+ * @list -- head of the list
+ */
+#define klist0_for_each(node, list) \
+	for (node = (list)->next; node != (list); node = node->next)
 
 #endif
