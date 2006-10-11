@@ -49,7 +49,7 @@ OBJ +=	arch/i386/asm/isr.o \
 	arch/i386/asm/irq.o \
 	arch/i386/asm/context_switch.o
 
-all: kernel
+all: kernel tests
 
 .c.o:
 	$(CC) $(CC_FLAGS) -Iinclude -ffreestanding -c $< -o $@
@@ -65,12 +65,16 @@ kernel-elf: $(OBJ) arch/i386/boot/multiboot.o
 		arch/i386/boot/multiboot.o $(OBJ)
 	
 kernel: kernel-elf
-	
+
+tests:
+	$(MAKE) -C tests test
+
 loader: arch/i386/boot/bootloader.S
 	$(ASM) -f bin arch/i386/boot/bootloader.S -o arch/i386/boot/bootloader.bin
 
 clean:
 	$(MAKE) clean -C rootfs
+	$(MAKE) clean -C tests
 	rm -f kernel/kernel.bin kuca-bin kuca-elf
 	rm -f arch/i386/boot/bootloader.bin
 	rm -fr arch/i386/*.o arch/i386/asm/*.o arch/i386/boot/*.o
