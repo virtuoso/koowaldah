@@ -3,18 +3,19 @@
  * (at least I can sleep after this)
  */
 #include <kuca.h>
-#include <klist.h>
+#include <klist0.h>
 #include <textio.h>
 #include <irq.h>
 #include <error.h>
 #include <mm.h>
 #include <thread.h>
 
-static struct klist *timers = NULL;
+static struct klist0_node timers;
 
 typedef void (*timer_fn)(void *data);
 
 struct timer {
+	struct klist0_node t_list;
 	timer_fn	func;
 	u32		counter;
 	void		*data;
@@ -22,22 +23,21 @@ struct timer {
 
 #define _TIMER(p) ((struct timer *)p)
 
+void __init timers_init()
+{
+	KLIST0_INIT(&timers);
+}
+
 int register_timer(timer_fn func, u32 delay, void *data)
 {
-        struct klist *new;
 	struct timer *timer;
 
 	/* lock here, shall we? */
 	disable_interrupts();
 
-        new = klist_new();
-        if (!new)
-                return ERR_NOMEMORY;
-	
 	timer = memory_alloc(sizeof(struct timer));
 	if (!timer) {
 		enable_interrupts();
-		/* XXX: kill a list entry */
 		return ERR_NOMEMORY;
 	}
 
@@ -45,8 +45,7 @@ int register_timer(timer_fn func, u32 delay, void *data)
 	timer->counter = delay;
 	timer->data = data;
 
-        new->data = timer;
-        klist_add(new, &timers);
+        klist0_append(&timer->t_list, &timers);
 
 	enable_interrupts();
 
@@ -55,27 +54,21 @@ int register_timer(timer_fn func, u32 delay, void *data)
 
 void update_timers()
 {
-        struct klist *tmp;
+        struct klist0_node *t;
 	struct timer *timer;
 
-        if (!klist_is_empty(&timers)) {
-                tmp = timers;
+        if (!klist0_empty(&timers)) {
 
-                do {
-			timer = _TIMER(tmp->data);
+		klist0_for_each(t, &timers) {
+			timer = klist0_entry(t, struct timer, t_list);
 			if (timer->counter)
 				timer->counter--;
 			else {
 				timer->func(timer->data);
-				klist_del(tmp, &timers);
+				klist0_unlink(t);
 				memory_release(timer);
 			}
-                        klist_iter(&tmp);
-
-			/* XXX: klist needs fixing badly */
-			if (!timers)
-				tmp = NULL;
-                } while (tmp != timers);
+                }
         }
 }
 
@@ -84,7 +77,6 @@ static void tsleep_alarm(void *data)
 	struct thread_t *thread = (struct thread_t *)data;
 
 	thread->state = THREAD_RUNNABLE;
-	//printf("waking up thread %d\n", thread->pid);
 }
 
 /* sleep on timer ticks */
