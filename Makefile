@@ -69,6 +69,9 @@ kernel: kernel-elf
 tests:
 	$(MAKE) -C tests test
 
+retest:
+	$(MAKE) clean test -C tests
+
 loader: arch/i386/boot/bootloader.S
 	$(ASM) -f bin arch/i386/boot/bootloader.S -o arch/i386/boot/bootloader.bin
 

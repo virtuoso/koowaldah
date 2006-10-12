@@ -57,9 +57,11 @@ void __init kern_start(){
 
 	thread_init();
 
+	timers_init();
+
 	scheduler_init();
 	
-	main_thread = thread_create(&kernel_main_thread);
+	main_thread = thread_create(&kernel_main_thread, "GOD");
 	if(!main_thread){
 		printf("Failed to create main kernel thread\n");
 		bug();
@@ -83,23 +85,12 @@ void kernel_main_thread()
 {
 
 	struct thread_t * me;
-
-#if TEST_THREADS
 	struct thread_t * thread;
-#endif
-
-#if TEST_KLIST
-        struct klist * list = NULL;
-        struct klist * tmp;
-#endif /* TEST_KLIST */
-
-#if TEST_PAGE_ALLOC
-        u32 * page1;
-        u32 * page2;
-#endif /* TEST_PAGE_ALLOC */
 
 
-	me = thread_get_current();
+	me = CURRENT();
+	/* init this thread 
+	init_thread_struct(me); */
 	
         if(scheduler_add_to_queue(me)){
                 printf("Failed to add main kernel thread to run queue\n");
@@ -107,13 +98,72 @@ void kernel_main_thread()
         }
         printf("Main kernel thread added to run queue.\n");
 
+
+	scheduler_start();
+
+        thread = thread_create(&idle_thread, "[idle]");
+        if(!thread){
+                printf("failed to create thread\n");
+		bug();
+        }
+        printf("Idle thread created.\n");
+
+        if(scheduler_add_to_queue(thread)){
+                printf("failed to add thread to run queue\n");
+		bug();
+        }
+        printf("Idle thread created.\n");
+
+        thread = thread_create(&func1, "[thread A]");
+        if(!thread){
+                printf("failed to create thread\n");
+		bug();
+        }
+        printf("Thread A created.\n");
+
+        if(scheduler_add_to_queue(thread)){
+                printf("failed to add thread to run queue\n");
+		bug();
+        }
+        printf("Thread A added to run queue.\n");
+
+
+        thread = thread_create(&func2, "[thread B]");
+        if(!thread){
+                printf("failed to create thread\n");
+		bug();
+        }
+        printf("Thread B created.\n");
+
+        if(scheduler_add_to_queue(thread)){
+                printf("failed to add thread to run queue\n");
+		bug();
+        }
+        printf("Thread B added to run queue.\n");
+
+        printf("Starting the Prigrammable Interval Timer...");
+        timer_init();
+        printf("Done\n");
+
+	for(;;)
+		__asm__ __volatile__("sti; hlt");
+}
+
+void test_irqs()
+{
 #if TEST_IRQS
         printf("Registering dummy keyboard interrupt service routine...");
         register_irq_handler(1, keyboard_irq_handler);
         printf("Done\n");
 #endif /* TEST_IRQS */
+}
 
+void test_page_alloc()
+{
 #if TEST_PAGE_ALLOC
+        u32 * page1;
+        u32 * page2;
+
         page1 = pages_get(1);
         printf("Got a page, %x\n", page1);
         page2 = pages_get(1);
@@ -128,8 +178,14 @@ void kernel_main_thread()
         printf("The second page released\n");
 
 #endif /* TEST_THREADS */
+}
 
+void test_klist()
+{
 #if TEST_KLIST
+        struct klist * list = NULL;
+        struct klist * tmp;
+
         printf("Testing the klist implementation\n");
 
         printf("klist_is_empty(&list) = %d\n", klist_is_empty(&list));
@@ -178,65 +234,7 @@ void kernel_main_thread()
         printf("Done with traversing\n");
 
 #endif /* TEST_KLIST */
-
-	scheduler_start();
-
-        thread = thread_create(&idle_thread);
-        if(!thread){
-                printf("failed to create thread\n");
-		bug();
-        }
-        printf("Thread A created.\n");
-
-        if(scheduler_add_to_queue(thread)){
-                printf("failed to add thread to run queue\n");
-		bug();
-        }
-        printf("Idle thread created.\n");
-
-#if TEST_THREADS
-        thread = thread_create(&func1);
-        if(!thread){
-                printf("failed to create thread\n");
-		bug();
-        }
-        printf("Thread A created.\n");
-
-        if(scheduler_add_to_queue(thread)){
-                printf("failed to add thread to run queue\n");
-		bug();
-        }
-        printf("Thread A added to run queue.\n");
-
-
-        thread = thread_create(&func2);
-        if(!thread){
-                printf("failed to create thread\n");
-		bug();
-        }
-        printf("Thread B created.\n");
-
-        if(scheduler_add_to_queue(thread)){
-                printf("failed to add thread to run queue\n");
-		bug();
-        }
-        printf("Thread B added to run queue.\n");
-
-#endif /* TEST_THREADS */
-
-//	thread_reschedule();
-
-#if TEST_TIMER
-        printf("Starting the Prigrammable Interval Timer...");
-        timer_init();
-        printf("Done\n");
-#endif /* TEST_TIMER */
-
-
-	for(;;)
-		__asm__ __volatile__("sti; hlt");
 }
-
 
 #if TEST_THREADS
 extern int tsleep(u32 delay);
