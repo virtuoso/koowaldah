@@ -14,6 +14,8 @@
 #include <mm.h>
 #include <klist0.h>
 
+#define THREAD_NAME_LEN 32
+
 /* thread state flags */
 #define THREAD_RUNNABLE (0x1) /* can be selected for execution */
 #define THREAD_NEW      (0x2) /* being created */
@@ -31,11 +33,12 @@ struct thread_t {
 	} ctx;
 	u32					pid;
 	u32					state;
+	char					name[THREAD_NAME_LEN];
 };
 
 //int thread_init();
 struct thread_t * thread_get_current();
-struct thread_t * thread_create(void (*func)());
+struct thread_t * thread_create(void (*func)(), char *name);
 void thread_switch_to(struct thread_t * thread);
 	
 void thread_reschedule();
