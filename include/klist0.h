@@ -48,26 +48,29 @@ struct klist0_node {
  * @node -- node to be added
  * @list -- node of the list
  */
-#define klist0_prepend(node, list) \
-	do { \
-		(node)->next = (list);	 \
-		(node)->prev = (list)->prev; \
-		(list)->prev->next = (node); \
-		(list)->prev = (node); \
-	} while (0);
+static inline void klist0_prepend(struct klist0_node * node,
+		struct klist0_node * list)
+{
+	(node)->next = (list);
+	(node)->prev = (list)->prev;
+	(list)->prev->next = (node);
+	(list)->prev = (node);
+}
 
 /*
  * Add a node after the given one into the list
  * @node -- node to be added
  * @list -- node of the list
  */
-#define klist0_append(node, list) \
-	do { \
-		(node)->next = (list)->next; \
-		(node)->prev = (list); \
-		(list)->next->prev = (node); \
-		(list)->next = (node); \
-	} while (0);
+static inline void klist0_append(struct klist0_node * node,
+		struct klist0_node * list)
+{
+	(node)->next = (list)->next; \
+	(node)->prev = (list); \
+	(list)->next->prev = (node); \
+	(list)->next = (node); \
+	
+}
 
 /*
  * Remove a node from it's list and relink it so that it be included
@@ -75,13 +78,13 @@ struct klist0_node {
  * @node -- node to be removed
  * Has no effect on an empty list: does no harm, but makes no sense.
  */
-#define klist0_unlink(node) \
-	do { \
-		(node)->prev->next = (node)->next; \
-		(node)->next->prev = (node)->prev; \
-		(node)->next = (node); \
-		(node)->prev = (node); \
-	} while (0);
+static inline void klist0_unlink(struct klist0_node * node)
+{
+	(node)->prev->next = (node)->next; \
+	(node)->next->prev = (node)->prev; \
+	(node)->next = (node); \
+	(node)->prev = (node); \
+}
 
 /*
  * Access the container of the list node
@@ -104,6 +107,10 @@ struct klist0_node {
  * Check is list is empty (next/prev point to itself).
  * @list -- the list
  */
-#define klist0_empty(list) \
-	((list)->next == (list) ? 1 : 0)
+static inline int klist0_empty(struct klist0_node * list)
+{
+	return (list)->next == (list);
+}
+
 #endif
+
