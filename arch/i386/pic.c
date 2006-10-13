@@ -45,8 +45,8 @@ void pic_clear(){
 void pic_mask_interrupt(u32 number){
 	u8 tmp;
 	
-//	printf("pic_mask_interrupt(%d)\n", number);
-//	printf("pic1_mask = %x, pic2_mask = %x\n", pic1_mask, pic2_mask);
+//	kprintf("pic_mask_interrupt(%d)\n", number);
+//	kprintf("pic1_mask = %x, pic2_mask = %x\n", pic1_mask, pic2_mask);
 	
 	if(number > 15)
 		return;
@@ -61,15 +61,15 @@ void pic_mask_interrupt(u32 number){
 		io_port_out(PIC1_BASE_PORT + 1, pic1_mask);
 	}
 
-//	printf("after running pic1_mask = %x, pic2_mask = %x\n", pic1_mask, pic2_mask);
+//	kprintf("after running pic1_mask = %x, pic2_mask = %x\n", pic1_mask, pic2_mask);
 	
 }
 
 void pic_unmask_interrupt(u32 number){
 	u8 tmp;
 
-//	printf("pic_unmask_interrupt(%d)\n", number);
-//	printf("pic1_mask = %x, pic2_mask = %x\n", pic1_mask, pic2_mask);
+//	kprintf("pic_unmask_interrupt(%d)\n", number);
+//	kprintf("pic1_mask = %x, pic2_mask = %x\n", pic1_mask, pic2_mask);
 	
 	if(number > 15)
 		return;
@@ -85,7 +85,7 @@ void pic_unmask_interrupt(u32 number){
 		pic1_mask &= tmp;
 		io_port_out(PIC1_BASE_PORT + 1, pic1_mask);
 	}
-//	printf("after running pic1_mask = %x, pic2_mask = %x\n", pic1_mask, pic2_mask);
+//	kprintf("after running pic1_mask = %x, pic2_mask = %x\n", pic1_mask, pic2_mask);
 }
 
 inline void pic_do_eoi(u32 number){

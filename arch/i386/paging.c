@@ -22,7 +22,7 @@ int paging_init()
 	u32 * page_table_pointer = (u32 *) &page_table;
 	u32 * page_directory_pointer = (u32 *) &page_directory;
 
-//	printf("page_dir = %x, page_table = %x\n", page_table_pointer, page_directory_pointer);
+//	kprintf("page_dir = %x, page_table = %x\n", page_table_pointer, page_directory_pointer);
 	
 	/* map the first 4 MB */
 	for(i=0; i<1024; i++){
@@ -37,12 +37,12 @@ int paging_init()
 		page_directory_pointer[i] = 0 | 2; /* 010 = supervisor level, read/write, not present */
 	};
 
-//	printf("Enabling paging.\n");
+//	kprintf("Enabling paging.\n");
 	
 	write_cr3((u32) page_directory_pointer);
-//	printf("write_cr3.\n");
+//	kprintf("write_cr3.\n");
 	write_cr0(read_cr0() | 0x80000000);
-//	printf("write cr0\n");
+//	kprintf("write cr0\n");
 		
 	return 0;		
 }

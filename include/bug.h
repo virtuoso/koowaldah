@@ -16,7 +16,7 @@
 #include <irq.h>
 
 #define bug() {\
-	printf("Achtung! BUG in file %s, line %d\n System halted.\n", __FILE__, __LINE__); \
+	kprintf("Achtung! BUG in file %s, line %d\n System halted.\n", __FILE__, __LINE__); \
 	disable_interrupts(); \
 	for(;;) \
 		asm volatile ("hlt"); \

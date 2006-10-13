@@ -68,13 +68,13 @@ void __init interrupts_init()
 }
 
 void main_irq_handler(u32 number){
-//	printf("Got irq %d\n", number);
+//	kprintf("Got irq %d\n", number);
 	if(irq_handler_table[number]){
-//		printf("Found handler, executing...");
+//		kprintf("Found handler, executing...");
 		irq_handler_table[number](number);
-//		printf("Done\n");
+//		kprintf("Done\n");
 	}else{
-//		printf("No irq handler found.\n");
+//		kprintf("No irq handler found.\n");
 	}
 	pic_do_eoi(number);
 	scheduler_tick();

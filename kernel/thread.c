@@ -23,7 +23,7 @@ u32 get_free_pid()
 
 void dump_thread(struct thread_t *thread)
 {
-	printf("Thread %x \"%s\":\n"
+	kprintf("Thread %x \"%s\":\n"
 		"\tpid: %d; stack: [%x..%x]\n"
 		"\tstate: %s\n"
 		"\tneighbours: %x, %x\n",
@@ -40,19 +40,19 @@ struct thread_t * thread_create(void (*func)(), char *name)
 	void *page;
 	struct thread_t * thread;
 	
-	printf("thread_create, func = %x, name: %s\n", func, name);
+	kprintf("thread_create, func = %x, name: %s\n", func, name);
 
 	/* allocate stack space */
 	page = pages_get(THREAD_STACK_LIMIT/PAGE_SIZE);
 	if (!page) {
-		printf("Thread allocation screwed up. Don't panic!\n");
+		kprintf("Thread allocation screwed up. Don't panic!\n");
 		return NULL;
 	}
 
 	/* now, place the task descriptor */
 	thread = THREAD(page);
 	thread->state = THREAD_NEW;
-	printf("page=%x, thread=%x\n", page, thread);
+	kprintf("page=%x, thread=%x\n", page, thread);
 
 	/* stack pointers */
 	tctx(thread).stack_base = (u32 *)thread - 1;
@@ -68,7 +68,7 @@ struct thread_t * thread_create(void (*func)(), char *name)
 
 	/* We place a reference to the thread_t on the bottom of the stack */ 
 
-	printf("created thread, stack_base = %x, esp = %x, pid = %d\n", 
+	kprintf("created thread, stack_base = %x, esp = %x, pid = %d\n", 
 			(u32) (tctx(thread).stack_base),
 			(u32) (tctx(thread).esp), thread->pid);
 

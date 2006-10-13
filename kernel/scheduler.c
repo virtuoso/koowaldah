@@ -47,7 +47,7 @@ void list_threads()
 
 	klist0_for_each(t, &thread_list) {
 		thread = klist0_entry(t, struct thread_t, kthreads);
-		printf("# [%s] pid=%d, state=%x, last_tick=%d\n",
+		kprintf("# [%s] pid=%d, state=%x, last_tick=%d\n",
 				thread->name, thread->pid,
 				thread->state, thread->last_tick);
 		if (i++ > MAX_THREADS) bug();
@@ -71,7 +71,7 @@ int register_cpusched(struct cpu_scheduler *sched)
 	    !sched->stop     ||
 	    !sched->init     ||
 	    !sched->exit) {
-		printf("%s: not a valid cpu scheduler\n", __FUNCTION__);
+		kprintf("%s: not a valid cpu scheduler\n", __FUNCTION__);
 		return -EINVAL;
 	}
 

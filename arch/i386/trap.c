@@ -23,25 +23,25 @@ void psod()
 	__asm__ __volatile__("mov %%esp, %0" : "=m"(frame));
 	thread = CURRENT();
 
-	printf("Task %d, stack base: %x, esp: %x\n",
+	kprintf("Task %d, stack base: %x, esp: %x\n",
 			thread->pid,
 			tctx(thread).stack_base,
 			tctx(thread).esp);
 
 	frame = tctx(thread).esp;
-	printf("Stack length: %d dwords\n", ((u32)thread - frame)/4);
+	kprintf("Stack length: %d dwords\n", ((u32)thread - frame)/4);
 	i = 0;
 	//while ((frame + i*4) < (u32)thread) {
 	for (i = 0; i < ((u32)thread - frame)/4; i++) {
-		printf(" (%d) %x", i, (u32)((u32 *)frame)[i]);
-		if (i && !(i % 8)) printf("\n");
+		kprintf(" (%d) %x", i, (u32)((u32 *)frame)[i]);
+		if (i && !(i % 8)) kprintf("\n");
 	}
 }
 
 void general_protection()
 {
 	vga_setcolor(0xd0);
-	printf("\nGENERAL PROTECTION FAULT\n");
+	kprintf("\nGENERAL PROTECTION FAULT\n");
 	psod();
 	for (;;) __asm__ __volatile__("hlt; nop");
 }
@@ -49,7 +49,7 @@ void general_protection()
 void page_fault()
 {
 	vga_setcolor(0x90);
-	printf("\nPAGE FAULT\n");
+	kprintf("\nPAGE FAULT\n");
 	psod();
 	for (;;) __asm__ __volatile__("hlt; nop");
 }

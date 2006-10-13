@@ -115,7 +115,7 @@ static struct cpu_scheduler sched0 = {
 
 void __init sched0_load()
 {
-	printf("Registering trivial cpu scheduler.\n");
+	kprintf("Registering trivial cpu scheduler.\n");
 	register_cpusched(&sched0);
 }
 

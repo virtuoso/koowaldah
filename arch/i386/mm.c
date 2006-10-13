@@ -55,7 +55,7 @@ static void show_list(struct klist * list)
         if(!klist_is_empty(&list)){
                 tmp = list;
                 do{
-                        printf("> %x\n", (u32) list->data);
+                        kprintf("> %x\n", (u32) list->data);
                         klist_iter(&list);
 
                 }while(tmp != list);
@@ -90,9 +90,9 @@ u32 * pages_get(u32 num)
 	if(1 != num)
 		return NULL;
 /*
-	printf("before allocation the page_list looks like the following:\n");
+	kprintf("before allocation the page_list looks like the following:\n");
 	show_list(page_list);
-	printf("and the used_page_list:\n");
+	kprintf("and the used_page_list:\n");
 	show_list(used_page_list);
 */
 	if(klist_is_empty(&page_list))
@@ -100,12 +100,12 @@ u32 * pages_get(u32 num)
 
 	tmp = page_list;
 	klist_remove(tmp, &page_list);
-	printf("We've allocated a page, tmp->data = %x\n", *(u32**)tmp->data);
+	kprintf("We've allocated a page, tmp->data = %x\n", *(u32**)tmp->data);
 	klist_add(tmp, &used_page_list);
 /*
-	printf("after allocation page_list looks like:\n");
+	kprintf("after allocation page_list looks like:\n");
 	show_list(page_list);
-	printf("and the used_page_list:\n");
+	kprintf("and the used_page_list:\n");
 	show_list(used_page_list);
 */	
 	return *(u32 **)tmp->data;
@@ -115,9 +115,9 @@ void pages_release(u32 * first_page){
 	
 	struct klist * tmp;
 /*	
-        printf("before release the page_list looks like the following:\n");
+        kprintf("before release the page_list looks like the following:\n");
         show_list(page_list);
-        printf("and the used_page_list:\n");
+        kprintf("and the used_page_list:\n");
         show_list(used_page_list);
 */
 	
@@ -129,7 +129,7 @@ void pages_release(u32 * first_page){
 
 	do{
 		if(first_page == (u32 *)used_page_list->data){
-			printf("Releasing page %x\n", (u32) first_page);
+			kprintf("Releasing page %x\n", (u32) first_page);
 			tmp = used_page_list;	
 			klist_remove(tmp, &used_page_list);
 			klist_add(tmp, &page_list);
@@ -141,13 +141,13 @@ void pages_release(u32 * first_page){
 	}while(tmp != used_page_list);
 
 #if 1	
-	printf("used_page_list does not contain page %x\n", first_page);
-	printf("used_page_list contains the following entryes:\n");
+	kprintf("used_page_list does not contain page %x\n", first_page);
+	kprintf("used_page_list contains the following entryes:\n");
 
 	tmp = used_page_list;
 	
 	do{
-		printf("%x\n", (u32 *)used_page_list->data);
+		kprintf("%x\n", (u32 *)used_page_list->data);
 		klist_iter(&used_page_list);
 	}while(tmp != used_page_list);	
 	
@@ -173,16 +173,16 @@ void fake_getpage_init()
                 if(!tmp)
                         bug();
                 *(u32 *)tmp->data = page_array + (0x1000 * i);
-		printf("[%x]", *(u32*)tmp->data);
+		kprintf("[%x]", *(u32*)tmp->data);
 
                 klist_add(tmp, &page_list);
-//              printf("added entry, tmp->data = %x\n", (u32) tmp->data);
+//              kprintf("added entry, tmp->data = %x\n", (u32) tmp->data);
         }
 /*
         if(!klist_is_empty(&page_list)){
                 tmp = page_list;
                 do{
-                        printf("got entry, page_list->data = %x\n", (u32) page_list->data);
+                        kprintf("got entry, page_list->data = %x\n", (u32) page_list->data);
                         klist_iter(&page_list);
                 }while(tmp != page_list);
         }
@@ -216,14 +216,14 @@ void debug_print_blocks(){
 	rintf("\nFree blocks:\n");
 		
 	for(i = 0; NULL != free_blocks[i].start; i++)
-		printf("%d. start = %d (0x%x), size = %d (0x%x)\n", i, 
+		kprintf("%d. start = %d (0x%x), size = %d (0x%x)\n", i, 
 						free_blocks[i].start, free_blocks[i].start, 
 						free_blocks[i].size, free_blocks[i].size);
 	
-	printf("Used blocks:\n");
+	kprintf("Used blocks:\n");
 
 	for(i = 0; NULL != used_blocks[i].start; i++)
-		printf("%d. start = %d (0x%x), size = %d (0x%x)\n", i, 
+		kprintf("%d. start = %d (0x%x), size = %d (0x%x)\n", i, 
 						used_blocks[i].start, used_blocks[i].start, 
 						used_blocks[i].size, used_blocks[i].size);
 }
