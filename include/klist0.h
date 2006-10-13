@@ -51,10 +51,10 @@ struct klist0_node {
 static inline void klist0_prepend(struct klist0_node * node,
 		struct klist0_node * list)
 {
-	(node)->next = (list);
-	(node)->prev = (list)->prev;
-	(list)->prev->next = (node);
-	(list)->prev = (node);
+	node->next = list;
+	node->prev = list->prev;
+	list->prev->next = node;
+	list->prev = node;
 }
 
 /*
@@ -65,10 +65,10 @@ static inline void klist0_prepend(struct klist0_node * node,
 static inline void klist0_append(struct klist0_node * node,
 		struct klist0_node * list)
 {
-	(node)->next = (list)->next; \
-	(node)->prev = (list); \
-	(list)->next->prev = (node); \
-	(list)->next = (node); \
+	node->next = list->next; \
+	node->prev = list; \
+	list->next->prev = node; \
+	list->next = node; \
 	
 }
 
@@ -80,10 +80,10 @@ static inline void klist0_append(struct klist0_node * node,
  */
 static inline void klist0_unlink(struct klist0_node * node)
 {
-	(node)->prev->next = (node)->next; \
-	(node)->next->prev = (node)->prev; \
-	(node)->next = (node); \
-	(node)->prev = (node); \
+	node->prev->next = node->next; \
+	node->next->prev = node->prev; \
+	node->next = node; \
+	node->prev = node; \
 }
 
 /*
@@ -109,7 +109,7 @@ static inline void klist0_unlink(struct klist0_node * node)
  */
 static inline int klist0_empty(struct klist0_node * list)
 {
-	return (list)->next == (list);
+	return list->next == list;
 }
 
 #endif
