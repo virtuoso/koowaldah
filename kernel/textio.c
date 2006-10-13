@@ -16,26 +16,49 @@
 static char *digits="0123456789ABCDEF";
 #define PRINTF_BUFSIZE 1024
 
-static size_t sprint_int( char *buf, long i, char base ) {
-    int pos = 1;
-    int k = 1, l = base;
+static size_t sprint_int_signed( char *buf, long i, char base ) {
+    int pos = 0;
+    int n;
+    long l = i;
 
     if(i < 0) {
-        buf[pos++ - 1] = '-';
+        buf[pos++] = '-';
         i = 0 - i;
     }
 
-    while ( i / l != 0 ) {
-        l *= base;
-        pos++;
-    } 
+    while (l / base) {
+    	l = l / base;
+	pos++;
+    }
 
+    n = pos + 1;
+    
     do {
-        buf[pos - k++] = digits[i % base];
-        i /= base;
-    } while(0 != i);
+        buf[pos--] = digits[i % base];
+        i = i / base;
+    } while(i);
 
-    return pos;
+    return n;
+}
+
+static size_t sprint_int_unsigned( char *buf, unsigned long i, char base ) {
+    int pos = 0;
+    int n;
+    unsigned long l = i;
+
+    while (l / base) {
+    	l = l / base;
+	pos++;
+    }
+
+    n = pos + 1;
+    
+    do {
+        buf[pos--] = digits[i % base];
+        i = i / base;
+    } while(i);
+
+    return n;
 }
 
 static void print(const char *message){
@@ -68,21 +91,21 @@ int vsnprintf( char *buf, size_t size, const char *format, va_list args )
             case 'd':
                 memory_set( sbuf, 0, 12 );
                 a_x = va_arg( args, int );
-                a_x = sprint_int( sbuf, a_x, 10 );
+                a_x = sprint_int_signed( sbuf, a_x, 10 );
                 pos += memory_copy( pos, sbuf, a_x );
                 break;
                 
             case 'l':
                 memory_set( sbuf, 0, 12 );
                 a_x = va_arg( args, long );
-                a_x = sprint_int( sbuf, a_x, 10 );
+                a_x = sprint_int_signed( sbuf, a_x, 10 );
                 pos += memory_copy( pos, sbuf, a_x );
                 break;
                 
             case 'x':
                 memory_set( sbuf, 0, 12 );
                 a_x = va_arg( args, long );
-                a_x = sprint_int( sbuf, a_x, 16 );
+                a_x = sprint_int_unsigned( sbuf, a_x, 16 );
                 pos += memory_copy( pos, sbuf, a_x );
                 break;
                 
@@ -102,7 +125,7 @@ int vsnprintf( char *buf, size_t size, const char *format, va_list args )
                 print( "Hell is that? '" );
                 console_put_char( *cur );
                 print( "'\n" );
-                /*print( "You surely aren't expecting a full-blown kprintf here?\n" );*/
+                /*print( "You surely aren't expecting a full-blown printf here?\n" );*/
         }
         old = cur + 1;
     } while( cur < format + flen );
