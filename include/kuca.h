@@ -39,6 +39,7 @@ extern u64 jiffies;
 
 #define __init __attribute__((section(".init")))
 #define __future __attribute__((unused))
+#define __inline __attribute__((always_inline)) inline
 
 #endif /* __KUCA_H_ */
 
