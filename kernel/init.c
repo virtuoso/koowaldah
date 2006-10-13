@@ -76,12 +76,6 @@ void __init kern_start(){
 
 }
 
-void idle_thread()
-{
-	for (;;)
-		__asm__ __volatile__("sti; hlt" : : : "memory");
-}
-
 void kernel_main_thread()
 {
 
@@ -101,19 +95,6 @@ void kernel_main_thread()
 
 
 	scheduler_start();
-
-        thread = thread_create(&idle_thread, "[idle]");
-        if(!thread){
-                kprintf("failed to create thread\n");
-		bug();
-        }
-        kprintf("Idle thread created.\n");
-
-        if(scheduler_enqueue(thread)){
-                kprintf("failed to add thread to run queue\n");
-		bug();
-        }
-        kprintf("Idle thread created.\n");
 
         thread = thread_create(&func1, "[thread A]");
         if(!thread){
@@ -264,12 +245,21 @@ void keyboard_irq_handler(u32 number){
         unsigned char c;
 
         c = io_port_in(0x60);
-        kprintf("Got a keyboard interrupt, scancode = %d\n", c);
-	if (c == 32) {
-		psod();
-		bug();
-	} else if (c == 33)
-		kprintf("Timer says %d\n", (u32)jiffies);
+	switch (c) {
+		case 31:
+			list_threads();
+			break;
+		case 32:
+			psod();
+			bug();
+			break;
+		case 33:
+			kprintf("Timer says %d\n", (u32)jiffies);
+			break;
+		default:
+			kprintf("keyboard, scancode = %d\n", c);
+			break;
+	}
 }
 #endif /* TEST_IRQS */
 
