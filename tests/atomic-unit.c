@@ -26,38 +26,60 @@
  */
 
 /*
- * K-Unit is a small framework for unit-testing freestanding components
- * of the kernel
+ * unit test for atomic operations
+ * atomic.h
+ *
+ * interfaces description
+ * + ATOMIC_INIT()
+ * + atomic_read()
+ * + atomic_set_u32
+ *
+ * TODO: complete
  */
+#include <stdlib.h>
+#include <stdio.h>
+#include <sys/types.h>
+#include "k-unit.h"
 
-#ifndef __K_UNIT_H__
-#define __K_UNIT_H__
+#define __inline __attribute__((always_inline)) inline
+typedef unsigned int u32;
+typedef unsigned short u16;
+typedef unsigned char u8;
+#include "atomic.h"
 
-/* ------------------------------------------ */
-/* generic test stuff                         */
-/* ------------------------------------------ */
-static unsigned int TESTS_FAILED = 0;
-static unsigned int TESTS_PASSED = 0;
-#define TEST_FAILURE(n) \
-	do { \
-		TESTS_FAILED++; \
-		printf("TEST %d failed\n", n); \
-	} while (0)
+atomic_u8  a8;
+atomic_u16 a16;
+atomic_u32 a32;
 
-#define TEST_PASSED(n) \
-	do { \
-		TESTS_PASSED++; \
-		printf("TEST %d passed\n", n); \
-	} while (0)
+int main() {
+	u32 i;
 
-#define TEST_DECLARE(n, title) \
-	printf("TEST %d, \"%s\"\n", n, title)
+	TEST_DECLARE(1, "ATOMIC_INIT() + atomic_read()");
+	ATOMIC_INIT(&a8);
+	ATOMIC_INIT(&a16);
+	ATOMIC_INIT(&a32);
+	i = atomic_read(&a32);
+	if (i) {
+		printf("a32 == %u, should be 0\n", i);
+		TEST_FAILURE(1);
+	} else
+		TEST_PASSED(1);
+	separator();
 
-#define separator() \
-	printf("------------------------\n");
+	TEST_DECLARE(2, "atomic_set_u32()");
+	atomic_set_u32(&a32, 5);
+	i = atomic_read(&a32);
+	if (i != 5) {
+		printf("a32 == %u, should be 5\n", i);
+		TEST_FAILURE(2);
+	} else
+		TEST_PASSED(2);
+	separator();
 
-/* ------------------------------------------ */
-/* end of generic test stuff                  */
-/* ------------------------------------------ */
 
-#endif
+	printf("tests failed: %d, tests passed: %d\n",
+			TESTS_FAILED, TESTS_PASSED);
+
+	return TESTS_FAILED;
+}
+
