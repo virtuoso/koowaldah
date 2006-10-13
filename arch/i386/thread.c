@@ -57,7 +57,7 @@ struct thread_t * thread_get_current()
 	
 	current = THREAD(esp);
 
-	/*printf("got current, stack_base = %x, esp = %x, pid = %d\n",
+	/*kprintf("got current, stack_base = %x, esp = %x, pid = %d\n",
 			(u32) current->ctx.stack_base, (u32) current->ctx.esp, current->pid);*/
 
 	return CURRENT();
@@ -70,11 +70,11 @@ void thread_switch_context(struct thread_t * from, struct thread_t * to)
 	u32 * esp_to;
 
 /*
-	printf("Switching context\n");
+	kprintf("Switching context\n");
 	
-	printf("from: stack_base = %x, esp = %x, pid = %d\n",
+	kprintf("from: stack_base = %x, esp = %x, pid = %d\n",
 			(u32) from->ctx.stack_base, from->ctx.esp, from->pid);
-	printf("to: stack_base = %x, esp = %x, pid = %d\n",
+	kprintf("to: stack_base = %x, esp = %x, pid = %d\n",
 			(u32) to->ctx.stack_base, to->ctx.esp, to->pid);
 */
 	

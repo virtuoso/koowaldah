@@ -59,7 +59,7 @@ void __init isr_init(){
 }
 
 void default_interrupt_handler(u32 num){
-	//printf("Unhandled interrupt %d fired\n", num);
+	//kprintf("Unhandled interrupt %d fired\n", num);
 	switch (num) {
 		case 13:
 			general_protection();
@@ -68,7 +68,7 @@ void default_interrupt_handler(u32 num){
 			page_fault();
 			break;
 		case 80:
-			printf("SYSCALL GATE!\n");
+			kprintf("SYSCALL GATE!\n");
 			break;
 		default:
 			break;

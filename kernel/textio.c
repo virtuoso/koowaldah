@@ -102,7 +102,7 @@ int vsnprintf( char *buf, size_t size, const char *format, va_list args )
                 print( "Hell is that? '" );
                 console_put_char( *cur );
                 print( "'\n" );
-                /*print( "You surely aren't expecting a full-blown printf here?\n" );*/
+                /*print( "You surely aren't expecting a full-blown kprintf here?\n" );*/
         }
         old = cur + 1;
     } while( cur < format + flen );
@@ -123,7 +123,7 @@ int snprintf( char *buf, size_t size, const char *fmt, ... )
     return i;
 }
 
-int printf( const char *fmt, ... )
+int kprintf( const char *fmt, ... )
 {
     va_list args;
     int i;
