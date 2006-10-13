@@ -77,7 +77,7 @@ void main_irq_handler(u32 number){
 //		printf("No irq handler found.\n");
 	}
 	pic_do_eoi(number);
-	scheduler_wake();
+	scheduler_tick();
 }
 
 int register_irq_handler(u32 number, void (*handler)(u32 number)){
