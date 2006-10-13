@@ -8,6 +8,9 @@
  *
  */
 
+#include <sys/errno.h>
+
+/* TODO: dG */
 #define ERR_NOMEMORY	1
 #define ERR_INVAL	2
 #define ERR_NOSPACE	3
