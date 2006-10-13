@@ -76,6 +76,8 @@ void __init kern_start(){
 
 }
 
+void test_irqs();
+
 void kernel_main_thread()
 {
 
