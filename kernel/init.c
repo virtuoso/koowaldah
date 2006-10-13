@@ -59,6 +59,7 @@ void __init kern_start(){
 
 	timers_init();
 
+	sched0_load();
 	scheduler_init();
 	
 	main_thread = thread_create(&kernel_main_thread, "GOD");
@@ -92,7 +93,7 @@ void kernel_main_thread()
 	/* init this thread 
 	init_thread_struct(me); */
 	
-        if(scheduler_add_to_queue(me)){
+        if(scheduler_enqueue(me)){
                 printf("Failed to add main kernel thread to run queue\n");
 		bug();
         }
@@ -108,7 +109,7 @@ void kernel_main_thread()
         }
         printf("Idle thread created.\n");
 
-        if(scheduler_add_to_queue(thread)){
+        if(scheduler_enqueue(thread)){
                 printf("failed to add thread to run queue\n");
 		bug();
         }
@@ -121,7 +122,7 @@ void kernel_main_thread()
         }
         printf("Thread A created.\n");
 
-        if(scheduler_add_to_queue(thread)){
+        if(scheduler_enqueue(thread)){
                 printf("failed to add thread to run queue\n");
 		bug();
         }
@@ -135,11 +136,13 @@ void kernel_main_thread()
         }
         printf("Thread B created.\n");
 
-        if(scheduler_add_to_queue(thread)){
+        if(scheduler_enqueue(thread)){
                 printf("failed to add thread to run queue\n");
 		bug();
         }
         printf("Thread B added to run queue.\n");
+
+	test_irqs();
 
         printf("Starting the Prigrammable Interval Timer...");
         timer_init();

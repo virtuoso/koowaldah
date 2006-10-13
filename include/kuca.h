@@ -14,6 +14,11 @@
 #include <arch/types.h>
 #include <config.h>
 
+extern u64 jiffies;
+
+/* kernel component name length */
+#define KCOMPONENT_NAME_LEN 16
+
 /* Generic MIN()/MAX() implementation */
 #define MIN(a,b) ({ \
 	typeof(a) _x = (a); \
@@ -33,6 +38,7 @@
 #endif
 
 #define __init __attribute__((section(".init")))
+#define __future __attribute__((unused))
 
 #endif /* __KUCA_H_ */
 

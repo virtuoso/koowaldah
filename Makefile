@@ -29,6 +29,7 @@ SRC = 	kernel/init.c \
 	kernel/klib.c \
 	kernel/thread.c \
 	kernel/scheduler.c \
+	kernel/sched0.c \
 	kernel/timecore.c \
 	arch/i386/asm.c \
 	arch/i386/pic.c \
