@@ -67,6 +67,9 @@ void default_interrupt_handler(u32 num){
 		case 14:
 			page_fault();
 			break;
+		case 80:
+			printf("SYSCALL GATE!\n");
+			break;
 		default:
 			break;
 	}
