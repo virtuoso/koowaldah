@@ -13,38 +13,14 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stddef.h>
+#include "k-unit.h"
 #include "klist0.h"
-
-/* ------------------------------------------ */
-/* generic test stuff                         */
-/* ------------------------------------------ */
-static unsigned int TESTS_FAILED = 0;
-static unsigned int TESTS_PASSED = 0;
-#define TEST_FAILURE(n) \
-	do { \
-		TESTS_FAILED++; \
-		printf("TEST %d failed\n", n); \
-	} while (0)
-
-#define TEST_PASSED(n) \
-	do { \
-		TESTS_PASSED++; \
-		printf("TEST %d passed\n", n); \
-	} while (0)
-
-#define TEST_DECLARE(n, title) \
-	printf("TEST %d, \"%s\"\n", n, title)
 
 #define dump_node(name, node) \
 	do { \
 		printf("%s: %p, %s->prev: %p, %s->next: %p\n", \
 			name, &node, name, node.prev, name, node.next); \
 	} while (0);
-#define separator() \
-	printf("------------------------\n");
-/* ------------------------------------------ */
-/* end of generic test stuff                  */
-/* ------------------------------------------ */
 
 #define MAX_NODES 4
 typedef struct list_test {
