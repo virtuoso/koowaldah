@@ -8,6 +8,8 @@
 #include <thread.h>
 #include <bug.h>
 #include <klist0.h>
+#include <scheduler.h>
+#include <lib.h>
 
 /* each architecture should define this */
 extern void thread_init_stack(struct thread_t * t, void (*func)(void));
@@ -33,18 +35,6 @@ void dump_thread(struct thread_t *thread)
 	);
 }
 
-void init_thread_struct(struct thread_t *thread)
-{
-	/* stack pointers */
-	tctx(thread).stack_base = (u32 *)thread - 1;
-	tctx(thread).esp = tctx(thread).stack_base;
-
-	thread->pid = 0;
-	thread->state = THREAD_RUNNABLE;
-	KLIST0_INIT(&thread->kthreads);
-}
-
-extern struct klist0_node thread_list;
 struct thread_t * thread_create(void (*func)(), char *name)
 {
 	void *page;
@@ -66,7 +56,7 @@ struct thread_t * thread_create(void (*func)(), char *name)
 
 	/* stack pointers */
 	tctx(thread).stack_base = (u32 *)thread - 1;
-	tctx(thread).esp = tctx(thread).stack_base;
+	tctx(thread).esp = (u32)tctx(thread).stack_base;
 	thread_init_stack(thread, func);
 
 	thread->pid = get_free_pid();
@@ -83,10 +73,5 @@ struct thread_t * thread_create(void (*func)(), char *name)
 			(u32) (tctx(thread).esp), thread->pid);
 
 	return thread;
-}
-
-void thread_yield()
-{
-	thread_reschedule();
 }
 

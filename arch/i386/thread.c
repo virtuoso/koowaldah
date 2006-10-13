@@ -63,7 +63,7 @@ struct thread_t * thread_get_current()
 	return CURRENT();
 }
 
-static void thread_switch_context(struct thread_t * from, struct thread_t * to)
+void thread_switch_context(struct thread_t * from, struct thread_t * to)
 {
 
 	u32 * esp_from;
@@ -87,21 +87,6 @@ static void thread_switch_context(struct thread_t * from, struct thread_t * to)
 	do_thread_switch_context(esp_from, esp_to);
 }
 
-
-void thread_reschedule()
-{
-	struct thread_t * current;
-	struct thread_t * next;
-	
-	current = CURRENT();
-	next = scheduler_get_next_thread();
-
-	if(/*next && current && */next != current)
-		thread_switch_context(current, next);
-	else
-		printf("ACHTUNG! Nowhere to reschedule!\n");
-
-}
 
 void thread_switch_to(struct thread_t * thread)
 {

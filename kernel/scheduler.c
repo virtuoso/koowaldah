@@ -1,10 +1,7 @@
-
 /*
- * arch/i386/scheduler.c
+ * kernel/scheduler.c
  *
- * Copyright (C) 2005 Alexey Zaytsev
- *
- * Is distributed under the GPL 2 license.
+ * Author: Alexander Shishkin, 2006
  *
  */
 
@@ -13,16 +10,36 @@
 #include <textio.h>
 #include <lib.h>
 #include <klist0.h>
-#include <error.h>
+#include <sys/errno.h>
 #include <scheduler.h>
 #include <thread.h>
 #include <bug.h>
 
-static int scheduler_is_active = 0;
+/* vvv unused till we have mm */
+struct my_sched {
+	struct cpu_scheduler *sched;
+	struct klist0_node   sched_list;
+};
+
+/* list of registered schedulers */
+static struct klist0_node __future sched_list;
+
+static struct my_sched __future *active_sched = NULL;
+/* ^^^ */
+
+static struct cpu_scheduler *reg_sched = NULL;
+static int sched_active = 0;
+
+/* system-wide list of threads */
 struct klist0_node thread_list;
+
 struct klist0_node krunqueue;
 
-static void list_threads()
+/*
+ * List all threads in the system
+ * Prints a lot of rubbish.
+ */
+void list_threads()
 {
 	struct klist0_node *t;
 	struct thread_t *thread;
@@ -30,72 +47,111 @@ static void list_threads()
 
 	klist0_for_each(t, &thread_list) {
 		thread = klist0_entry(t, struct thread_t, kthreads);
-		printf("# pid=%d, state=%x\n", thread->pid, thread->state);
-		if (i++ > 10) bug();
+		printf("# [%s] pid=%d, state=%x, last_tick=%d\n",
+				thread->name, thread->pid,
+				thread->state, thread->last_tick);
+		if (i++ > MAX_THREADS) bug();
 	}
 }
 
-int scheduler_add_to_queue(struct thread_t * thread)
+/*
+ * Register a cpu scheduler within the kernel.
+ * There can be just one scheduler at the moment,
+ * because there's no memory management yet.
+ */
+int register_cpusched(struct cpu_scheduler *sched)
+{
+	if (!sched           ||
+	    !sched->name     ||
+	    !sched->enqueue  ||
+	    !sched->tick     ||
+	    !sched->yield    ||
+	    !sched->schedule ||
+	    !sched->start    ||
+	    !sched->stop     ||
+	    !sched->init     ||
+	    !sched->exit) {
+		printf("%s: not a valid cpu scheduler\n", __FUNCTION__);
+		return -EINVAL;
+	}
+
+	reg_sched = sched;
+	reg_sched->init();
+
+	return 0;
+}
+
+/*
+ * Add the thread to the execution queue.
+ * Make sure it is not listed in any other run/waitqueue or
+ * I will bite.
+ */
+int scheduler_enqueue(struct thread_t *thread)
 {
 	disable_interrupts();
 
-	dump_thread(thread);
-	if (!klist0_empty(&thread->krunq))
+	/* a thread should be removed from any run/waitqueues */
+	if (!klist0_empty(&thread->krunq)) {
+		dump_thread(thread);
 		bug();
-	klist0_append(&thread->krunq, &krunqueue);
-	/*list_threads();*/
+	}
+	reg_sched->enqueue(thread);
+	enable_interrupts();
+
+	return 0;
+}
+
+/*
+ * Dequeue the thread.
+ */
+int scheduler_dequeue(struct thread_t *thread)
+{
+	disable_interrupts();
+
+	/* likewise */
+	if (klist0_empty(&thread->krunq))
+		bug();
+
+	klist0_unlink(&thread->krunq);
+	if (reg_sched->dequeue)
+		reg_sched->dequeue(thread);
 
 	enable_interrupts();
 
-        return 0;
+	return 0;
 }
 
-struct thread_t *scheduler_get_next_thread()
+void scheduler_tick()
 {
-	struct klist0_node *t = &(CURRENT()->krunq);
-	struct thread_t *thread;
+	disable_interrupts();
+	reg_sched->tick();
+	enable_interrupts();
+}
 
-	printf("%s: current=%s\n", __FUNCTION__, CURRENT()->name);
-	do {
-		t = t->next;
-		thread = klist0_entry(t,
-				struct thread_t, krunq);
-	} while (t->next != &krunqueue && !(thread->state & THREAD_RUNNABLE));
-	printf("%s: next=%s\n", __FUNCTION__, thread->name);
-	return thread;
-	list_threads();
-	printf("selecting a thread to run...");
-	/* start searching from the thread which is next to current;
-	 * at least one thread should be runnable */
-	klist0_for_each(t, &krunqueue) {
-		thread = klist0_entry(t, struct thread_t, krunq);
-		if (thread->state & THREAD_RUNNABLE)
-			break;
-	}
-	printf("pid=%d\n", thread->pid);
+void scheduler_yield()
+{
+	reg_sched->yield();
+}
 
-        return thread;
+void schedule()
+{
+	reg_sched->schedule();
 }
 
 void scheduler_start()
 {
-	scheduler_is_active = 1;
+	sched_active = 1;
+	reg_sched->start();
 }
 
 void scheduler_stop()
 {
-	scheduler_is_active = 0;
+	reg_sched->stop();
+	sched_active = 0;
 }
 
 void scheduler_init()
 {
 	KLIST0_INIT(&thread_list);
-	KLIST0_INIT(&krunqueue);
-}
-
-void scheduler_wake()
-{
-	if(scheduler_is_active)
-		thread_reschedule();
 }
 

@@ -15,6 +15,7 @@
 #include <klist0.h>
 
 #define THREAD_NAME_LEN 32
+#define MAX_THREADS 128
 
 /* thread state flags */
 #define THREAD_RUNNABLE (0x1) /* can be selected for execution */
@@ -22,26 +23,33 @@
 #define THREAD_ILL      (0x4) /* screwed up */
 #define THREAD_WAIT     (0x8) /* sleeping on condition */
 
+typedef unsigned short prio_t;
+
 struct thread_t {
-	/* all threads on the system */
+	/* scheduler data */
 	struct klist0_node			kthreads;
-	/* threads in our runqueue */
 	struct klist0_node			krunq;
+	u32					quantum;
+	u64 					last_tick;
+	prio_t					prio;
+
+	/* architecture-dependent thread info */
 	union {
 		struct x86_thread_context	x86;
 		/* whatever else thread_context */
 	} ctx;
+
+	/* process related */
 	u32					pid;
 	u32					state;
 	char					name[THREAD_NAME_LEN];
 };
 
-//int thread_init();
-struct thread_t * thread_get_current();
-struct thread_t * thread_create(void (*func)(), char *name);
-void thread_switch_to(struct thread_t * thread);
-	
-void thread_reschedule();
+void dump_thread(struct thread_t *thread);
+struct thread_t *thread_create(void (*func)(), char *name);
 
+/* arch */
+void thread_switch_to(struct thread_t *thread);
+void thread_switch_context(struct thread_t * from, struct thread_t * to);
 
 #endif /* __THREAD_H__ */
