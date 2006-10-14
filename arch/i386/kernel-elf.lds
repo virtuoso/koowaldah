@@ -6,16 +6,14 @@ SECTIONS
 
 	. = 0xFFFF;
 	kernel_stack = .;
+
 	. = 0x11000;
-    	alloc_mem_start = .;
+	alloc_mem_start = .;
 	. = 0x9FFFF;
 	alloc_mem_end = .;
-	. = 0x100000;
 
-	page_directory = .;
-	. += 0x1000;
-	page_table = .;
-	. += 0x1000;
+	/* The kernel starts from 1 MB. */
+	. = 0x100000;
 
 	.init :
 	{
@@ -43,5 +41,6 @@ SECTIONS
 		*(.bss)
 		_bss_end = .;
 	}
+	kernel_end = ALIGN(0x1000);
 }
 

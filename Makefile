@@ -31,6 +31,8 @@ SRC = 	kernel/init.c \
 	kernel/scheduler.c \
 	kernel/sched0.c \
 	kernel/timecore.c \
+	kernel/mm_zone.c \
+	kernel/page_alloc.c \
 	arch/i386/asm.c \
 	arch/i386/pic.c \
 	arch/i386/serial_console.c \
@@ -41,6 +43,7 @@ SRC = 	kernel/init.c \
 	arch/i386/trap.c \
 	arch/i386/timer.c \
 	arch/i386/thread.c \
+	arch/i386/bootmem_zone.c \
 	arch/i386/mm.c \
 	arch/i386/paging.c
 
