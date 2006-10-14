@@ -58,6 +58,9 @@ void __init isr_init(){
 	asm volatile("lidt %0\n":"=m"(idt_desc));
 }
 
+extern void general_protection(void);
+extern void page_fault(void);
+
 void default_interrupt_handler(u32 num){
 	//kprintf("Unhandled interrupt %d fired\n", num);
 	switch (num) {

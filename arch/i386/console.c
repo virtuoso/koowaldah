@@ -15,6 +15,9 @@
 #include <arch/serial_console.h>
 #include <arch/vga_console.h>
 
+extern void early_serial_init(void);
+extern void early_vga_init(void);
+
 /*
  * This is an early console in fact, we'll have a proper console
  * once mm is initialized
@@ -31,6 +34,8 @@ int __init early_console_init()
 	return 0;
 }
 
+extern void early_serial_put_char(char c);
+extern void early_vga_put_char(char c);
 void console_put_char(char c)
 {	
 #if CONFIG_SERIAL_CONSOLE

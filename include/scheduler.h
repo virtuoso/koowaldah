@@ -40,7 +40,14 @@ int register_cpusched(struct cpu_scheduler *sched);
 /* int deregister_cpusched() to come as soon as it's needed */
 int scheduler_enqueue(struct thread_t *thread);
 int scheduler_dequeue(struct thread_t *thread);
+
 void scheduler_yield();
+void scheduler_tick();
 void schedule();
+void scheduler_start();
+void scheduler_stop();
+
+
+void list_threads();
 
 #endif /* __SCHEDULER_H__ */

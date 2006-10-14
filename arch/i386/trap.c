@@ -10,8 +10,6 @@
 #include <mm.h>
 #include <thread.h>
 
-/* since we're KucaOS, our screen-of-death will be pink */
-/* Pink Screen Of Death, KYCA KYKY */
 void psod()
 {
 	u32 frame;
@@ -40,7 +38,6 @@ void psod()
 
 void general_protection()
 {
-	vga_setcolor(0xd0);
 	kprintf("\nGENERAL PROTECTION FAULT\n");
 	psod();
 	for (;;) __asm__ __volatile__("hlt; nop");
@@ -48,7 +45,6 @@ void general_protection()
 
 void page_fault()
 {
-	vga_setcolor(0x90);
 	kprintf("\nPAGE FAULT\n");
 	psod();
 	for (;;) __asm__ __volatile__("hlt; nop");
