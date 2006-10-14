@@ -11,7 +11,6 @@
 #ifndef __THREAD_H__
 #define __THREAD_H__
 #include <arch/thread.h>
-#include <mm.h>
 #include <klist0.h>
 
 #define THREAD_NAME_LEN 32

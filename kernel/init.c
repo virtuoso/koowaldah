@@ -14,9 +14,12 @@
 #define TEST_PAGE_ALLOC 0
 #define TEST_KLIST 0
 
+#define  PAGE_ALLOCATOR_TEST 1
+
 #include <kuca.h>
 #include <console.h>
-/* #include <mm.h> */ 
+#include <page_alloc.h>
+#include <mm_zone.h>
 #include <arch/asm.h>
 #include <arch/isr.h>
 #include <irq.h>
@@ -42,10 +45,14 @@ extern void timers_init(void);
 extern void sched0_load(void);
 extern void scheduler_init(void);
 
+extern void init_mem_info(void);
+extern void mm_init(void); /* legacy mm */ 
+
 
 void __init kern_start(){
 
 	struct thread_t * main_thread;
+	struct page * pg[7];
 
 	early_console_init();
 
@@ -61,6 +68,74 @@ void __init kern_start(){
         interrupts_init();
 	trap_init();
         kprintf("Done\n");
+
+#ifdef PAGE_ALLOCATOR_TEST
+	init_mem_info();
+
+
+	kprintf("Testing the page allocator...\n");
+	
+
+	print_alloc_info();
+
+	pg[1] = alloc_pages(0, 0);
+	kprintf("got page 0x%x, order %d\n", pg[1]->index, pg[1]->private.order);
+	print_alloc_info();
+
+	kprintf("\nTest 1 passed\n\n");
+
+	pg[2] = alloc_pages(0, 1);
+	kprintf("got page 0x%x, order %d\n", pg[2]->index, pg[2]->private.order);
+	print_alloc_info();
+
+	kprintf("\nTest 2 passed\n\n");
+
+
+	kprintf("free 1\n");
+	free_pages(pg[1]);
+	print_alloc_info();
+	
+	pg[3] = alloc_pages(0, 3);
+	kprintf("got page 0x%x, order %d\n", pg[3]->index, pg[3]->private.order);
+	print_alloc_info();
+	kprintf("\nTest 3 passed\n\n");
+
+	pg[4] = alloc_pages(0, 1);
+	kprintf("got page 0x%x, order %d\n", pg[4]->index, pg[4]->private.order);
+	print_alloc_info();
+	kprintf("\nTest 4 passed\n\n");
+
+	kprintf("free 2\n");
+	free_pages(pg[2]);
+	print_alloc_info();
+
+	pg[5] = alloc_pages(0, 4);
+	kprintf("got page 0x%x, order %d\n", pg[5]->index, pg[5]->private.order);
+	print_alloc_info();
+	kprintf("\nTest 5 passed\n\n");
+
+	pg[6] = alloc_pages(0, 2);
+	kprintf("got page 0x%x, order %d\n", pg[6]->index, pg[6]->private.order);
+	print_alloc_info();
+	kprintf("\nTest 6 passed\n\n");
+
+	kprintf("free 4\n");
+	free_pages(pg[4]);
+	print_alloc_info();
+
+	kprintf("free 3\n");
+	free_pages(pg[3]);
+	print_alloc_info();
+	kprintf("free 6\n");
+	free_pages(pg[6]);
+	print_alloc_info();
+
+	kprintf("free 5\n");
+	free_pages(pg[5]);
+	print_alloc_info();
+
+	kprintf("Done.\n");
+#endif /* PAGE_ALLOCATOR_TEST */
 
 	thread_init();
 
