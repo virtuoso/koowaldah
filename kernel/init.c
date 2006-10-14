@@ -36,6 +36,13 @@ void kernel_main_thread();
 
 extern void trap_init(void);
 
+extern void early_console_init(void);
+extern void thread_init(void);
+extern void timers_init(void);
+extern void sched0_load(void);
+extern void scheduler_init(void);
+
+
 void __init kern_start(){
 
 	struct thread_t * main_thread;

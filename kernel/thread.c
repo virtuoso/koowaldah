@@ -61,7 +61,9 @@ struct thread_t * thread_create(void (*func)(), char *name)
 
 	thread->pid = get_free_pid();
 	thread->state = THREAD_RUNNABLE;
-	memory_copy(thread->name, name, MIN(string_len(name), THREAD_NAME_LEN));
+
+	/* No problem if we copy a little more. */
+	memory_copy(thread->name, name, THREAD_NAME_LEN);
 	KLIST0_INIT(&thread->kthreads);
 	KLIST0_INIT(&thread->krunq);
 	klist0_append(&thread->kthreads, &thread_list);
