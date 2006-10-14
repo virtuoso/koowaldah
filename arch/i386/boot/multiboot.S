@@ -9,6 +9,7 @@
 
 extern kern_start
 extern kernel_stack
+extern multiboot_info
 global multiboot_start
 
 ; setting up the Multiboot header - see GRUB docs for details
@@ -26,6 +27,7 @@ MultiBootHeader:
    dd CHECKSUM
 
 multiboot_start:
+	mov [multiboot_info], ebx
 	mov esp, kernel_stack
 	jmp kern_start
 	cli

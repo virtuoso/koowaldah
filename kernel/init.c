@@ -16,7 +16,7 @@
 
 #include <kuca.h>
 #include <console.h>
-#include <mm.h>
+/* #include <mm.h> */ 
 #include <arch/asm.h>
 #include <arch/isr.h>
 #include <irq.h>

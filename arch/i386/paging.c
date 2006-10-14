@@ -16,6 +16,7 @@ extern u8 page_table;
 
 int paging_init()
 {
+#if 0
 	u32 address=0;
 	int i;
 
@@ -45,6 +46,7 @@ int paging_init()
 //	kprintf("write cr0\n");
 		
 	return 0;		
+#endif
 }
 
 
