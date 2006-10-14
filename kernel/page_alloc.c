@@ -140,6 +140,16 @@ inline struct page * alloc_pages(u32 flags, u32 order)
 	return __alloc_pages(flags, &boot_zone, order);
 }
 
+char * page_to_addr(struct page * page)
+{
+	return ((char *)page->zone->base) + page->index * PAGE_SIZE;
+}
+
+inline char * get_pages(u32 flags, u32 order)
+{
+	return page_to_addr(alloc_pages(flags, order));
+}
+
 
 void free_pages(struct page * pg)
 {
