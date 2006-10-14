@@ -7,6 +7,7 @@
  */
 
 #include <kuca.h>
+#include <page_alloc.h>
 #include <scheduler.h>
 #include <bug.h>
 #include <textio.h>

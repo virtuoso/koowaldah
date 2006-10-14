@@ -45,8 +45,8 @@ int paging_init()
 	write_cr0(read_cr0() | 0x80000000);
 //	kprintf("write cr0\n");
 		
-	return 0;		
 #endif
+	return 0;		
 }
 
 
