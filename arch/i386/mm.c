@@ -37,12 +37,12 @@
 
 #include <kuca.h>
 #include <mm.h>
-#include <arch/paging.h>
 #include <klist.h>
 #include <bug.h>
 #include <error.h>
 #include <textio.h>
 
+extern int paging_init();
 
 /* from arch/i386/kernel-*.lds */
 extern char alloc_mem_start;
