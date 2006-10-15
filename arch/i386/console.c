@@ -34,10 +34,6 @@
 #include <kuca.h>
 #include <console.h>
 
-/* this is BAD and subject to be FIXED */
-#include <arch/serial_console.h>
-#include <arch/vga_console.h>
-
 extern void early_serial_init(void);
 extern void early_vga_init(void);
 

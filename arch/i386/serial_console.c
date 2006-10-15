@@ -32,7 +32,6 @@
  */
 
 #include <kuca.h>
-#include <arch/serial_console.h>
 #include <arch/asm.h>
 
 #define SERIO_1_BASE	0x3F8
