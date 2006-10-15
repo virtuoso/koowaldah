@@ -25,32 +25,30 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/*
- * Device related types, constants and helpers
- */
-#ifndef __DEVICE_H__
-#define __DEVICE_H__
-
-#define NODEV (0x0)
-#define ROOTFSDEV (0x1)
-
-typedef u32 dev_t;
-
-#define DEV_MAJOR_BITS (16)
-#define DEV_MINOR_BITS (sizeof(dev_t) - DEV_MAJOR_BITS)
+#include <kuca.h>
+#include <bug.h>
+#include <error.h>
+#include <klist0.h>
+#include <mm.h>
+#include <lib.h>
+#include <device.h>
+#include <super.h>
+#include <inode.h>
+#include <file.h>
+#include <namespace.h>
 
 /*
- * Obtain major/minor number of a device
- * @d -- the device
+ * FS core
  */
-#define DEV_MAJOR(d) (((d) >> DEV_MAJOR_BITS) & ((1 << DEV_MAJOR_BITS) - 1))
-#define DEV_MINOR(d) ((d) & ((1 << DEV_MINOR_BITS) - 1))
 
-/*
- * Construct a device number from major and minor
- * @maj -- major number
- * @min -- minor number
- */
-#define DEV_DEVICE(maj, min) (((maj) << DEV_MAJOR_BITS) & (min))
+extern void __init fs_init_super();
+extern int __init fs_init_inodes();
+extern void __init fs_init_namespace();
 
-#endif
+void __init fs_init()
+{
+	fs_init_super();
+	fs_init_inodes();
+	fs_init_namespace();
+}
+
