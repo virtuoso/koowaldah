@@ -36,6 +36,13 @@
 #include <bug.h>
 #include <textio.h>
 
+/* #define MM_ANAL_DEBUG 1 */
+#ifdef MM_ANAL_DEBUG
+# define mm_kprintf(fmt, args ...) kprintf(fmt, ## args)
+#else
+# define mm_kprintf(fmt, args ...) do {} while (0)
+#endif
+
 static inline int idx_order(u32 index)
 {
 	int i = -1;
@@ -62,10 +69,10 @@ void print_alloc_info()
 		struct klist0_node * tmp;
 		struct page * pg;
 		
-		kprintf("Alloc level %d:", i);
+		mm_kprintf("Alloc level %d:", i);
 		klist0_for_each(tmp, &boot_zone.alloc_levels[i]) {
 			pg = klist0_entry(tmp, struct page, list);
-			kprintf(" [0x%x - 0x%x(lvl %d)]", pg->index, pg->index + (1 << i) - 1, idx_order(pg->index));
+			mm_kprintf(" [0x%x - 0x%x(lvl %d)]", pg->index, pg->index + (1 << i) - 1, idx_order(pg->index));
 
 			if (pg->private.order != i) {
 				bug();
@@ -80,9 +87,9 @@ void print_alloc_info()
 
 		total += j * (1 << i);
 
-		kprintf("(%d chunks)\n", j);
+		mm_kprintf("(%d chunks)\n", j);
 	}
-	kprintf("Total %d pages\n", total);
+	mm_kprintf("Total %d pages\n", total);
 }
 
 
@@ -112,13 +119,13 @@ void mem_zone_init(struct mem_zone * zone)
 		int pages_left = zone->total_pages - i;
 		int order = idx_order(i);
 
-		kprintf("Dealign with page 0x%x, order = %d, left %d pages.\n",
+		mm_kprintf("Dealign with page 0x%x, order = %d, left %d pages.\n",
 				i, order, pages_left);
 		
 		while ((1 << order) > pages_left)
 			order--;
 
-		kprintf("page order %d inserted into te list.\n", order);
+		mm_kprintf("page order %d inserted into te list.\n", order);
 		klist0_prepend(&p_pool[i].list, &zone->alloc_levels[order]);
 		p_pool[i].private.order = order;
 
