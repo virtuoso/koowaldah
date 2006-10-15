@@ -1,12 +1,4 @@
 
-#
-# Makefile
-#
-# Copyright (C) 2005 Alexey Zaytsev
-#
-# Is distributed under the GPL 2 license.
-#
-
 #### CONFIGURATION SECTION START ####
 
 
