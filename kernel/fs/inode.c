@@ -139,7 +139,17 @@ struct inode *get_inode(struct superblock *sb, ino_t ino)
 		if (inode->i_ino == ino)
 			return inode;
 	}
-	return NULL;
+
+	/* search failed, allocate */
+	inode = new_inode(sb);
+	if (!inode)
+		return NULL;
+
+	inode->i_ino = ino;
+	/* we read via fops' read method on anonymous inodes */
+	if (sb)
+		sb->s_ops->read_inode(inode);
+	return inode;
 }
 
 /*

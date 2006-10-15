@@ -41,8 +41,8 @@
 struct super_operations {
 	struct inode *(*alloc_inode)(void);
 	void (*kill_inode)(struct inode *inode);
-	int (*read_inode)(struct inode *inode);
-	int (*write_inode)(struct inode *inode);
+	void (*read_inode)(struct inode *inode);
+	void (*write_inode)(struct inode *inode);
 };
 
 struct superblock {
