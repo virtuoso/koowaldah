@@ -1,4 +1,3 @@
-/*	$NetBSD: errno.h,v 1.38 2006/02/20 17:30:16 christos Exp $	*/
 
 /*
  * Copyright (c) 1982, 1986, 1989, 1993
@@ -33,7 +32,6 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- *	@(#)errno.h	8.5 (Berkeley) 1/21/94
  */
 
 #ifndef _SYS_ERRNO_H_
