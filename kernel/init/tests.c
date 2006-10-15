@@ -50,7 +50,7 @@
 #define TEST_THREADS 0
 #define TEST_KLIST 0
 #define PAGE_ALLOCATOR_TEST 0
-#define TEST_PCKBD 1
+#define TEST_PCKBD 0
 
 void test_mm()
 {
