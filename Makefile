@@ -16,6 +16,7 @@ OBJCOPY ?= objcopy
 
 
 SRC = 	kernel/init.c \
+	kernel/init/tests.c \
 	kernel/textio.c \
 	kernel/klist.c \
 	kernel/klib.c \
@@ -83,5 +84,6 @@ clean:
 	rm -f arch/i386/boot/bootloader.bin
 	rm -fr arch/i386/*.o arch/i386/asm/*.o arch/i386/boot/*.o
 	rm -fr *.o kernel/*.o kernel/libs/*.o drivers/*.o kernel/fs/*.o
+	rm -fr kernel/init/*.o
 
 
