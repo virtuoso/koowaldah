@@ -1,4 +1,7 @@
+
 /*
+ * include/i386/atimic.h
+ *
  * Copyright (c) 2006, Alexander Shishkin
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
