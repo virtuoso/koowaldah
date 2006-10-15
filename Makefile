@@ -27,6 +27,9 @@ SRC = 	kernel/init.c \
 	kernel/page_alloc.c \
 	kernel/fs/super.c \
 	kernel/fs/inode.c \
+	kernel/fs/file.c \
+	kernel/fs/namespace.c \
+	kernel/fs/fs.c \
 	arch/i386/asm.c \
 	arch/i386/pic.c \
 	arch/i386/serial_console.c \
