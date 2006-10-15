@@ -50,6 +50,7 @@
 #define TEST_THREADS 0
 #define TEST_KLIST 0
 #define PAGE_ALLOCATOR_TEST 0
+#define TEST_PCKBD 1
 
 void test_mm()
 {
@@ -262,11 +263,51 @@ void test_irqs()
 #endif /* TEST_IRQS */
 }
 
+#if TEST_PCKBD
+extern int pckbd_open();
+extern u16 pckbd_read();
+extern int pckbd_load();
+
+void kbd_reader()
+{
+	u16 c;
+
+	pckbd_open();
+	kprintf("Keyboard input: ");
+	for (;;) {
+		c = pckbd_read();
+		console_put_char(c & 0xFF);
+	}
+}
+#endif /* TEST_PCKBD */
+
+void test_pckbd()
+{
+#if TEST_PCKBD && !TEST_IRQS
+	struct thread_t *thread;
+
+	pckbd_load();
+        thread = thread_create(&kbd_reader, "[keyboard]");
+        if (!thread) {
+                kprintf("failed to create thread\n");
+		bug();
+        }
+        kprintf("Thread keyboard created.\n");
+
+        if (scheduler_enqueue(thread)) {
+                kprintf("failed to add thread to run queue\n");
+		bug();
+        }
+        kprintf("Thread keyboard added to run queue.\n");
+#endif /* TEST_PCKBD */
+}
+
 void run_tests()
 {
 	test_mm();
 	test_klist();
 	test_threads();
+	test_pckbd();
 	test_irqs();
 }
 
