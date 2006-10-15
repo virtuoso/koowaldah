@@ -119,7 +119,7 @@ int pckbd_close()
 	return 0;
 }
 
-int __lowinit pckbd_load()
+int pckbd_load()
 {
 	sleeper = NULL;
 	users = read_idx = write_idx = 0; /* although, that's .bss, isn it? */
