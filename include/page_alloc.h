@@ -36,9 +36,8 @@
 
 #include <kuca.h>
 #include <klist0.h>
+#include <arch/asm.h>
 
-#define PAGE_SHIFT 12
-#define PAGE_SIZE (1UL << PAGE_SHIFT)
 #define MAX_ORDER 11
 
 

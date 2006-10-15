@@ -34,6 +34,9 @@
 #ifndef __ARCH_ASM_H__
 #define __ARCH_ASM_H__
 
+#define PAGE_SHIFT 12
+#define PAGE_SIZE (1UL << PAGE_SHIFT)
+
 inline u32 read_cr0();
 inline void write_cr0(u32 value);
 

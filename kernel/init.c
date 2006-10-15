@@ -58,10 +58,13 @@ extern void thread_init(void);
 extern void timers_init(void);
 extern void sched0_load(void);
 extern void scheduler_init(void);
+extern void fs_init(void);
 
 extern void init_mem_info(void);
 extern void mm_init(void); /* legacy mm */ 
 
+/* this is also needed only once */
+extern void run_tests(void);
 
 void __init kern_start()
 {

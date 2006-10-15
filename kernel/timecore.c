@@ -39,6 +39,7 @@
 #include <irq.h>
 #include <error.h>
 #include <mm.h>
+#include <page_alloc.h>
 #include <thread.h>
 #include <scheduler.h>
 

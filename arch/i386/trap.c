@@ -38,6 +38,7 @@
 #include <console.h>
 #include <bug.h>
 #include <mm.h>
+#include <i386/asm.h>
 #include <thread.h>
 
 void psod()

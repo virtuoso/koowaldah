@@ -55,4 +55,6 @@ struct superblock {
 	struct super_operations *s_ops;
 };
 
+struct superblock *get_super(dev_t dev);
+
 #endif

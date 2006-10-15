@@ -34,8 +34,6 @@
 #ifndef __MM_H__
 #define __MM_H__
 
-#define PAGE_SIZE 4096
-
 #if CONFIG_DEBUG_MEMALLOC
 void debug_print_blocks();
 #endif /* CONFIG_DEBUG_MEMALLOC */		
