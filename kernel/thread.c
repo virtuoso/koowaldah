@@ -41,6 +41,7 @@
 #include <klist0.h>
 #include <scheduler.h>
 #include <lib.h>
+#include <page_alloc.h>
 
 /* each architecture should define this */
 extern void thread_init_stack(struct thread_t * t, void (*func)(void));

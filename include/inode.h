@@ -56,6 +56,7 @@ struct inode {
 
 struct inode *alloc_inode();
 void kill_inode(struct inode *inode);
+struct inode *get_inode(struct superblock *sb, ino_t ino);
 
 #endif
 
