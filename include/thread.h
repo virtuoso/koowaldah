@@ -35,6 +35,7 @@
 #define __THREAD_H__
 #include <arch/thread.h>
 #include <klist0.h>
+#include <namespace.h>
 
 #define THREAD_NAME_LEN 32
 #define MAX_THREADS 128
@@ -65,6 +66,7 @@ struct thread_t {
 	u32					pid;
 	u32					state;
 	char					name[THREAD_NAME_LEN];
+	struct namespace			*ns;
 };
 
 void dump_thread(struct thread_t *thread);

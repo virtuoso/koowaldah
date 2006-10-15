@@ -25,32 +25,76 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/*
- * Device related types, constants and helpers
- */
-#ifndef __DEVICE_H__
-#define __DEVICE_H__
-
-#define NODEV (0x0)
-#define ROOTFSDEV (0x1)
-
-typedef u32 dev_t;
-
-#define DEV_MAJOR_BITS (16)
-#define DEV_MINOR_BITS (sizeof(dev_t) - DEV_MAJOR_BITS)
+#include <kuca.h>
+#include <bug.h>
+#include <error.h>
+#include <klist0.h>
+#include <mm.h>
+#include <lib.h>
+#include <device.h>
+#include <super.h>
+#include <inode.h>
+#include <file.h>
+#include <namespace.h>
 
 /*
- * Obtain major/minor number of a device
- * @d -- the device
+ * FS namespaces, names etc related code
  */
-#define DEV_MAJOR(d) (((d) >> DEV_MAJOR_BITS) & ((1 << DEV_MAJOR_BITS) - 1))
-#define DEV_MINOR(d) ((d) & ((1 << DEV_MINOR_BITS) - 1))
+
+struct namespace root_ns;
+
+struct direntry *new_direntry(char *name, struct inode *inode)
+{
+	struct direntry *dent;
+
+	if (!inode || !name)
+		bug();
+
+	dent = memory_alloc(sizeof(struct direntry));
+	if (!dent)
+		return NULL;
+	
+	ATOMIC_INIT(&dent->d_refcnt);
+	KLIST0_INIT(&dent->d_idlist);
+	memory_copy(dent->d_name, name,
+			MIN(FILENAME_MAX, string_len(name)));
+	dent->d_inode = inode;
+	klist0_append(&dent->d_idlist, &inode->i_dent);
+	return dent;
+}
+
+void free_direntry(struct direntry *dent)
+{
+	/* direntry should be unused */
+	if (atomic_read(&dent->d_refcnt))
+		bug();
+
+	klist0_unlink(&dent->d_idlist);
+	memory_release(dent);
+}
 
 /*
- * Construct a device number from major and minor
- * @maj -- major number
- * @min -- minor number
+ * Create root namespace
  */
-#define DEV_DEVICE(maj, min) (((maj) << DEV_MAJOR_BITS) & (min))
+void __init fs_init_namespace()
+{
+	struct superblock *sb;
+	struct inode *inode;
+	struct direntry *dent;
 
-#endif
+	/* get rootfs superblock */
+	sb = get_super(ROOTFSDEV);
+	if (!sb)
+		bug();
+
+	/* get root inode */
+	inode = get_inode(sb, 0);
+	if (!inode)
+		bug();
+
+	/* assign a name for it */
+	dent = new_direntry("/", inode);
+
+	root_ns.n_inode = inode;
+}
+

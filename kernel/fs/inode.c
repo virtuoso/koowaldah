@@ -33,6 +33,7 @@
 #include <device.h>
 #include <super.h>
 #include <inode.h>
+#include <namespace.h>
 
 /*
  * FS inode operations
@@ -90,6 +91,7 @@ struct inode *new_inode(struct superblock *sb)
 	if (sb)
 		klist0_append(&inode->i_sblist, &sb->s_ilist);
 
+	KLIST0_INIT(&inode->i_dent);
 	ATOMIC_INIT(&inode->i_refcnt);
 	inode->i_state = INODE_NEW;
 
@@ -111,6 +113,19 @@ struct inode *new_inode(struct superblock *sb)
  */
 void free_inode(struct inode *inode)
 {
+	struct direntry *dent;
+	struct klist0_node *t;
+
+	/* remove all associated direntries, if any */
+	if (!klist0_empty(&inode->i_dent)) {
+		t = &inode->i_dent;
+		do {
+			dent = klist0_entry(t, struct direntry, d_idlist);
+			t = t->next;
+			free_direntry(dent);
+		} while (t != &inode->i_dent);
+	}
+
 	if (inode->i_sb)
 		inode->i_sb->s_ops->kill_inode(inode);
 	else
@@ -157,6 +172,14 @@ struct inode *get_inode(struct superblock *sb, ino_t ino)
  */
 int __init fs_init_inodes()
 {
+	struct superblock *sb;
+
+	sb = get_super(ROOTFSDEV);
+	if (!sb)
+		bug();
+
+	/* root inode */
+	new_inode(sb);
 	KLIST0_INIT(&anon_inodes);
 	return 0;
 }

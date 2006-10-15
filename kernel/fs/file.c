@@ -25,32 +25,70 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/*
- * Device related types, constants and helpers
- */
-#ifndef __DEVICE_H__
-#define __DEVICE_H__
-
-#define NODEV (0x0)
-#define ROOTFSDEV (0x1)
-
-typedef u32 dev_t;
-
-#define DEV_MAJOR_BITS (16)
-#define DEV_MINOR_BITS (sizeof(dev_t) - DEV_MAJOR_BITS)
+#include <kuca.h>
+#include <bug.h>
+#include <error.h>
+#include <klist0.h>
+#include <mm.h>
+#include <device.h>
+#include <super.h>
+#include <inode.h>
+#include <file.h>
 
 /*
- * Obtain major/minor number of a device
- * @d -- the device
+ * FS file operations.
  */
-#define DEV_MAJOR(d) (((d) >> DEV_MAJOR_BITS) & ((1 << DEV_MAJOR_BITS) - 1))
-#define DEV_MINOR(d) ((d) & ((1 << DEV_MINOR_BITS) - 1))
+struct file *new_file()
+{
+	struct file *file;
 
-/*
- * Construct a device number from major and minor
- * @maj -- major number
- * @min -- minor number
- */
-#define DEV_DEVICE(maj, min) (((maj) << DEV_MAJOR_BITS) & (min))
+	file = memory_alloc(sizeof(struct file));
+	if (!file)
+		return NULL;
 
-#endif
+	file->f_offset = 0;
+	file->f_ops = NULL;
+	file->f_sb = NULL;
+	file->f_inode = NULL;
+	return file;
+}
+
+void kill_file(struct file *file)
+{
+	memory_release(file);
+}
+
+int generic_open(struct file *file, struct inode *inode)
+{
+	return 0;
+}
+
+int generic_close(struct file *file)
+{
+	return 0;
+}
+
+int generic_read(struct file *file, char *buf, off_t offset)
+{
+	return 0;
+}
+
+int generic_write(struct file *file, char *buf, off_t offset)
+{
+	return 0;
+}
+
+static struct file_operations generic_fops = {
+	.open = generic_open,
+	.close = generic_close,
+	.read = generic_read,
+	.write = generic_write
+};
+
+int open(char *name)
+{
+	/* lookup name */
+	return 0;
+}
+
+

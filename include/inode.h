@@ -39,6 +39,7 @@ typedef u32 ino_t;
 
 struct inode {
 	struct klist0_node i_sblist;  /* sb list linkage */
+	struct klist0_node i_dent;    /* direntries */
 	struct superblock *i_sb;      /* our sb */
 	u32 i_state;
 	ino_t i_ino;

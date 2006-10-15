@@ -105,6 +105,6 @@ void __init fs_init_super()
 {
 	KLIST0_INIT(&superblock_list);
 	/* system rootfs */
-	alloc_super(NODEV);
+	alloc_super(ROOTFSDEV);
 }
 
