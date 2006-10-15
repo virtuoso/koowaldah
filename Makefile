@@ -25,6 +25,8 @@ SRC = 	kernel/init.c \
 	kernel/timecore.c \
 	kernel/mm_zone.c \
 	kernel/page_alloc.c \
+	kernel/fs/super.c \
+	kernel/fs/inode.c \
 	arch/i386/asm.c \
 	arch/i386/pic.c \
 	arch/i386/serial_console.c \
@@ -77,6 +79,6 @@ clean:
 	rm -f kernel/kernel.bin kuca-bin kuca-elf
 	rm -f arch/i386/boot/bootloader.bin
 	rm -fr arch/i386/*.o arch/i386/asm/*.o arch/i386/boot/*.o
-	rm -fr *.o kernel/*.o kernel/libs/*.o drivers/*.o 
+	rm -fr *.o kernel/*.o kernel/libs/*.o drivers/*.o kernel/fs/*.o
 
 
