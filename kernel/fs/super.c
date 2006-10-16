@@ -38,7 +38,7 @@
  */
 
 /* all the king's man */
-static struct klist0_node superblock_list;
+static KLIST0_DECLARE(superblock_list);
 
 static struct super_operations generic_sbops = {
 	.alloc_inode = alloc_inode,
@@ -92,6 +92,9 @@ struct superblock *get_super(dev_t dev)
 {
 	struct klist0_node *t;
 	struct superblock *sb;
+
+	if (klist0_empty(&superblock_list))
+		return NULL;
 
 	klist0_for_each(t, &superblock_list) {
 		sb = klist0_entry(t, struct superblock, s_blocks);
