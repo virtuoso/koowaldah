@@ -43,6 +43,7 @@
 #include <klist.h>
 #include <thread.h>
 #include <scheduler.h>
+#include <namespace.h>
 #include <bug.h>
 
 #define TEST_IRQS 0
@@ -51,6 +52,7 @@
 #define TEST_KLIST 0
 #define PAGE_ALLOCATOR_TEST 0
 #define TEST_PCKBD 0
+#define TEST_FSLOOKUP 0
 
 void test_mm()
 {
@@ -301,6 +303,18 @@ void test_pckbd()
 #endif /* TEST_PCKBD */
 }
 
+void test_fslookup()
+{
+#if TEST_FSLOOKUP
+	struct direntry *dent = lookup_path("/dev/console");
+	
+	if (!dent)
+		bug();
+
+	kprintf("FS test found: %s\n", dent->d_name);
+#endif
+}
+
 void run_tests()
 {
 	test_mm();
@@ -308,5 +322,6 @@ void run_tests()
 	test_threads();
 	test_pckbd();
 	test_irqs();
+	test_fslookup();
 }
 
