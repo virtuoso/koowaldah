@@ -41,5 +41,36 @@ size_t memory_copy( void *dest, void *src, size_t n );
 size_t string_len( char *str );
 char * find_char( char *str, char c );
 
+static __inline size_t kstrlen(char *str)
+{
+	char *p = str;
+
+	while ('\0' != *(++p));
+	return p - str;
+}
+
+static __inline int kstrncmp(char *a, char *b, size_t n)
+{
+	while (n-- && *a++ == *b++);
+	return (*a - *b);
+}
+
+static __inline int k__strcmp(char *a, char *b)
+{
+	while (*a && *b && *a++ == *b++);
+	return (*a - *b);
+}
+
+static __inline int kstrcmp(char *a, char *b)
+{
+	int len_a = kstrlen(a);
+	int len_b = kstrlen(b);
+
+	if (len_a == len_b)
+		return kstrncmp(a, b, len_a);
+
+	return k__strcmp(a, b);
+}
+
 #endif /* __LIB_H__ */
 
