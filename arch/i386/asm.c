@@ -87,8 +87,8 @@ inline u32 read_eflags()
 	u32 result;
 	
 	asm volatile ("pushf");
-	asm volatile ("pop %%eax"::);
-	asm volatile ("movl %%eax, %0":"=r"(result):);
+	asm volatile ("pop %%eax" :);
+	asm volatile ("movl %%eax, %0":"=r"(result));
 
 	return result;
 }
