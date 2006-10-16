@@ -1,4 +1,4 @@
-TESTS := klist0-unit atomic-unit
+TESTS := klist0-unit atomic-unit klib-unit
 TEST_STAMPS := $(patsubst %,%_stamp,$(TESTS))
 INCLUDES := ../include
 
@@ -20,4 +20,11 @@ atomic-unit: atomic-unit.c
 atomic-unit_stamp: atomic-unit
 	cat $<.d >> $@
 	./atomic-unit | tee -a $@
+
+klib-unit: klib-unit.c
+	$(CC) -MD -g -I$(INCLUDES) $< -o $@ 2>&1 | tee $@_stamp
+
+klib-unit_stamp: klib-unit
+	cat $<.d >> $@
+	./klib-unit | tee -a $@
 
