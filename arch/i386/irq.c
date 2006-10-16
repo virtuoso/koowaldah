@@ -120,12 +120,12 @@ void unregister_irq_handler(u32 number){
 
 inline void disable_interrupts()
 {
-        asm("cli");
+        asm volatile ("cli");
 }
 
 inline void enable_interrupts()
 {
-        asm("sti");
+        asm volatile ("sti");
 }
 
 
