@@ -37,6 +37,7 @@
 #define __ARCH_THREAD_H__
 
 #include <i386/i386.h>
+#include <i386/asm.h>
 
 struct x86_thread_context {
 	u32 *stack_base;
