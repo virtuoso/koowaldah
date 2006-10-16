@@ -43,13 +43,17 @@ extern struct namespace root_ns;
 
 struct direntry {
 	struct inode *d_inode;
-	struct klist0_node d_idlist;
+	struct klist0_node d_idlist;   /* i_dent linkage */
 	char d_name[FILENAME_MAX];
 	atomic_u32 d_refcnt;
+	struct klist0_node d_siblings; /* i_children linkage */
 };
 
 struct direntry *new_direntry(char *name, struct inode *inode);
 void free_direntry(struct direntry *dent);
+
+struct direntry *lookup_direntry(char *name, struct inode *inode);
+struct direntry *lookup_path(char *pathname);
 
 struct namespace {
 	struct inode *n_inode;  /* inode to start the namespace */

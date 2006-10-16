@@ -37,6 +37,8 @@ typedef u32 ino_t;
 
 #define INODE_NEW (0x1)
 
+#define ROOT_INO 2
+
 struct inode {
 	struct klist0_node i_sblist;  /* sb list linkage */
 	struct klist0_node i_dent;    /* direntries */
@@ -52,10 +54,14 @@ struct inode {
 	u32 i_atime;
 	u32 i_ctime;
 	u32 i_mtime;
+	struct klist0_node i_children; /* direntries list */
+	struct inode *i_parent;
 };
 
 struct inode *alloc_inode();
 void kill_inode(struct inode *inode);
+struct inode *new_inode(struct superblock *sb);
+void free_inode(struct inode *inode);
 struct inode *get_inode(struct superblock *sb, ino_t ino);
 
 #endif
