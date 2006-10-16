@@ -86,5 +86,6 @@ clean:
 	rm -fr arch/i386/*.o arch/i386/asm/*.o arch/i386/boot/*.o
 	rm -fr *.o kernel/*.o kernel/libs/*.o drivers/*.o kernel/fs/*.o
 	rm -fr kernel/init/*.o
+	rm -fr drivers/*.o drivers/keyboard/*.o
 
 
