@@ -29,6 +29,7 @@
 #include <bug.h>
 #include <error.h>
 #include <klist0.h>
+#include <thread.h>
 #include <mm.h>
 #include <lib.h>
 #include <device.h>
@@ -36,6 +37,7 @@
 #include <inode.h>
 #include <file.h>
 #include <namespace.h>
+#include <sys/stat.h>
 
 /*
  * FS namespaces, names etc related code
@@ -56,6 +58,7 @@ struct direntry *new_direntry(char *name, struct inode *inode)
 	
 	ATOMIC_INIT(&dent->d_refcnt);
 	KLIST0_INIT(&dent->d_idlist);
+	KLIST0_INIT(&dent->d_siblings);
 	memory_copy(dent->d_name, name,
 			MIN(FILENAME_MAX, string_len(name)));
 	dent->d_inode = inode;
@@ -74,6 +77,70 @@ void free_direntry(struct direntry *dent)
 }
 
 /*
+ * Look up a given name in inode's children.
+ * @name -- part of a pathname to look for
+ * @inode -- directory's inode
+ */
+struct direntry *lookup_direntry(char *name, struct inode *inode)
+{
+	struct direntry *child_dent;
+	struct klist0_node *d;
+
+	if (!S_ISDIR(inode->i_mode))
+		return NULL;
+
+	/* we don't have inode ops yet */
+#if 0
+	if (klist0_empty(&inode->i_children))
+		inode->i_ops->readdir(inode);
+#endif
+
+	klist0_for_each(d, &inode->i_children) {
+		child_dent = klist0_entry(d, struct direntry, d_siblings);
+		if (!kstrcmp(child_dent->d_name, name))
+			return child_dent;
+	}
+
+	return NULL;
+}
+
+/*
+ * Look up a pathname
+ * @pathname -- a full *normalized* pathname
+ */
+struct direntry *lookup_path(char *pathname)
+{
+	struct thread_t *me = CURRENT();
+	struct inode *inode = me->ns->n_inode;
+	struct direntry *dent;
+	char name[FILENAME_MAX];
+	char *p = pathname;
+	char *n;
+
+	if (*pathname == '/')
+		p++;
+
+	while ((n = find_char(p, '/'))) {
+		memory_copy(name, p, n - p);
+		name[n - p] = '\0';
+
+		dent = lookup_direntry(name, inode);
+		if (!dent)
+			return NULL;
+
+		p = n + 1;
+		/* it's absolutely necessary for inode to be there */
+		inode = dent->d_inode;
+		if (!inode)
+			bug();
+	}
+
+	dent = lookup_direntry(p, inode);
+
+	return dent;
+}
+
+/*
  * Create root namespace
  */
 void __init fs_init_namespace()
@@ -88,7 +155,7 @@ void __init fs_init_namespace()
 		bug();
 
 	/* get root inode */
-	inode = get_inode(sb, 0);
+	inode = get_inode(sb, ROOT_INO);
 	if (!inode)
 		bug();
 

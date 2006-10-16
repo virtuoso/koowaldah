@@ -34,6 +34,7 @@
 #include <super.h>
 #include <inode.h>
 #include <namespace.h>
+#include <sys/stat.h>
 
 /*
  * FS inode operations
@@ -93,6 +94,11 @@ struct inode *new_inode(struct superblock *sb)
 
 	KLIST0_INIT(&inode->i_dent);
 	ATOMIC_INIT(&inode->i_refcnt);
+
+	/* relatives */
+	KLIST0_INIT(&inode->i_children);
+	inode->i_parent = NULL; /* we are disconnected */
+
 	inode->i_state = INODE_NEW;
 
 	/* following fields must be filled in by fs driver */
@@ -173,13 +179,16 @@ struct inode *get_inode(struct superblock *sb, ino_t ino)
 int __init fs_init_inodes()
 {
 	struct superblock *sb;
+	struct inode *root;
 
 	sb = get_super(ROOTFSDEV);
 	if (!sb)
 		bug();
 
 	/* root inode */
-	new_inode(sb);
+	root = new_inode(sb);
+	root->i_ino = ROOT_INO;
+	root->i_mode = S_IFDIR;
 	KLIST0_INIT(&anon_inodes);
 	return 0;
 }

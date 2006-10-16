@@ -36,19 +36,61 @@
 #include <inode.h>
 #include <file.h>
 #include <namespace.h>
+#include <sys/stat.h>
 
 /*
- * FS core
+ * FS core; rootfs filesystem
  */
+
+struct inode *fs_add_entry(struct inode *parent, char *name, u32 mode)
+{
+	struct superblock *sb = parent->i_sb;
+	struct inode *inode;
+	struct direntry *dent;
+
+	inode = new_inode(sb);
+	if (!inode)
+		bug();
+	inode->i_ino = parent->i_ino + 1; /* XXX */
+	inode->i_mode = mode;
+
+	dent = new_direntry(name, inode);
+	if (!dent)
+		bug();
+
+	klist0_append(&dent->d_siblings, &parent->i_children);
+	return inode;
+}
 
 extern void __init fs_init_super();
 extern int __init fs_init_inodes();
 extern void __init fs_init_namespace();
 
+/*
+ * Initialize FS and create rootfs
+ *
+ * ROOTFS:
+ *  /dev
+ *  /dev/console
+ *  /initfs
+ *  /mnt
+ */
 void __init fs_init()
 {
+	struct superblock *sb;
+	struct inode *root;
+	struct inode *p;
+
 	fs_init_super();
 	fs_init_inodes();
 	fs_init_namespace();
+
+	sb = get_super(ROOTFSDEV);
+	root = get_inode(sb, ROOT_INO);
+
+	p = fs_add_entry(root, "dev", S_IFDIR);
+	p = fs_add_entry(p, "console", S_IFCHR);
+	p = fs_add_entry(root, "initfs", S_IFDIR);
+	p = fs_add_entry(root, "mnt", S_IFDIR);
 }
 
