@@ -87,10 +87,6 @@ void __init kern_start()
 
 	init_mem_info();
 
-	kprintf("Initializing vfs core... ");
-	fs_init();
-	kprintf("Done.\n");
-
 	thread_init();
 
 	timers_init();
@@ -122,6 +118,10 @@ void kernel_main_thread()
 		bug();
         }
         kprintf("Main kernel thread added to run queue.\n");
+
+	kprintf("Initializing vfs core... ");
+	fs_init();
+	kprintf("Done.\n");
 
 	scheduler_start();
 
