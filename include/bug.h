@@ -37,15 +37,41 @@
 
 #include <textio.h>
 #include <irq.h>
+#include <arch/bug.h>
 
-#define bug() {\
-	kprintf("Achtung! BUG in file %s, line %d\n System halted.\n", __FILE__, __LINE__); \
-	disable_interrupts(); \
-	for(;;) \
-		asm volatile ("hlt"); \
-}
 
-/* this is arch-specific, actually */
-void psod();
+/*
+ * First of all, we dump all the registers on the stack. Now we can mess with them calling
+ * fprintf and other stuff and get them unchanged in arch_display_regs().
+ */
+
+#define info(fmt, args ...) do {		\
+	arch_dump_registers();			\
+	kprintf("\nDebug info: " fmt "\b", ## args);	\
+	arch_display_thread();			\
+	kprintf("Registers:\n");		\
+	arch_display_registers();		\
+	kprintf("Stack:\n");			\
+	arch_display_stack();			\
+}while (0)
+
+#define panic(fmt, args ... ) do {		\
+	arch_dump_registers();			\
+	kprintf("\nPanic: " fmt "\n", ## args);	\
+	arch_display_thread();			\
+	kprintf("Registers:\n");		\
+	arch_display_registers();		\
+	kprintf("Stack:\n");			\
+	arch_display_stack();			\
+	for(;;) {				\
+		kprintf("R.I.P.\n");		\
+		arch_halt();			\
+	}					\
+} while (0)
+
+#define bug() do {				\
+	panic("Bug in file %s, line %s", __FILE__, __LINE__); \
+} while (0)
+
 
 #endif /* __BUG_H__ */
