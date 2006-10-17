@@ -34,6 +34,8 @@
 #ifndef __LIB_H__
 #define __LIB_H__
 
+#include <stdarg.h>
+
 size_t memory_set(void *s, char c, size_t n);
 size_t memory_copy( void *dest, void *src, size_t n );
 
@@ -71,6 +73,9 @@ static __inline int kstrcmp(char *a, char *b)
 
 	return k__strcmp(a, b);
 }
+
+int vsnprintf(char *buf, size_t size, const char *format, va_list args);
+int snprintf(char *buf, size_t size, const char *fmt, ...);
 
 #endif /* __LIB_H__ */
 
