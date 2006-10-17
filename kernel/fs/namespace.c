@@ -120,7 +120,7 @@ struct direntry *lookup_path(char *pathname)
 	if (*pathname == '/')
 		p++;
 
-	while ((n = find_char(p, '/'))) {
+	while ((n = kstrchr(p, '/'))) {
 		memory_copy(name, p, n - p);
 		name[n - p] = '\0';
 
