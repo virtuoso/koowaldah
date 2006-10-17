@@ -62,21 +62,3 @@ size_t memory_copy(void *dest, void *src, size_t n)
 	return n;
 }
 
-size_t string_len(char *str)
-{
-	char *p = str;
-
-	while ('\0' != *p++);
-	return p - str;
-}
-
-char *find_char(char *str, char c)
-{
-	char *p = str;
-
-	while ('\0' != *p && c != *p) p++;
-	if ('\0' == *p) return NULL;
-
-	return p;
-}
-
