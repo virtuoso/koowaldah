@@ -39,9 +39,10 @@
 
 #define PRINTF_BUFSIZE 1024
 
-static void print(const char *message){
-    while(*message)
-        console_put_char(*(message++));
+static void print(const char *message)
+{
+	while (*message)
+		console_put_char(*(message++));
 }
 
 void hex_dump(char * ptr, u32 len)
@@ -71,17 +72,17 @@ void hex_dump(char * ptr, u32 len)
 	kprintf("\n");
 }
 
-int kprintf( const char *fmt, ... )
+int kprintf(const char *fmt, ...)
 {
-    va_list args;
-    int i;
-    char buf[PRINTF_BUFSIZE];
+	va_list args;
+	int i;
+	char buf[PRINTF_BUFSIZE];
 
-    va_start( args, fmt );
-    i = vsnprintf( buf, PRINTF_BUFSIZE, fmt, args );
-    va_end( args );
-    print( buf );
+	va_start(args, fmt);
+	i = vsnprintf(buf, PRINTF_BUFSIZE, fmt, args);
+	va_end(args);
+	print(buf);
 
-    return i;
+	return i;
 }
 
