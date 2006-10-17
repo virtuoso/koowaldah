@@ -4,7 +4,7 @@ ENTRY (multiboot_start)
 SECTIONS
 {
 
-	. = 0xFFFF;
+	. = 0x10000;
 	kernel_stack = .;
 
 	. = 0x11000;
