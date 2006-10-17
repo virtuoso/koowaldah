@@ -36,6 +36,7 @@
 
 #include <stdarg.h>
 
+void hex_dump(char *ptr, u32 len);
 int vsnprintf( char *buf, size_t size, const char *format, va_list args );
 int snprintf(char *buf, size_t size, const char *fmt, ...);
 int kprintf( const char *fmt, ... );
