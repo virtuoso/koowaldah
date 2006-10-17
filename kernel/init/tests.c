@@ -244,7 +244,7 @@ void keyboard_irq_handler(u32 number)
 			list_threads();
 			break;
 		case 32:
-			psod();
+			bug();
 			break;
 		case 33:
 			kprintf("Timer says %d\n", (u32)jiffies);
