@@ -60,7 +60,7 @@ struct direntry *new_direntry(char *name, struct inode *inode)
 	KLIST0_INIT(&dent->d_idlist);
 	KLIST0_INIT(&dent->d_siblings);
 	memory_copy(dent->d_name, name,
-			MIN(FILENAME_MAX, string_len(name)));
+			MIN(FILENAME_MAX, kstrlen(name) + 1));
 	dent->d_inode = inode;
 	klist0_append(&dent->d_idlist, &inode->i_dent);
 	return dent;
