@@ -159,6 +159,33 @@ int vsnprintf( char *buf, size_t size, const char *format, va_list args )
     return pos - buf;
 }
 
+void hex_dump(char * ptr, u32 len)
+{
+	int i;
+	for (i = 0; i < len; i++) {
+		if (!(i % 16)) { /*0, 16, 32...*/
+			/* I wish we had a working %N.Mx in kprintf... */
+			kprintf("0x%x%x%x%x%x%x%x%x:",
+				((i + (u32)ptr) & 0xf0000000) >> 28,
+				((i + (u32)ptr) & 0x0f000000) >> 24,
+				((i + (u32)ptr) & 0x00f00000) >> 20,
+				((i + (u32)ptr) & 0x000f0000) >> 16,
+				((i + (u32)ptr) & 0x0000f000) >> 12,
+				((i + (u32)ptr) & 0x00000f00) >> 8,
+				((i + (u32)ptr) & 0x000000f0) >> 4,
+				((i + (u32)ptr) & 0x0000000f));
+		}
+		
+		if (!(i % 4))  /* 0, 4, 8, 12...*/
+			kprintf("  %x", ptr[i] & 0xff);
+		else if (!((i+ 1) % 16)) /* 15, 31, 47...*/
+			kprintf(" %x\n", ptr[i] & 0xff);
+		else
+			kprintf(" %x", ptr[i] & 0xff);
+	}
+	kprintf("\n");
+}
+
 int snprintf( char *buf, size_t size, const char *fmt, ... )
 {
     va_list args;
