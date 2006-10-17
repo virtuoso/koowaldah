@@ -101,7 +101,7 @@ int vsnprintf(char *buf, size_t size, const char *format, va_list args)
 
 	/* parse <format> */
 	do {
-		cur = find_char(cur, '%');
+		cur = kstrchr(cur, '%');
 		if (NULL != cur)
 			pos += memory_copy(pos, old, cur - old);
 

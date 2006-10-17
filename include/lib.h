@@ -40,8 +40,15 @@ size_t memory_set(void *s, char c, size_t n);
 size_t memory_copy( void *dest, void *src, size_t n );
 
 
-size_t string_len( char *str );
-char * find_char( char *str, char c );
+static __inline char *kstrchr(char *str, char c)
+{
+	char *p = str;
+
+	while ('\0' != *p && c != *p) p++;
+	if ('\0' == *p) return NULL;
+
+	return p;
+}
 
 static __inline size_t kstrlen(char *str)
 {
