@@ -20,6 +20,7 @@ SRC = 	kernel/init.c \
 	kernel/textio.c \
 	kernel/klist.c \
 	kernel/klib.c \
+	kernel/lib/vsnprintf.c \
 	kernel/thread.c \
 	kernel/scheduler.c \
 	kernel/sched0.c \
@@ -86,7 +87,7 @@ clean:
 	rm -f arch/i386/boot/bootloader.bin
 	rm -fr arch/i386/*.o arch/i386/asm/*.o arch/i386/boot/*.o
 	rm -fr *.o kernel/*.o kernel/libs/*.o drivers/*.o kernel/fs/*.o
-	rm -fr kernel/init/*.o
+	rm -fr kernel/init/*.o kernel/lib/*.o
 	rm -fr drivers/*.o drivers/keyboard/*.o
 
 
