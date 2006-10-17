@@ -53,6 +53,7 @@
 #define PAGE_ALLOCATOR_TEST 0
 #define TEST_PCKBD 0
 #define TEST_FSLOOKUP 0
+#define TEST_BUG 0
 
 void test_mm()
 {
@@ -315,6 +316,13 @@ void test_fslookup()
 #endif
 }
 
+void test_bug()
+{
+#if TEST_BUG
+	bug();
+#endif
+}
+
 void run_tests()
 {
 	test_mm();
@@ -323,5 +331,6 @@ void run_tests()
 	test_pckbd();
 	test_irqs();
 	test_fslookup();
+	test_bug();
 }
 
