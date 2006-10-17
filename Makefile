@@ -18,8 +18,8 @@ OBJCOPY ?= objcopy
 SRC = 	kernel/init.c \
 	kernel/init/tests.c \
 	kernel/textio.c \
-	kernel/klist.c \
-	kernel/klib.c \
+	kernel/lib/klist.c \
+	kernel/lib/klib.c \
 	kernel/lib/vsnprintf.c \
 	kernel/thread.c \
 	kernel/scheduler.c \
