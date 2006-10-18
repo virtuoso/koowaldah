@@ -46,18 +46,9 @@
 #include <namespace.h>
 #include <bug.h>
 
-#define TEST_IRQS 0
-#define TEST_TIMER 0
-#define TEST_THREADS 0
-#define TEST_KLIST 0
-#define PAGE_ALLOCATOR_TEST 0
-#define TEST_PCKBD 0
-#define TEST_FSLOOKUP 0
-#define TEST_BUG 0
-
 void test_mm()
 {
-#if PAGE_ALLOCATOR_TEST
+#ifdef OPT_PAGE_ALLOCATOR_TEST
 	struct page *pg[7];
 
 	kprintf("Testing the page allocator...\n");
@@ -126,7 +117,7 @@ void test_mm()
 
 void test_klist()
 {
-#if TEST_KLIST
+#ifdef OPT_TEST_KLIST
         struct klist * list = NULL;
         struct klist * tmp;
 
@@ -177,10 +168,10 @@ void test_klist()
 
         kprintf("Done with traversing\n");
 
-#endif /* TEST_KLIST */
+#endif /* OPT_TEST_KLIST */
 }
 
-#if TEST_THREADS
+#ifdef OPT_TEST_THREADS
 extern int tsleep(u32 delay);
 
 void func1()
@@ -198,11 +189,11 @@ void func2()
 		tsleep(70);
 	}
 }
-#endif /* TEST_THREADS */
+#endif /* OPT_TEST_THREADS */
 
 void test_threads()
 {
-#if TEST_THREADS
+#ifdef OPT_TEST_THREADS
 	struct thread_t *thread;
 
         thread = thread_create(&func1, "[thread A]");
@@ -230,10 +221,10 @@ void test_threads()
 		bug();
         }
         kprintf("Thread B added to run queue.\n");
-#endif /* TEST_THREADS */
+#endif /* OPT_TEST_THREADS */
 }
 
-#if TEST_IRQS
+#ifdef OPT_TEST_IRQS
 void keyboard_irq_handler(u32 number)
 {
         unsigned char c;
@@ -254,18 +245,18 @@ void keyboard_irq_handler(u32 number)
 			break;
 	}
 }
-#endif /* TEST_IRQS */
+#endif /* OPT_TEST_IRQS */
 
 void test_irqs()
 {
-#if TEST_IRQS
+#ifdef OPT_TEST_IRQS
         kprintf("Registering dummy keyboard interrupt service routine...");
         register_irq_handler(1, keyboard_irq_handler);
         kprintf("Done\n");
-#endif /* TEST_IRQS */
+#endif /* OPT_TEST_IRQS */
 }
 
-#if TEST_PCKBD
+#ifdef OPT_TEST_PCKBD
 extern int pckbd_open();
 extern u16 pckbd_read();
 extern int pckbd_load();
@@ -281,11 +272,11 @@ void kbd_reader()
 		console_put_char(c & 0xFF);
 	}
 }
-#endif /* TEST_PCKBD */
+#endif /* OPT_TEST_PCKBD */
 
 void test_pckbd()
 {
-#if TEST_PCKBD && !TEST_IRQS
+#ifdef OPT_TEST_PCKBD && !OPT_TEST_IRQS
 	struct thread_t *thread;
 
 	pckbd_load();
@@ -301,12 +292,12 @@ void test_pckbd()
 		bug();
         }
         kprintf("Thread keyboard added to run queue.\n");
-#endif /* TEST_PCKBD */
+#endif /* OPT_TEST_PCKBD */
 }
 
 void test_fslookup()
 {
-#if TEST_FSLOOKUP
+#ifdef OPT_TEST_FSLOOKUP
 	struct direntry *dent = lookup_path("/dev/console");
 	
 	if (!dent)
@@ -318,7 +309,7 @@ void test_fslookup()
 
 void test_bug()
 {
-#if TEST_BUG
+#ifdef OPT_TEST_BUG
 	bug();
 #endif
 }
