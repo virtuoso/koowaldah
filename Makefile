@@ -62,14 +62,24 @@ all: kernel tests
 .S.o:
 	$(ASM) $(ASM_FLAGS) -f aout  $< -o $@
 
+include/koptions.h: konfig/konfigure
+	konfig/konfigure
+	cat KONFIG
+
+konfig/konfigure: konfig/konfigure.c
+	$(CC) -Ikonfig -I. -o $@ $<
+
 image:	kernel loader
 	$(MAKE) -C rootfs
+
+konfig: include/koptions.h
+.PHONY: konfig
 
 kernel-elf: $(OBJ) arch/i386/boot/multiboot.o
 	$(LD) -T arch/i386/kernel-elf.lds -o kuca-elf \
 		arch/i386/boot/multiboot.o $(OBJ)
 	
-kernel: kernel-elf
+kernel: konfig kernel-elf
 
 tests:
 	$(MAKE) -C tests test
@@ -89,5 +99,6 @@ clean:
 	rm -fr *.o kernel/*.o kernel/libs/*.o drivers/*.o kernel/fs/*.o
 	rm -fr kernel/init/*.o kernel/lib/*.o
 	rm -fr drivers/*.o drivers/keyboard/*.o
+	rm -f KONFIG include/koptions.h konfig/konfigure
 
 
