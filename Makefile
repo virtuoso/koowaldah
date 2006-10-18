@@ -99,6 +99,6 @@ clean:
 	rm -fr *.o kernel/*.o kernel/libs/*.o drivers/*.o kernel/fs/*.o
 	rm -fr kernel/init/*.o kernel/lib/*.o
 	rm -fr drivers/*.o drivers/keyboard/*.o
-	rm -f KONFIG include/koptions.h konfig/konfigure
+	rm -f include/koptions.h konfig/konfigure
 
 
