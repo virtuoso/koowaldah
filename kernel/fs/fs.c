@@ -42,6 +42,22 @@
  * FS core; rootfs filesystem
  */
 
+static void fs_read_inode(struct inode *inode)
+{
+	/* 
+	 * this should never be called, because all the rootfs' inodes
+	 * should be there already
+	 */
+	bug();
+}
+
+static void fs_write_inode(struct inode *inode)
+{
+	/*
+	 * no backend -- no writeback
+	 */
+}
+
 struct inode *fs_add_entry(struct inode *parent, char *name, u32 mode)
 {
 	struct superblock *sb = parent->i_sb;
@@ -86,6 +102,8 @@ void __init fs_init()
 	fs_init_namespace();
 
 	sb = get_super(ROOTFSDEV);
+	sb->s_ops->read_inode = fs_read_inode;
+	sb->s_ops->write_inode = fs_write_inode;
 	root = get_inode(sb, ROOT_INO);
 
 	p = fs_add_entry(root, "dev", S_IFDIR);
