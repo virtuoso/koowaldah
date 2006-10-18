@@ -276,7 +276,7 @@ void kbd_reader()
 
 void test_pckbd()
 {
-#ifdef OPT_TEST_PCKBD && !OPT_TEST_IRQS
+#ifdef OPT_TEST_PCKBD
 	struct thread_t *thread;
 
 	pckbd_load();
