@@ -1,5 +1,5 @@
 /*
- * config/koption.h
+ * konfig/koption.h
  *
  * Copyright (C) 2006 Alexander Shishkin
  *
@@ -31,7 +31,7 @@
  */
 
 /*
- * This is KOPT, the K kernel configuration system
+ * This is KOPT, the KOS kernel configuration system
  */
 #define OPTNAME_MAX 32
 
