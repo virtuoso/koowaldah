@@ -42,7 +42,7 @@ typedef s32 off_t;
 struct file;
 
 struct file_operations {
-	int (*open)(struct file *file, struct inode *inode);
+	int (*open)(struct file *file);
 	int (*close)(struct file *file);
 	int (*read)(struct file *file, char *buf, off_t size);
 	int (*write)(struct file *file, char *buf, off_t size);

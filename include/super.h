@@ -48,6 +48,7 @@ struct super_operations {
 struct superblock {
 	struct klist0_node s_blocks; /* big list linkage */
 	struct klist0_node s_ilist;  /* our inodes */
+	struct inode *s_root;        /* root inode */
 	u32 s_magic;
 	u32 s_inodes;
 	dev_t s_dev;

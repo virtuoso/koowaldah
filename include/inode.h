@@ -39,6 +39,15 @@ typedef u32 ino_t;
 
 #define ROOT_INO 2
 
+/* this is temporary, till we have sane pages */
+#define INODE_PAGES 64 /* 256kb per file is, khm.. */
+struct inode_mapping {
+	/* and this assumes consequent reading only */
+	struct page 	*i_pages[INODE_PAGES];
+	u32		i_filled;     /* how many pages are there */
+	/* methods coming soon */
+};
+
 struct inode {
 	struct klist0_node i_sblist;  /* sb list linkage */
 	struct klist0_node i_dent;    /* direntries */
@@ -54,8 +63,10 @@ struct inode {
 	u32 i_atime;
 	u32 i_ctime;
 	u32 i_mtime;
+	struct inode_mapping i_map;    /* what's inside */
 	struct klist0_node i_children; /* direntries list */
 	struct inode *i_parent;
+	struct file_operations *i_fops;/* this propagates to file */
 };
 
 struct inode *alloc_inode();
