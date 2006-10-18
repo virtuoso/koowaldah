@@ -91,7 +91,6 @@ typedef struct koption {
 		.desc = __desc, \
 		.items = __number \
 	}; \
-	const int __name ## _number = __number; \
 	const void __PTR *__name ## _options_ptr = &__name ## _options; \
 	const void __PTR *__name ## _desc_ptr = &__name ## _section; \
 	const koption_t __name ## _options[__number] = {
