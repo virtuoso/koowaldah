@@ -14,5 +14,5 @@ KOPTION(
 	"-ash"
 ),
 KOPTIONS_END
-#include "kernel/init/koption.inc"
+#include "kernel/koption.inc"
 

@@ -37,7 +37,7 @@
 #include <textio.h>
 
 /* #define MM_ANAL_DEBUG 1 */
-#ifdef MM_ANAL_DEBUG
+#ifdef OPT_MM_ANAL_DEBUG
 # define mm_kprintf(fmt, args ...) kprintf(fmt, ## args)
 #else
 # define mm_kprintf(fmt, args ...) do {} while (0)
