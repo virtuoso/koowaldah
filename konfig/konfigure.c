@@ -54,7 +54,7 @@ static int nointr = 0;
 
 void print_option(koption_t *kopt)
 {
-	fprintf(out, "/* %s */\n", kopt->desc);
+	fprintf(out, "# %s\n", kopt->desc);
 	fprintf(out, "OPT_%s=", kopt->name);
 	switch (kopt->type) {
 		case KOPT_BOOL:
@@ -111,7 +111,7 @@ void define_option(koption_t *kopt)
 			break;
 
 		case KOPT_STRING:
-			fprintf(out_header, "#define OPT_%s %s\n",
+			fprintf(out_header, "#define OPT_%s \"%s\"\n",
 					kopt->name,
 					kopt->def.s.v);
 			break;
@@ -134,7 +134,7 @@ void print_all()
 				fprintf(out_header, "\n\n");
 			}
 			ksec = KOPT[i].section;
-			fprintf(out, "/*\n * %s\n * (%d options)\n */\n\n",
+			fprintf(out, "# %s\n# (%d options)\n#\n\n",
 					ksec->desc, ksec->items);
 			fprintf(out_header,
 					"/*\n * %s\n * (%d options)\n */\n\n",
@@ -181,12 +181,63 @@ void init()
 
 }
 
+int kopt_setval(char *name, char *val)
+{
+	int i;
+
+	name += 4; /* skip OPT_ */
+	for (i = 0; i < total_kopts; i++)
+		if (!strcmp(KOPT[i].name, name)) {
+			switch (KOPT[i].type) {
+				case KOPT_BOOL:
+					KOPT[i].def.b.v = val[0];
+					break;
+				case KOPT_TRISTATE:
+					KOPT[i].def.t.v = val[0];
+					break;
+				case KOPT_INT:
+					KOPT[i].def.i.v = atoi(val);
+					break;
+				case KOPT_STRING:
+					KOPT[i].def.s.v = strdup(val);
+					break;
+			}
+			KOPT[i].user_set++;
+			return 0;
+		}
+	return -1;
+}
+
 void read_konfig()
 {
-	int fd = open(KONFIG_PATH, O_RDONLY);
-	if (!fd)
-		return;
-	close(fd);
+	FILE *config;
+	char line[80], *ps, *pe;
+	char opt[OPTNAME_MAX], val[OPTNAME_MAX];
+	char cv;
+	int iv;
+	char *sv;
+
+	config = fopen(KONFIG_PATH, "rw");
+	if (config) {
+
+		while (!feof(config)) {
+			memset(opt, 0, OPTNAME_MAX);
+			memset(val, 0, OPTNAME_MAX);
+			fscanf(config, "%79[^\n]\n", line);
+			ps = line;
+			while (*ps == ' ' || *ps == '\t') ps++;
+			if (*ps == '#') continue;
+
+			pe = strchr(ps, '=');
+			if (!pe) continue;
+
+			strncpy(opt, ps, pe-ps);
+			strcpy(val, pe+1);
+			if (kopt_setval(opt, val))
+				printf("No such option: %s\n", opt);
+		}
+		fclose(config);
+	}
 
 	out = fopen(KONFIG_PATH, "w");
 	if (!out)
