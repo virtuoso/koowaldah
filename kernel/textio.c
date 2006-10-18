@@ -37,8 +37,6 @@
 #include <lib.h>
 #include <console.h>
 
-#define PRINTF_BUFSIZE 1024
-
 static void print(const char *message)
 {
 	while (*message)
@@ -76,10 +74,10 @@ int kprintf(const char *fmt, ...)
 {
 	va_list args;
 	int i;
-	char buf[PRINTF_BUFSIZE];
+	char buf[OPT_KPRINTF_BUFSIZE];
 
 	va_start(args, fmt);
-	i = vsnprintf(buf, PRINTF_BUFSIZE, fmt, args);
+	i = vsnprintf(buf, OPT_KPRINTF_BUFSIZE, fmt, args);
 	va_end(args);
 	print(buf);
 
