@@ -66,6 +66,7 @@ struct superblock *alloc_super(dev_t dev)
 	sb->s_dev = dev;
 	sb->s_flags = SB_NEW;
 	sb->s_ops = &generic_sbops;
+	sb->s_root = NULL;
 
 	klist0_append(&sb->s_blocks, &superblock_list);
 	return sb;

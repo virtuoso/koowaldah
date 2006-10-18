@@ -108,6 +108,7 @@ struct inode *new_inode(struct superblock *sb)
 	inode->i_nlinks = 0;
 	inode->i_uid = inode->i_gid = 0;
 	inode->i_atime = inode->i_ctime = inode->i_mtime = 0;
+	inode->i_fops = NULL;
 
 	return inode;
 }
@@ -189,6 +190,7 @@ int __init fs_init_inodes()
 	root = new_inode(sb);
 	root->i_ino = ROOT_INO;
 	root->i_mode = S_IFDIR;
+	sb->s_root = root;
 	KLIST0_INIT(&anon_inodes);
 	return 0;
 }

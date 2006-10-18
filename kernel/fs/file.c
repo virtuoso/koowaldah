@@ -58,7 +58,7 @@ void kill_file(struct file *file)
 	memory_release(file);
 }
 
-int generic_open(struct file *file, struct inode *inode)
+int generic_open(struct file *file)
 {
 	return 0;
 }
@@ -87,7 +87,28 @@ static struct file_operations generic_fops = {
 
 int open(char *name)
 {
-	/* lookup name */
+	struct direntry *dent;
+	struct file *file;
+
+	dent = lookup_path(name);
+	if (!dent)
+		return -ENOENT;
+
+	file = new_file();
+	if (!file)
+		return -ENOMEM;
+
+	atomic_inc_u32(&dent->d_refcnt);
+
+	file->f_inode = dent->d_inode;
+	file->f_sb = dent->d_inode->i_sb;
+	file->f_offset = 0;
+	if (dent->d_inode->i_fops) {
+		file->f_ops = dent->d_inode->i_fops;
+		file->f_ops->open(file);
+	} else
+		file->f_ops = &generic_fops;
+
 	return 0;
 }
 

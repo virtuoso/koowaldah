@@ -104,7 +104,7 @@ void __init fs_init()
 	sb = get_super(ROOTFSDEV);
 	sb->s_ops->read_inode = fs_read_inode;
 	sb->s_ops->write_inode = fs_write_inode;
-	root = get_inode(sb, ROOT_INO);
+	root = sb->s_root;
 
 	p = fs_add_entry(root, "dev", S_IFDIR);
 	p = fs_add_entry(p, "console", S_IFCHR);
