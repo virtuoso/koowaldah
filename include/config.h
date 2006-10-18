@@ -34,6 +34,9 @@
 #ifndef __CONFIG_H__
 #define __CONFIG_H__
 
+/* user specified config */
+#include <koptions.h>
+
 #define CONFIG_X86
 #define CONFIG_SERIAL_CONSOLE 	1
 #define CONFIG_VGA_CONSOLE	1
