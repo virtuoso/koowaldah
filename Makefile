@@ -67,7 +67,10 @@ include/koptions.h: konfig/konfigure
 	cat KONFIG
 
 konfig/konfigure: konfig/konfigure.c
-	$(CC) -Ikonfig -I. -o $@ $<
+	$(CC) -Wall -Ikonfig -I. -o konfig/konfigure.o -c konfig/konfigure.c
+	$(CC) -Wall -Ikonfig -I. -o konfig/kout.o -c konfig/kout.c
+	$(CC) -Wall -Ikonfig -I. -o konfig/kuser.o -c konfig/kuser.c
+	$(CC) -o $@ konfig/*.o
 
 image:	kernel loader
 	$(MAKE) -C rootfs
@@ -99,6 +102,5 @@ clean:
 	rm -fr *.o kernel/*.o kernel/libs/*.o drivers/*.o kernel/fs/*.o
 	rm -fr kernel/init/*.o kernel/lib/*.o
 	rm -fr drivers/*.o drivers/keyboard/*.o
-	rm -f include/koptions.h konfig/konfigure
-
+	rm -f include/koptions.h konfig/konfigure konfig/*.o konfig.mk
 

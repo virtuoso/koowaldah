@@ -110,3 +110,10 @@ typedef struct koption {
 #define DEF_KOPT_INT(x) { .i = { .v = (x) } }
 #define DEF_KOPT_STRING(x) { .s = { .v = (x) } }
 
+/* kout.c */
+void writeback(const char *konfig,
+	       const char *header,
+	       const char *make);
+/* kuser.c */
+void ask_user();
+

@@ -1,5 +1,5 @@
 /*
- * config/configure.c
+ * konfig/konfigure.c
  *
  * Copyright (C) 2006 Alexander Shishkin
  *
@@ -40,110 +40,28 @@
 #include "koption.h"
 #include "koption.inc"
 
+/* 
+ * Input/output files.
+ * Allow for these to be defined from the outside.
+ */
+#ifndef KONFIG_PATH
 #define KONFIG_PATH "./KONFIG"
-#define OUTPUT_PATH "./include/koptions.h"
+#endif
+
+#ifndef HEADER_PATH
+#define HEADER_PATH "./include/koptions.h"
+#endif
+
+#ifndef MAKE_PATH
+#define MAKE_PATH "./konfig.mk"
+#endif
 
 extern unsigned long __start_KPTR;
 extern unsigned long __stop_KPTR;
 
-static unsigned int total_kopts = 0;
-static koption_t *KOPT;
-static FILE *out = NULL;
-static FILE *out_header = NULL;
+unsigned int total_kopts = 0;
+koption_t *KOPT;
 static int nointr = 0;
-
-void print_option(koption_t *kopt)
-{
-	fprintf(out, "# %s\n", kopt->desc);
-	fprintf(out, "OPT_%s=", kopt->name);
-	switch (kopt->type) {
-		case KOPT_BOOL:
-			fputc(kopt->def.b.v, out);
-			break;
-
-		case KOPT_TRISTATE:
-			fputc(kopt->def.t.v, out);
-			break;
-
-		case KOPT_INT:
-			fprintf(out, "%d", kopt->def.i.v);
-			break;
-
-		case KOPT_STRING:
-			fprintf(out, "%s", kopt->def.s.v);
-			break;
-
-		default:
-			fprintf(stderr, "invalid option type %d\n", kopt->type);
-			exit(EXIT_FAILURE);
-	}
-
-	fputc('\n', out);
-}
-
-void define_option(koption_t *kopt)
-{
-	fprintf(out_header, "/* %s */\n", kopt->desc);
-	switch (kopt->type) {
-		case KOPT_BOOL:
-			if (kopt->def.b.v == 'Y')
-				fprintf(out_header, "#define OPT_%s\n",
-						kopt->name);
-			else
-				fprintf(out_header, "#undef OPT_%s\n",
-						kopt->name);
-			break;
-
-		case KOPT_TRISTATE:
-			if (kopt->def.t.v == 'Y' ||
-			    kopt->def.t.v == 'M')
-				fprintf(out_header, "#define OPT_%s\n",
-						kopt->name);
-			else
-				fprintf(out_header, "#undef OPT_%s\n",
-						kopt->name);
-			break;
-
-		case KOPT_INT:
-			fprintf(out_header, "#define OPT_%s %d\n",
-					kopt->name,
-					kopt->def.i.v);
-			break;
-
-		case KOPT_STRING:
-			fprintf(out_header, "#define OPT_%s \"%s\"\n",
-					kopt->name,
-					kopt->def.s.v);
-			break;
-
-		default:
-			fprintf(stderr, "invalid option type %d\n", kopt->type);
-			exit(EXIT_FAILURE);
-	}
-}
-
-void print_all()
-{
-	int i;
-	ksection_t *ksec = NULL;
-
-	for (i = 0; i < total_kopts; i++) {
-		if (KOPT[i].section != ksec) {
-			if (ksec) {
-				fprintf(out, "\n\n");
-				fprintf(out_header, "\n\n");
-			}
-			ksec = KOPT[i].section;
-			fprintf(out, "# %s\n# (%d options)\n#\n\n",
-					ksec->desc, ksec->items);
-			fprintf(out_header,
-					"/*\n * %s\n * (%d options)\n */\n\n",
-					ksec->desc, ksec->items);
-		}
-		print_option(&KOPT[i]);
-		define_option(&KOPT[i]);
-	}
-}
 
 void init()
 {
@@ -178,7 +96,6 @@ void init()
 		}
 		p += 8;
 	}
-
 }
 
 int kopt_setval(char *name, char *val)
@@ -238,187 +155,6 @@ void read_konfig()
 		}
 		fclose(config);
 	}
-
-	out = fopen(KONFIG_PATH, "w");
-	if (!out)
-		exit(EXIT_FAILURE);
-	out_header = fopen(OUTPUT_PATH, "w");
-	if (!out_header)
-		exit(EXIT_FAILURE);
-}
-
-/* interrogation buffer */
-char answer[80];
-
-void put_bool_answer(koption_t *kopt)
-{
-entry:
-	switch (kopt->def.b.v) {
-		case 'y':
-		case 'Y':
-			printf("[Y,n,help]: ");
-			break;
-
-		case 'n':
-		case 'N':
-			printf("[y,N,help]: ");
-			break;
-
-		default:
-			printf("invalid bool value %c\n", kopt->def.b.v);
-	}
-
-	scanf("%[^\n]\n", answer);
-	switch (answer[0]) {
-		case 'y':
-		case 'Y':
-			kopt->def.b.v = 'Y';
-			break;
-
-		case 'n':
-		case 'N':
-			kopt->def.b.v = 'N';
-			break;
-
-		case 'h':
-		case 'H':
-			printf("\n\n%s (%s)\n-------------\n%s\n",
-					kopt->desc,
-					kopt->name,
-					kopt->help);
-
-		case '\0':
-			printf("%c\n", kopt->def.b.v);
-			getchar();
-			break;
-
-		default:
-			goto entry;
-	}
-}
-
-void put_tristate_answer(koption_t *kopt)
-{
-entry:
-	switch (kopt->def.t.v) {
-		case 'y':
-		case 'Y':
-			printf("[Y,n,m,help]: ");
-			break;
-
-		case 'n':
-		case 'N':
-			printf("[y,N,m,help]: ");
-			break;
-
-		case 'm':
-		case 'M':
-			printf("[y,n,M,help]: ");
-			break;
-
-		default:
-			printf("invalid bool value %c\n", kopt->def.t.v);
-	}
-
-	scanf("%[^\n]\n", answer);
-	switch (answer[0]) {
-		case 'y':
-		case 'Y':
-			kopt->def.t.v = 'Y';
-			break;
-
-		case 'n':
-		case 'N':
-			kopt->def.t.v = 'N';
-			break;
-
-		case 'm':
-		case 'M':
-			kopt->def.t.v = 'M';
-			break;
-
-		case 'h':
-		case 'H':
-			printf("\n\n%s (%s)\n-------------\n%s\n",
-					kopt->desc,
-					kopt->name,
-					kopt->help);
-
-		case '\0':
-			printf("%c\n", kopt->def.t.v);
-			getchar();
-			break;
-
-		default:
-			goto entry;
-	}
-}
-
-void put_int_answer(koption_t *kopt)
-{
-	int i;
-
-	printf("[%d]: ", kopt->def.i.v);
-	scanf("%d", &i);
-	kopt->def.i.v = i;
-}
-
-void put_string_answer(koption_t *kopt)
-{
-	printf("[%s]: ", kopt->def.s.v);
-}
-
-void ask_option(koption_t *kopt)
-{
-	char *s;
-	printf("%s: %s ", kopt->name, kopt->desc);
-
-	switch (kopt->type) {
-		case KOPT_BOOL:
-			put_bool_answer(kopt);
-			break;
-
-		case KOPT_TRISTATE:
-			put_tristate_answer(kopt);
-			break;
-
-		case KOPT_INT:
-			put_int_answer(kopt);
-			break;
-
-		case KOPT_STRING:
-			put_string_answer(kopt);
-			s = malloc(80);
-			scanf("%79[^\n]\n", s);
-			if (s[0] != '\0')
-				kopt->def.s.v = s;
-			else
-				getchar();
-			break;
-
-		default:
-			fprintf(stderr, "invalid option type %d\n", kopt->type);
-			exit(EXIT_FAILURE);
-	}
-	kopt->user_set++;
-}
-
-void ask_user()
-{
-	int i;
-	ksection_t *ksec = NULL;
-
-	for (i = 0; i < total_kopts; i++) {
-		if (KOPT[i].section != ksec) {
-			if (ksec) printf("\n\n");
-			ksec = KOPT[i].section;
-			printf("/*\n * %s\n * (%d options)\n */\n\n",
-					ksec->desc, ksec->items);
-		}
-		
-		if (!KOPT[i].user_set)
-			ask_option(&KOPT[i]);
-	}
 }
 
 int main()
@@ -429,10 +165,8 @@ int main()
 	if (!nointr)
 		ask_user();
 
-	print_all();
+	writeback(KONFIG_PATH, HEADER_PATH, MAKE_PATH);
 	free(KOPT);
-	fclose(out);
-	fclose(out_header);
 
 	return 0;
 }
