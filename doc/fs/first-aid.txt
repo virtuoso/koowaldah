@@ -1,0 +1,46 @@
+KOS (V)FS subsystem introduction
+================================
+
+Basically, FS is everywhere from open() call to filesystem's internal
+lookups, reads and writes.
+There are several kernel objects involved, namely:
+1) "superblock" -- is here to describe a (exactly one) mount point
+   and underlying filesystem. This one exists only in a filesystem
+   context.
+2) "inode" -- is something that hosts all the metadata associated with
+   a file (a socket and whatever else you can read from/write to) like
+   size, owner, modification time and the like.
+3) "direntry" -- is a bastard that holds a name for an inode (if the
+   latter needs a name at all). This type of objects only makes sense
+   in a filesystem or maybe driver context; network sockets are nameless,
+   for one thing and therefore are not associated with any direntries.
+4) "file" -- is the kind of object that ties up inodes and direntries
+   for the sake of open()/read()/write()/etc system calls. It is assigned
+   a file descriptor, internal offset and it has some higher-level methods
+   which can be overloaded by drivers and whoever else pretending to be
+   a file. If you're here to write a driver, this is almost everything
+   you'll ever need from FS.
+5) "namespace" -- is roughly a place where a process/thread lives. Think
+   of good ol' chroot().
+
+The relationships between those are as follows.
+A superblock (struct superblock) has a list of associated inodes (s_ilist)
+which belong to its file system. Because inside a file system all inodes
+are organised into a tree structure, there is an inode that sits on top
+and is called a "root inode" (s_root) for a given superblock.
+An inode (struct inode), in turn, has a name (struct direntry). In fact,
+it can have several names, thanks to hard links. There's a bit more on the
+hard links topic later. These names are linked to an inode via i_dent list.
+Aside that, considering that an inode can represent a directory as well as
+a file or anything, it is fair to mention that it can have children. An
+inode refers to its children as direntry objects, which are linked to it
+via i_children list.
+A directory entry (struct direntry) is linked back to its inode via d_inode
+field, and to its fellow direntries (members of a same directory) via
+d_siblings list.
+A namespace refers to a certain inode object which starts the namespace.
+That inode object never care about namespaces though, so the relationship
+is not mutual.
+
+..to be continued.
+Alexander Shishkin <alexander.shishckin@gmail.com>, 2006
