@@ -88,6 +88,8 @@ int kill_super(struct superblock *sb)
 /*
  * Find a superblock object by a backing device
  * @dev -- backing device
+ *
+ * XXX: should be similar to get/release_inode().
  */
 struct superblock *get_super(dev_t dev)
 {
