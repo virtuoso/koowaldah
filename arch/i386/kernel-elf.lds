@@ -41,6 +41,10 @@ SECTIONS
 		*(.bss)
 		_bss_end = .;
 	}
+
+	rootfs_start = .;
+	.rootfs : { *(.rootfs) }
+	rootfs_end = .;
 	kernel_end = ALIGN(0x1000);
 }
 

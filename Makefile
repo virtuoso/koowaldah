@@ -75,14 +75,16 @@ konfig/konfigure: konfig/konfigure.c
 image:	kernel loader
 	$(MAKE) -C rootfs
 
+initfs:
+	$(MAKE) -C usr
 konfig: include/koptions.h
 .PHONY: konfig
 
 kernel-elf: $(OBJ) arch/i386/boot/multiboot.o
 	$(LD) -T arch/i386/kernel-elf.lds -o kuca-elf \
-		arch/i386/boot/multiboot.o $(OBJ)
+		arch/i386/boot/multiboot.o $(OBJ) usr/rootfs.o
 	
-kernel: konfig kernel-elf
+kernel: konfig initfs kernel-elf
 
 tests:
 	$(MAKE) -C tests test
@@ -95,6 +97,7 @@ loader: arch/i386/boot/bootloader.S
 
 clean:
 	$(MAKE) clean -C rootfs
+	$(MAKE) clean -C usr
 	$(MAKE) clean -C tests
 	rm -f kernel/kernel.bin kuca-bin kuca-elf
 	rm -f arch/i386/boot/bootloader.bin
