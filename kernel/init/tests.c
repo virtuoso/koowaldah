@@ -44,6 +44,7 @@
 #include <thread.h>
 #include <scheduler.h>
 #include <namespace.h>
+#include <lib.h>
 #include <bug.h>
 
 void test_mm()
@@ -299,11 +300,26 @@ void test_fslookup()
 {
 #ifdef OPT_TEST_FSLOOKUP
 	struct direntry *dent = lookup_path("/dev/console");
+	int fd, l;
+	char buf[256];
 	
 	if (!dent)
 		bug();
 
 	kprintf("FS test found: %s\n", dent->d_name);
+
+	fd = open("/dev/console");
+	if (fd == -1) {
+		kprintf("Open failed!\n");
+		return;
+	}
+	kprintf("Opened a file descriptor %d\n", fd);
+
+	memory_set(buf, 0, 256);
+	do {
+		l = read(fd, buf, 100);
+		kprintf("Read %d bytes, [%s]\n", l, buf);
+	} while (l == 100);
 #endif
 }
 
