@@ -36,6 +36,7 @@
 #include <inode.h>
 #include <file.h>
 #include <namespace.h>
+#include <page_alloc.h>
 #include <sys/stat.h>
 
 /*
@@ -76,6 +77,28 @@ struct inode *fs_add_entry(struct inode *parent, char *name, u32 mode)
 
 	klist0_append(&dent->d_siblings, &parent->i_children);
 	return inode;
+}
+
+static void __future fs_stuff_inode(struct inode *inode, char *src, off_t len)
+{
+	struct page **pages = inode->i_map.i_pages;
+	int npages = inode->i_map.i_filled;
+	off_t pglen = len >> PAGE_SHIFT;
+	char *from = src;
+	off_t left = len;
+	int i;
+
+	for (i = 0; i <= pglen; i++) {
+		pages[npages] = alloc_pages(0, 0);
+		memory_copy(page_to_addr(pages[npages]),
+				from, MIN((off_t)PAGE_SIZE, left));
+		from += PAGE_SIZE;
+		left -= PAGE_SIZE;
+		npages++;
+	}
+
+	inode->i_size = len;
+	inode->i_map.i_filled = npages;
 }
 
 extern void __init fs_init_super();
