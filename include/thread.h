@@ -66,7 +66,10 @@ struct thread_t {
 	u32					pid;
 	u32					state;
 	char					name[THREAD_NAME_LEN];
+	/* fs related */
 	struct namespace			*ns;
+	struct klist0_node			files; /* or array? */
+	int					last_fd;
 };
 
 void dump_thread(struct thread_t *thread);
