@@ -53,6 +53,10 @@ struct file {
 	struct inode *f_inode;
 	struct file_operations *f_ops;
 	off_t f_offset;
+	int f_fd;
+	struct klist0_node f_tlist;
 };
 
+int open(char *name);
+int read(int fd, char *buf, size_t len);
 #endif

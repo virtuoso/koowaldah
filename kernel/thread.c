@@ -75,7 +75,7 @@ struct thread_t * thread_create(void (*func)(), char *name)
 	kprintf("thread_create, func = %x, name: %s\n", func, name);
 
 	/* allocate stack space */
-	page = get_pages(/*THREAD_STACK_LIMIT/PAGE_SIZE*/0, 1);
+	page = get_pages(/*THREAD_STACK_LIMIT/PAGE_SIZE*/0, 0);
 	if (!page) {
 		kprintf("Thread allocation screwed up. Don't panic!\n");
 		return NULL;
@@ -100,6 +100,8 @@ struct thread_t * thread_create(void (*func)(), char *name)
 	KLIST0_INIT(&thread->krunq);
 	klist0_append(&thread->kthreads, &thread_list);
 	thread->ns = &root_ns;
+	thread->last_fd = 0;
+	KLIST0_INIT(&thread->files);
 
 	/* We place a reference to the thread_t on the bottom of the stack */ 
 
