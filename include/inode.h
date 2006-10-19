@@ -31,6 +31,7 @@
 #include <klist0.h>
 #include <atomic.h>
 #include <super.h>
+#include <file.h>
 /* yes, I'm aware of cross-inclusion */
 
 typedef u32 ino_t;
@@ -45,7 +46,10 @@ struct inode_mapping {
 	/* and this assumes consequent reading only */
 	struct page 	*i_pages[INODE_PAGES];
 	u32		i_filled;     /* how many pages are there */
-	/* methods coming soon */
+	
+	/* I don't see the point in separating these */
+	int (*read_page)(struct page *page, off_t offset);
+	int (*write_page)(struct page *page, off_t offset);
 };
 
 struct inode {
@@ -74,6 +78,7 @@ void kill_inode(struct inode *inode);
 struct inode *new_inode(struct superblock *sb);
 void free_inode(struct inode *inode);
 struct inode *get_inode(struct superblock *sb, ino_t ino);
+void release_inode(struct inode *inode);
 
 #endif
 
