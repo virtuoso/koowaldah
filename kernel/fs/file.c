@@ -28,12 +28,14 @@
 #include <kuca.h>
 #include <bug.h>
 #include <error.h>
+#include <lib.h>
 #include <klist0.h>
 #include <mm.h>
 #include <device.h>
 #include <super.h>
 #include <inode.h>
 #include <file.h>
+#include <page_alloc.h>
 
 /*
  * FS file operations.
@@ -89,6 +91,7 @@ int open(char *name)
 {
 	struct direntry *dent;
 	struct file *file;
+	struct thread_t *thread = CURRENT();
 
 	dent = lookup_path(name);
 	if (!dent)
@@ -100,6 +103,8 @@ int open(char *name)
 
 	atomic_inc_u32(&dent->d_refcnt);
 
+	klist0_append(&file->f_tlist, &thread->files);
+	file->f_fd = thread->last_fd++;
 	file->f_inode = dent->d_inode;
 	file->f_sb = dent->d_inode->i_sb;
 	file->f_offset = 0;
@@ -112,4 +117,107 @@ int open(char *name)
 	return 0;
 }
 
+/*
+ * Read len bytes from file fd buf. Bytes are read starting
+ * from current offset.
+ * @fd -- descriptor of an (opened) file to read from
+ * @buf -- a buffer to read the data into
+ * @len -- how many bytes you want to read
+ * returns number of bytes actually read.
+ * TODO: this should be split in no less than 3 functions.
+ */
+int read(int fd, char *buf, size_t len)
+{
+	struct thread_t *thread = CURRENT();
+	struct klist0_node *t;
+	struct file *file;
+	struct inode *inode;
+	struct page **pages;
+	int npages;
+	int r;
+	int R; 		/* overall bytes read in */
+	off_t pgstart_off;
+	off_t pgstart;
+	off_t pgsize;
+	char *to;
+	size_t left;
+
+	if (fd > thread->last_fd)
+		return -EBADF;
+
+	/* find a corresponding file */
+	klist0_for_each(t, &thread->files) {
+		file = klist0_entry(t, struct file, f_tlist);
+		if (file->f_fd == fd)
+			break;
+	}
+
+	if (file->f_fd != fd)
+		return -EBADF;
+
+	if (!file->f_inode)
+		bug();
+
+	inode = file->f_inode;
+	if (file->f_offset == inode->i_size)
+		return 0;
+
+	/* make sure not to read beyond what's expected */
+	if (file->f_offset + len > inode->i_size)
+		len = inode->i_size - file->f_offset;
+	left = len;
+
+	pages = inode->i_map.i_pages;
+	npages = inode->i_map.i_filled;
+	pgstart = file->f_offset >> PAGE_SHIFT;
+	pgstart_off = file->f_offset & (PAGE_SIZE - 1);
+	pgsize = len >> PAGE_SHIFT;
+
+	if (pgstart + pgsize > npages) {
+		/* ok, we should do some reading */
+		if (inode->i_map.read_page) {
+			do {
+				r = inode->i_map.read_page(pages[npages], npages);
+				R += r;
+				/* incomplete page read means
+				 * it's the last one */
+				if (!r || r < PAGE_SIZE)
+					break;
+
+			} while (npages++ < pgstart + pgsize);
+		} else {
+			/* 
+			 * not having read_page method means all the pages
+			 * should be there and since we're here, they are
+			 * not
+			 */
+			bug();
+		}
+
+		/* ok, we read all the pages we wanted */
+		inode->i_map.i_filled = npages;
+	}
+
+	/* do a corner case first */
+	if (!pgsize) {
+		memory_copy(buf,
+			page_to_addr(pages[pgstart]) + pgstart_off, len);
+		file->f_offset += len;
+		return len;
+	}
+
+	r = pgstart;
+	to = buf;
+
+	do {
+		memory_copy(to, page_to_addr(pages[r++]) + pgstart_off,
+				MIN((size_t)PAGE_SIZE, left));
+		left -= PAGE_SIZE;
+		to += PAGE_SIZE;
+	} while (r < npages);
+
+	file->f_offset += len;
+
+	return len;
+}
 
