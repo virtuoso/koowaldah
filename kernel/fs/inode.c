@@ -109,6 +109,9 @@ struct inode *new_inode(struct superblock *sb)
 	inode->i_uid = inode->i_gid = 0;
 	inode->i_atime = inode->i_ctime = inode->i_mtime = 0;
 	inode->i_fops = NULL;
+	inode->i_map.i_filled = 0;
+	inode->i_map.read_page = NULL;
+	inode->i_map.write_page = NULL;
 
 	return inode;
 }
@@ -141,7 +144,10 @@ void free_inode(struct inode *inode)
 
 /*
  * Find an inode associated with a given superblock, with given
- * number.
+ * number and increment its reference count.
+ *
+ * By calling this you imply you are the use of this inode and thus
+ * fully responsible of it.
  * @sb -- superblock
  * @ino -- inode number
  */
@@ -159,7 +165,7 @@ struct inode *get_inode(struct superblock *sb, ino_t ino)
 	klist0_for_each(t, list) {
 		inode = klist0_entry(t, struct inode, i_sblist);
 		if (inode->i_ino == ino)
-			return inode;
+			goto out;
 	}
 
 	/* search failed, allocate */
@@ -171,7 +177,20 @@ struct inode *get_inode(struct superblock *sb, ino_t ino)
 	/* we read via fops' read method on anonymous inodes */
 	if (sb)
 		sb->s_ops->read_inode(inode);
+out:
+	atomic_inc_u32(&inode->i_refcnt);
 	return inode;
+}
+
+/*
+ * Decrement usage count of a given inode and free it
+  Opposite of get_inode()* if no longer in use. Opposite of get_inode()
+ * @inode -- inode
+ */
+void release_inode(struct inode *inode)
+{
+	if (!atomic_dec_and_test_u32(&inode->i_refcnt))
+		free_inode(inode);
 }
 
 /*
