@@ -265,7 +265,7 @@ void kbd_reader()
 	int fd;
 	u16 buf;
 
-	fd = open("/dev/pckbd");
+	fd = open("/dev/pckbd", 0);
 	kprintf("Keyboard input: ");
 	for (;;) {
 		if(!read(fd, (char *)&buf, 0)) bug();
@@ -308,7 +308,7 @@ void test_fslookup()
 
 	kprintf("FS test found: %s\n", dent->d_name);
 
-	fd = open("/dev/console");
+	fd = open("/dev/console", 0);
 	if (fd == -1) {
 		kprintf("Open failed!\n");
 		return;
