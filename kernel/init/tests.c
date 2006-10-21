@@ -258,19 +258,19 @@ void test_irqs()
 }
 
 #ifdef OPT_TEST_PCKBD
-extern int pckbd_open();
-extern u16 pckbd_read();
 extern int pckbd_load();
 
 void kbd_reader()
 {
-	u16 c;
+	int fd;
+	u16 buf;
 
-	pckbd_open();
+	fd = open("/dev/pckbd");
 	kprintf("Keyboard input: ");
 	for (;;) {
-		c = pckbd_read();
-		console_put_char(c & 0xFF);
+		if(!read(fd, (char *)&buf, 0)) bug();
+		console_put_char(buf >> 8);
+		//console_put_char(buf & 0xFF);
 	}
 }
 #endif /* OPT_TEST_PCKBD */
