@@ -81,7 +81,6 @@ extern void general_protection(void);
 extern void page_fault(void);
 
 void default_interrupt_handler(u32 num){
-	//kprintf("Unhandled interrupt %d fired\n", num);
 	switch (num) {
 		case 13:
 			general_protection();
@@ -89,10 +88,10 @@ void default_interrupt_handler(u32 num){
 		case 14:
 			page_fault();
 			break;
-		case 80:
+		case 0x40:
 			kprintf("SYSCALL GATE!\n");
 			break;
 		default:
-			break;
+			kprintf("Unhandled interrupt %d fired\n", num);
 	}
 }
