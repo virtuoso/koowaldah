@@ -36,6 +36,7 @@
 #include <inode.h>
 #include <file.h>
 #include <page_alloc.h>
+#include <sys/stat.h>
 
 /*
  * FS file operations.
@@ -70,67 +71,8 @@ int generic_close(struct file *file)
 	return 0;
 }
 
-int generic_read(struct file *file, char *buf, off_t offset)
+int generic_read(struct file *file, char *buf, off_t len)
 {
-	return 0;
-}
-
-int generic_write(struct file *file, char *buf, off_t offset)
-{
-	return 0;
-}
-
-static struct file_operations generic_fops = {
-	.open = generic_open,
-	.close = generic_close,
-	.read = generic_read,
-	.write = generic_write
-};
-
-int open(char *name)
-{
-	struct direntry *dent;
-	struct file *file;
-	struct thread_t *thread = CURRENT();
-
-	dent = lookup_path(name);
-	if (!dent)
-		return -ENOENT;
-
-	file = new_file();
-	if (!file)
-		return -ENOMEM;
-
-	atomic_inc_u32(&dent->d_refcnt);
-
-	klist0_append(&file->f_tlist, &thread->files);
-	file->f_fd = thread->last_fd++;
-	file->f_inode = dent->d_inode;
-	file->f_sb = dent->d_inode->i_sb;
-	file->f_offset = 0;
-	if (dent->d_inode->i_fops) {
-		file->f_ops = dent->d_inode->i_fops;
-		file->f_ops->open(file);
-	} else
-		file->f_ops = &generic_fops;
-
-	return 0;
-}
-
-/*
- * Read len bytes from file fd buf. Bytes are read starting
- * from current offset.
- * @fd -- descriptor of an (opened) file to read from
- * @buf -- a buffer to read the data into
- * @len -- how many bytes you want to read
- * returns number of bytes actually read.
- * TODO: this should be split in no less than 3 functions.
- */
-int read(int fd, char *buf, size_t len)
-{
-	struct thread_t *thread = CURRENT();
-	struct klist0_node *t;
-	struct file *file;
 	struct inode *inode;
 	struct page **pages;
 	int npages;
@@ -141,26 +83,6 @@ int read(int fd, char *buf, size_t len)
 	off_t pgsize;
 	char *to;
 	size_t left;
-
-	if (fd > thread->last_fd)
-		return -EBADF;
-
-	/* find a corresponding file */
-	klist0_for_each(t, &thread->files) {
-		file = klist0_entry(t, struct file, f_tlist);
-		if (file->f_fd == fd)
-			break;
-	}
-
-	if (file->f_fd != fd)
-		return -EBADF;
-
-	if (!file->f_inode)
-		bug();
-
-	inode = file->f_inode;
-	if (file->f_offset == inode->i_size)
-		return 0;
 
 	/* make sure not to read beyond what's expected */
 	if (file->f_offset + len > inode->i_size)
@@ -219,5 +141,104 @@ int read(int fd, char *buf, size_t len)
 	file->f_offset += len;
 
 	return len;
+}
+
+int generic_write(struct file *file, char *buf, off_t offset)
+{
+	return 0;
+}
+
+static struct file_operations generic_fops = {
+	.open = generic_open,
+	.close = generic_close,
+	.read = generic_read,
+	.write = generic_write
+};
+
+int open(char *name)
+{
+	struct direntry *dent;
+	struct file *file;
+	struct device *device;
+	struct file_operations *fops = NULL;
+	struct thread_t *thread = CURRENT();
+
+	dent = lookup_path(name);
+	if (!dent)
+		return -ENOENT;
+
+	if (S_ISDIR(dent->d_inode->i_mode))
+		return -EISDIR;
+
+	/* if it's a device file, look it up and hook its fops to
+	 * our file */
+	if (dent->d_inode->i_dev != NODEV) {
+		device = get_device(dent->d_inode->i_dev);
+		if (!device)
+			return -ENODEV;
+
+		fops = device->d_fops;
+	}
+	
+	file = new_file();
+	if (!file)
+		return -ENOMEM;
+
+	atomic_inc_u32(&dent->d_refcnt);
+	atomic_inc_u32(&dent->d_inode->i_refcnt);
+
+	klist0_append(&file->f_tlist, &thread->files);
+	file->f_fd = thread->last_fd++;
+	file->f_inode = dent->d_inode;
+	file->f_sb = dent->d_inode->i_sb;
+	file->f_offset = 0;
+
+	if (fops)
+		file->f_ops = fops;
+	else if (dent->d_inode->i_fops) {
+		file->f_ops = dent->d_inode->i_fops;
+		file->f_ops->open(file);
+	} else
+		file->f_ops = &generic_fops;
+
+	return file->f_fd;
+}
+
+/*
+ * Read len bytes from file fd buf. Bytes are read starting
+ * from current offset.
+ * @fd -- descriptor of an (opened) file to read from
+ * @buf -- a buffer to read the data into
+ * @len -- how many bytes you want to read
+ * returns number of bytes actually read.
+ */
+int read(int fd, char *buf, size_t len)
+{
+	struct thread_t *thread = CURRENT();
+	struct klist0_node *t;
+	struct file *file;
+	struct inode *inode;
+
+	if (fd > thread->last_fd)
+		return -EBADF;
+
+	/* find a corresponding file */
+	klist0_for_each(t, &thread->files) {
+		file = klist0_entry(t, struct file, f_tlist);
+		if (file->f_fd == fd)
+			break;
+	}
+
+	if (file->f_fd != fd)
+		return -EBADF;
+
+	if (!file->f_inode)
+		bug();
+
+	inode = file->f_inode;
+	if (file->f_offset == inode->i_size && !S_ISCHR(inode->i_mode))
+		return 0;
+
+	return file->f_ops->read(file, buf, len);
 }
 
