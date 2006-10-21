@@ -59,7 +59,8 @@ static void fs_write_inode(struct inode *inode)
 	 */
 }
 
-struct inode *fs_add_entry(struct inode *parent, char *name, u32 mode)
+struct inode *fs_add_entry(struct inode *parent, char *name, u32 mode,
+		dev_t dev)
 {
 	struct superblock *sb = parent->i_sb;
 	struct inode *inode;
@@ -70,6 +71,7 @@ struct inode *fs_add_entry(struct inode *parent, char *name, u32 mode)
 		bug();
 	inode->i_ino = parent->i_ino + 1; /* XXX */
 	inode->i_mode = mode;
+	inode->i_dev = dev;
 
 	dent = new_direntry(name, inode);
 	if (!dent)
@@ -129,9 +131,12 @@ void __init fs_init()
 	sb->s_ops->write_inode = fs_write_inode;
 	root = sb->s_root;
 
-	p = fs_add_entry(root, "dev", S_IFDIR);
-	p = fs_add_entry(p, "console", S_IFCHR);
-	p = fs_add_entry(root, "initfs", S_IFDIR);
-	p = fs_add_entry(root, "mnt", S_IFDIR);
+	p = fs_add_entry(root, "dev", S_IFDIR, NODEV);
+	fs_add_entry(p, "console", S_IFCHR, NODEV);
+	fs_add_entry(p, "pckbd", S_IFCHR, DEV_DEVICE(13, 128));
+	p = fs_add_entry(root, "initfs", S_IFDIR, NODEV);
+	p = fs_add_entry(root, "mnt", S_IFDIR, NODEV);
+
+	devices_init();
 }
 
