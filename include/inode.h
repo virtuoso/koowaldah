@@ -60,6 +60,7 @@ struct inode {
 	ino_t i_ino;
 	atomic_u32 i_refcnt;
 	u32 i_mode;
+	u32 i_dev;
 	u32 i_size;
 	u32 i_nlinks;
 	u32 i_uid;

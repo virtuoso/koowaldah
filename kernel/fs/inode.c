@@ -104,6 +104,7 @@ struct inode *new_inode(struct superblock *sb)
 	/* following fields must be filled in by fs driver */
 	inode->i_ino = 0;
 	inode->i_mode = 0;
+	inode->i_dev = NODEV;
 	inode->i_size = 0;
 	inode->i_nlinks = 0;
 	inode->i_uid = inode->i_gid = 0;
