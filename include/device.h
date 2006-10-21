@@ -37,7 +37,7 @@
 typedef u32 dev_t;
 
 #define DEV_MAJOR_BITS (16)
-#define DEV_MINOR_BITS (sizeof(dev_t) - DEV_MAJOR_BITS)
+#define DEV_MINOR_BITS (sizeof(dev_t) * 8 - DEV_MAJOR_BITS)
 
 /*
  * Obtain major/minor number of a device
@@ -51,6 +51,28 @@ typedef u32 dev_t;
  * @maj -- major number
  * @min -- minor number
  */
-#define DEV_DEVICE(maj, min) (((maj) << DEV_MAJOR_BITS) & (min))
+#define DEV_DEVICE(maj, min) (((maj) << DEV_MAJOR_BITS) | (min))
+
+#define DEVNAME_MAX 32
+
+/*
+ * device flags
+ */
+#define DF_RDONLY 0x1
+#define DF_WRONLY 0x2
+#define DF_CHAR   0x4
+
+struct device {
+	char d_name[DEVNAME_MAX];
+	dev_t d_dev;
+	u32 d_flags;
+	struct file_operations *d_fops;
+	struct klist0_node d_list;
+};
+
+int register_device(struct device *dev);
+struct device *get_device(dev_t dev);
+struct device *get_device_by_name(char *name);
+void __init devices_init();
 
 #endif
