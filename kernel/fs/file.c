@@ -155,7 +155,12 @@ static struct file_operations generic_fops = {
 	.write = generic_write
 };
 
-int open(char *name)
+/*
+ * Open a file with a given operation mode
+ * @name -- full pathname of a file
+ * @mode -- how to open it
+ */
+int open(char *name, u32 mode)
 {
 	struct direntry *dent;
 	struct file *file;
