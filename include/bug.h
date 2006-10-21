@@ -70,7 +70,7 @@
 } while (0)
 
 #define bug() do {				\
-	panic("Bug in file %s, line %s", __FILE__, __LINE__); \
+	panic("Bug in file %s, line %d", __FILE__, __LINE__); \
 } while (0)
 
 
