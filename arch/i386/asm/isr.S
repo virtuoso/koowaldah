@@ -36,7 +36,15 @@ global isr_table
 %macro m1 1
 global default_isr%1
 default_isr%1:
-	pushad
+	;pushad
+	push esp
+	push ebp
+	push edi
+	push esi
+	push edx
+	push ecx
+	push ebx
+	push eax
 	push dword %1			;default_interrult_handler takes a lone
 					;argument - interrupt number
 	jmp quit_isr
@@ -56,8 +64,17 @@ extern default_interrupt_handler
 
 quit_isr:
 	call default_interrupt_handler
-	pop eax				;remove the int number
-	popad			
+	;leave eax intact for it holds the return value
+	pop ebx				;remove the int number
+	pop ebx				;remove arguments
+	pop ebx				;remove arguments
+	pop ecx				;remove arguments
+	pop edx				;remove arguments
+	pop esi				;remove arguments
+	pop edi				;remove arguments
+	pop ebp				;remove arguments
+	pop esp				;remove arguments
+	;popad			
 	iret
 
 [section .data]

@@ -48,8 +48,6 @@ typedef struct {
 
 extern isr_table_entry isr_table[]; /* from arch/i386/asm/isr.S */
 
-void default_interrupt_handler();
-
 int isr_insert_entry(unsigned int number, void ( *handler)()){
 	if(number > 255)
 		return 1;
@@ -79,8 +77,10 @@ void __init isr_init(){
 
 extern void general_protection(void);
 extern void page_fault(void);
+extern u32 sys_call_gate();
 
-void default_interrupt_handler(u32 num){
+u32 default_interrupt_handler(u32 num, u32 eax, u32 ebx, u32 ecx, u32 edx)
+{
 	switch (num) {
 		case 13:
 			general_protection();
@@ -89,9 +89,10 @@ void default_interrupt_handler(u32 num){
 			page_fault();
 			break;
 		case 0x40:
-			kprintf("SYSCALL GATE!\n");
+			return sys_call_gate(eax, ebx, ecx, edx);
 			break;
 		default:
 			kprintf("Unhandled interrupt %d fired\n", num);
 	}
+	return 0;
 }
