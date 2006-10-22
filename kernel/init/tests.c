@@ -332,9 +332,32 @@ void test_fslookup()
 #endif
 }
 
+#ifdef OPT_TEST_ROOTFS
+typedef void (*_start_t)(void);
+extern int pckbd_load();
+#endif
+
 void test_rootfs()
 {
 #ifdef OPT_TEST_ROOTFS
+	struct direntry *dent;
+	struct inode *inode;
+	char *dst = (char *)0x4000; /* _start() load address */
+	_start_t _start = (_start_t)dst;
+	int i;
+
+	pckbd_load();
+	dent = lookup_path("/sbin/init");
+	if (!dent) {
+		kprintf("Init not found.\n");
+		panic();
+	}
+
+	inode = dent->d_inode;
+	i = memory_copy(dst, page_to_addr(inode->i_map.i_pages[1]), 4096);
+
+	_start();
+	bug();
 #endif
 }
 
@@ -347,6 +370,8 @@ void test_bug()
 
 void run_tests()
 {
+	char *str = "ZHOPA!";
+	u32 res;
 	test_mm();
 	test_klist();
 	test_threads();
@@ -355,5 +380,11 @@ void run_tests()
 	test_rootfs();
 	test_fslookup();
 	test_bug();
+	__asm__ __volatile__(
+			"mov $0x0, %%eax\n"
+			"mov %1, %%ebx\n"
+			"int $0x40\n"
+			"mov %%eax, %0" : "=m"(res) : "m"(str));
+	kprintf("syscall returned: %d\n", res);
 }
 
