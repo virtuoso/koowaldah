@@ -38,6 +38,7 @@
 #include <namespace.h>
 #include <page_alloc.h>
 #include <sys/stat.h>
+#include "fs.h"
 
 /*
  * FS core; rootfs filesystem
@@ -144,10 +145,6 @@ void fs_insert_entry(char *pathname, u32 mode, dev_t dev, char *buf, size_t len)
 	if (S_ISREG(mode) && buf && len)
 		fs_stuff_inode(inode, buf, len);
 }
-
-extern void __init fs_init_super();
-extern int __init fs_init_inodes();
-extern void __init fs_init_namespace();
 
 /*
  * Initialize FS and create rootfs

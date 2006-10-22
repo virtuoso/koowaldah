@@ -38,6 +38,7 @@
 #include <klist0.h>
 #include <device.h>
 #include <inode.h>
+#include "fs.h"
 
 /*
  * cpio archive routines
@@ -73,12 +74,6 @@ typedef struct {
 
 #define _cast(x) ((HD_BCPIO *)x)
 
-extern char rootfs_start;
-extern char rootfs_end;
-
-extern void fs_insert_entry(char *pathname, u32 mode, dev_t dev, char *buf,
-		size_t len);
-
 int cpio_read()
 {
 	HD_BCPIO *r;
@@ -87,7 +82,6 @@ int cpio_read()
 	char *body;
 	size_t fsize;
 	u32 mode;
-	u32 rootfs_len = &rootfs_end - &rootfs_start;
 	int reverse = 0;
 
 	/* check byte order first */
