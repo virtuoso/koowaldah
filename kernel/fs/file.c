@@ -73,7 +73,7 @@ int generic_close(struct file *file)
 
 int generic_read(struct file *file, char *buf, off_t len)
 {
-	struct inode *inode;
+	struct inode *inode = file->f_inode;
 	struct page **pages;
 	int npages;
 	int r;
