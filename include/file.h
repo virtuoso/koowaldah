@@ -57,6 +57,6 @@ struct file {
 	struct klist0_node f_tlist;
 };
 
-int open(char *name);
+int open(char *name, u32 mode);
 int read(int fd, char *buf, size_t len);
 #endif
