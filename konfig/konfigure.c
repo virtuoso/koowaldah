@@ -130,9 +130,6 @@ void read_konfig()
 	FILE *config;
 	char line[80], *ps, *pe;
 	char opt[OPTNAME_MAX], val[OPTNAME_MAX];
-	char cv;
-	int iv;
-	char *sv;
 
 	config = fopen(KONFIG_PATH, "rw");
 	if (config) {
