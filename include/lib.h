@@ -59,15 +59,25 @@ static __inline size_t kstrlen(char *str)
 	return p - str;
 }
 
+static __inline char *kstrrchr(char *str, char c)
+{
+	char *p = str + kstrlen(str);
+
+	while (str != p && c != *p) p--;
+	if (c != *p) return NULL;
+
+	return p;
+}
+
 static __inline int kstrncmp(char *a, char *b, size_t n)
 {
-	while (n-- && *a++ == *b++);
+	while (n-- && *a == *b) a++, b++;
 	return (*a - *b);
 }
 
 static __inline int k__strcmp(char *a, char *b)
 {
-	while (*a && *b && *a++ == *b++);
+	while (*a && *b && *a == *b) a++, b++;
 	return (*a - *b);
 }
 
