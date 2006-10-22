@@ -33,6 +33,7 @@ SRC = 	kernel/init.c \
 	kernel/fs/namespace.c \
 	kernel/fs/fs.c \
 	kernel/fs/device.c \
+	kernel/fs/cpio.c \
 	drivers/keyboard/pc-kbd.c \
 	arch/i386/bug.c \
 	arch/i386/asm.c \
