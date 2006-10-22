@@ -65,11 +65,12 @@ struct inode *fs_add_entry(struct inode *parent, char *name, u32 mode,
 	struct superblock *sb = parent->i_sb;
 	struct inode *inode;
 	struct direntry *dent;
+	static ino_t ino = ROOT_INO;
 
 	inode = new_inode(sb);
 	if (!inode)
 		bug();
-	inode->i_ino = parent->i_ino + 1; /* XXX */
+	inode->i_ino = ++ino; /* XXX */
 	inode->i_mode = mode;
 	inode->i_dev = dev;
 
@@ -81,10 +82,10 @@ struct inode *fs_add_entry(struct inode *parent, char *name, u32 mode,
 	return inode;
 }
 
-static void __future fs_stuff_inode(struct inode *inode, char *src, off_t len)
+static void fs_stuff_inode(struct inode *inode, char *src, off_t len)
 {
 	struct page **pages = inode->i_map.i_pages;
-	int npages = inode->i_map.i_filled;
+	int npages = 0; //inode->i_map.i_filled;
 	off_t pglen = len >> PAGE_SHIFT;
 	char *from = src;
 	off_t left = len;
@@ -101,6 +102,47 @@ static void __future fs_stuff_inode(struct inode *inode, char *src, off_t len)
 
 	inode->i_size = len;
 	inode->i_map.i_filled = npages;
+}
+
+void fs_insert_entry(char *pathname, u32 mode, dev_t dev, char *buf, size_t len)
+{
+	struct inode *inode;
+	struct direntry *dent;
+	char *p = kstrrchr(pathname, '/');
+	char dir[FILENAME_MAX]; /* XXX: should be PATH_MAX and limits.h */
+
+	if (!kstrcmp(pathname, "."))
+		return;
+
+	/* silently skip the attempt to insert an existing entry */
+	dent = lookup_path(pathname);
+	if (dent)
+		return;
+
+	memory_set(dir, '\0', FILENAME_MAX);
+
+	if (p)
+		memory_copy(dir, pathname, p - pathname);
+	else {
+		dir[0] = '/';
+		p = pathname;
+	}
+
+	if (p == pathname)
+		inode = root_ns.n_inode;
+	else {
+		dent = lookup_path(dir);
+		if (!dent) {
+			kprintf("directory %s not found\n");
+			bug();
+		}
+		inode = dent->d_inode;
+		p++; /* skip the slash */
+	}
+
+	inode = fs_add_entry(inode, p, mode, dev);
+	if (S_ISREG(mode) && buf && len)
+		fs_stuff_inode(inode, buf, len);
 }
 
 extern void __init fs_init_super();
@@ -137,6 +179,7 @@ void __init fs_init()
 	p = fs_add_entry(root, "initfs", S_IFDIR, NODEV);
 	p = fs_add_entry(root, "mnt", S_IFDIR, NODEV);
 
+	cpio_read();
 	devices_init();
 }
 
