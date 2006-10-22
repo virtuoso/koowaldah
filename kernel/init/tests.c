@@ -266,9 +266,13 @@ void kbd_reader()
 	u16 buf;
 
 	fd = open("/dev/pckbd", 0);
+	if (fd < 0) {
+		kprintf("Error opening /dev/pckbd: %d\n", fd);
+		bug();
+	}
 	kprintf("Keyboard input: ");
 	for (;;) {
-		if(!read(fd, (char *)&buf, 0)) bug();
+		if(2 != read(fd, (char *)&buf, 0)) bug();
 		console_put_char(buf >> 8);
 		//console_put_char(buf & 0xFF);
 	}
@@ -299,7 +303,7 @@ void test_pckbd()
 void test_fslookup()
 {
 #ifdef OPT_TEST_FSLOOKUP
-	struct direntry *dent = lookup_path("/dev/console");
+	struct direntry *dent = lookup_path("/sbin/init");
 	int fd, l;
 	char buf[256];
 	
@@ -308,9 +312,9 @@ void test_fslookup()
 
 	kprintf("FS test found: %s\n", dent->d_name);
 
-	fd = open("/dev/console", 0);
-	if (fd == -1) {
-		kprintf("Open failed!\n");
+	fd = open("/init", 0);
+	if (fd < 0) {
+		kprintf("Open failed! %d\n", fd);
 		return;
 	}
 	kprintf("Opened a file descriptor %d\n", fd);
@@ -318,8 +322,19 @@ void test_fslookup()
 	memory_set(buf, 0, 256);
 	do {
 		l = read(fd, buf, 100);
+		if (l < 0) {
+			kprintf("Error %d occured\n", l);
+			return;
+		}
 		kprintf("Read %d bytes, [%s]\n", l, buf);
+		break;
 	} while (l == 100);
+#endif
+}
+
+void test_rootfs()
+{
+#ifdef OPT_TEST_ROOTFS
 #endif
 }
 
@@ -337,6 +352,7 @@ void run_tests()
 	test_threads();
 	test_pckbd();
 	test_irqs();
+	test_rootfs();
 	test_fslookup();
 	test_bug();
 }
