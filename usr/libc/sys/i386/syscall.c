@@ -32,6 +32,11 @@
 
 #include <syscalls.h>
 
+/*
+ * System calls. This will most likely be automatically generated
+ * in future.
+ */
+
 typedef unsigned int u32;
 extern u32 sys_call(u32,u32,u32,u32);
 
