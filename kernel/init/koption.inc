@@ -1,4 +1,4 @@
-KOPTIONS_START(KERNEL_INIT, "Initialization options", 8)
+KOPTIONS_START(KERNEL_INIT, "Initialization options", 9)
 KOPTION(
 	"TEST_IRQS",
 	"Run irq serving test",
@@ -48,6 +48,13 @@ KOPTION(
 	"TEST_FSLOOKUP",
 	"Test FS path lookup facility",
 	"Try to find /dev/console on the rootfs.",
+	KOPT_BOOL,
+	'N'
+       ),
+KOPTION(
+	"TEST_ROOTFS",
+	"Test root filesystem",
+	"Perform various tests on the rootfs.",
 	KOPT_BOOL,
 	'N'
        ),
