@@ -72,8 +72,6 @@ struct thread_t * thread_create(void (*func)(), char *name)
 	void *page;
 	struct thread_t * thread;
 	
-	kprintf("thread_create, func = %x, name: %s\n", func, name);
-
 	/* allocate stack space */
 	page = get_pages(/*THREAD_STACK_LIMIT/PAGE_SIZE*/0, 0);
 	if (!page) {
@@ -84,7 +82,7 @@ struct thread_t * thread_create(void (*func)(), char *name)
 	/* now, place the task descriptor */
 	thread = THREAD(page);
 	thread->state = THREAD_NEW;
-	kprintf("page=%x, thread=%x\n", page, thread);
+	/*kprintf("page=%x, thread=%x\n", page, thread);*/
 
 	/* stack pointers */
 	tctx(thread).stack_base = (u32 *)thread - 1;
@@ -103,11 +101,9 @@ struct thread_t * thread_create(void (*func)(), char *name)
 	thread->last_fd = 0;
 	KLIST0_INIT(&thread->files);
 
-	/* We place a reference to the thread_t on the bottom of the stack */ 
-
-	kprintf("created thread, stack_base = %x, esp = %x, pid = %d\n", 
+	/*kprintf("created thread, stack_base = %x, esp = %x, pid = %d\n", 
 			(u32) (tctx(thread).stack_base),
-			(u32) (tctx(thread).esp), thread->pid);
+			(u32) (tctx(thread).esp), thread->pid);*/
 
 	return thread;
 }
