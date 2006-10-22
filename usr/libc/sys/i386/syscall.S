@@ -30,6 +30,9 @@
  *
  */
 
+/*
+ * System call gate function
+ */
 .text
 .global sys_call
 .type sys_call,%function
