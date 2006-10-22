@@ -109,12 +109,20 @@ int main() {
 		TEST_PASSED(6);
 	separator();
 
-	TEST_DECLARE(7, "kstrlen()");
-	if (strlen(string) != kstrlen(string)) {
-		printf("strlen() disagrees with kstrlen()\n");
+	TEST_DECLARE(7, "kstrcmp(): corner case");
+	if (!kstrcmp("init", "mnt")) {
+		printf("kstrcmp() thinks that 'mnt' and 'init' are equal\n");
 		TEST_FAILURE(7);
 	} else
 		TEST_PASSED(7);
+	separator();
+
+	TEST_DECLARE(8, "kstrlen()");
+	if (strlen(string) != kstrlen(string)) {
+		printf("strlen() disagrees with kstrlen()\n");
+		TEST_FAILURE(8);
+	} else
+		TEST_PASSED(8);
 	separator();
 
 	printf("tests failed: %d, tests passed: %d\n",
