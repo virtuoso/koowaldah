@@ -49,7 +49,7 @@ extern void thread_init_stack(struct thread_t * t, void (*func)(void));
 /* omgwtf */
 u32 get_free_pid()
 {
-	static u32 i = 1;
+	static u32 i = 0;
 	return i++;
 }
 
