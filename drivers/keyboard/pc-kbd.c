@@ -157,11 +157,14 @@ static struct device pckbd_dev = {
 	.d_fops = &pckbd_fops
 };
 
-int pckbd_load()
+int __init pckbd_load()
 {
+	kprintf("pckbd_load()\n");
 	sleeper = NULL;
 	users = read_idx = write_idx = 0; /* although, that's .bss, isn it? */
 	register_device(&pckbd_dev);
 	return register_irq_handler(KEYBOARD_IRQ, pckbd_intr);
 }
+
+late_init(pckbd_load);
 
