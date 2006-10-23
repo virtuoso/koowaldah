@@ -52,9 +52,12 @@ u32 sys_call_gate(u32 eax, u32 ebx, u32 ecx, u32 edx)
 			return open((char *)ebx, (u32)ecx);
 
 		case 2:
-			return read((int)ebx, (char *)ecx, (size_t)edx);
+			return close((int)ebx);
 
 		case 3:
+			return read((int)ebx, (char *)ecx, (size_t)edx);
+
+		case 4:
 			return tsleep(ebx);
 
 		default:
