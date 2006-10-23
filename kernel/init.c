@@ -107,6 +107,21 @@ void __init kern_start()
 	bug();
 }
 
+extern initfn late_init_start;
+extern initfn late_init_end;
+
+void call_late_init()
+{
+	initfn *fn;
+
+	if (&late_init_start == &late_init_end)
+		return;
+
+	for (fn = &late_init_start; fn < &late_init_end; fn++)
+		if ((*fn)() != 0)
+			kprintf("Late-init function %x failed\n", *fn);
+}
+
 void kernel_main_thread()
 {
 	struct thread_t *me;
@@ -128,6 +143,8 @@ void kernel_main_thread()
         kprintf("Starting the Prigrammable Interval Timer...");
         timer_init();
         kprintf("Done\n");
+
+	call_late_init();
 
 	run_tests();
 
