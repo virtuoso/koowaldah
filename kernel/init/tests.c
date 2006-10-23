@@ -258,7 +258,6 @@ void test_irqs()
 }
 
 #ifdef OPT_TEST_PCKBD
-extern int pckbd_load();
 
 void kbd_reader()
 {
@@ -284,7 +283,6 @@ void test_pckbd()
 #ifdef OPT_TEST_PCKBD
 	struct thread_t *thread;
 
-	pckbd_load();
         thread = thread_create(&kbd_reader, "[keyboard]");
         if (!thread) {
                 kprintf("failed to create thread\n");
@@ -335,7 +333,6 @@ void test_fslookup()
 #ifdef OPT_TEST_ROOTFS
 typedef void (*_start_t)(void);
 _start_t _start;
-extern int pckbd_load();
 
 void init_thread()
 {
@@ -354,7 +351,6 @@ void test_rootfs()
 	int i;
 
 	_start = (_start_t)dst;
-	pckbd_load();
 	dent = lookup_path("/sbin/init");
 	if (!dent) {
 		kprintf("Init not found.\n");
