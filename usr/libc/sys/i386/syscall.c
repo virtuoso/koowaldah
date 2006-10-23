@@ -50,6 +50,11 @@ int sys_open(char *name, unsigned int mode)
 	return sys_call(SYS_open, (u32)name, mode, 0);
 }
 
+int sys_close(int fd)
+{
+	return sys_call(SYS_close, (u32)fd, 0, 0);
+}
+
 int sys_read(int fd, char *buf, unsigned int len)
 {
 	return sys_call(SYS_read, (u32)fd, (u32)buf, len);
