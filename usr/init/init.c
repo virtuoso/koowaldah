@@ -34,7 +34,6 @@
 
 /*
  * The init program.
- * (a little cpu warm-up to keep me from freezing)
  */
 
 char buf[16];
@@ -48,6 +47,7 @@ void _start()
 	fd = sys_open("/init", 0);
 	l = sys_read(fd, buf, 12);
 	sys_debug(buf);
+	sys_close(fd);
 
 	for (;;) {
 		sys_debug("waking up");
