@@ -370,8 +370,6 @@ void test_bug()
 
 void run_tests()
 {
-	char *str = "ZHOPA!";
-	u32 res;
 	test_mm();
 	test_klist();
 	test_threads();
@@ -380,11 +378,5 @@ void run_tests()
 	test_rootfs();
 	test_fslookup();
 	test_bug();
-	__asm__ __volatile__(
-			"mov $0x0, %%eax\n"
-			"mov %1, %%ebx\n"
-			"int $0x40\n"
-			"mov %%eax, %0" : "=m"(res) : "m"(str));
-	kprintf("syscall returned: %d\n", res);
 }
 
