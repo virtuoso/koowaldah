@@ -51,7 +51,7 @@ void _start()
 
 	for (;;) {
 		sys_debug("waking up");
-		for (fd = 0; fd < 0x8000000; fd++);
+		sys_tsleep(1000);
 	}
 }
 
