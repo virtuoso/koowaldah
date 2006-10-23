@@ -58,5 +58,6 @@ struct file {
 };
 
 int open(char *name, u32 mode);
+int close(int fd);
 int read(int fd, char *buf, size_t len);
 #endif

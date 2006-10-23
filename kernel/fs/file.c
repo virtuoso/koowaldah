@@ -210,6 +210,28 @@ int open(char *name, u32 mode)
 }
 
 /*
+ * Find file object by given descriptor
+ */
+static struct file *fd2file(int fd)
+{
+	struct thread_t *thread = CURRENT();
+	struct klist0_node *t;
+	struct file *file;
+
+	if (fd > thread->last_fd)
+		return NULL;
+
+	/* find a corresponding file */
+	klist0_for_each(t, &thread->files) {
+		file = klist0_entry(t, struct file, f_tlist);
+		if (file->f_fd == fd)
+			return file;
+	}
+
+	return NULL;
+}
+
+/*
  * Read len bytes from file fd buf. Bytes are read starting
  * from current offset.
  * @fd -- descriptor of an (opened) file to read from
@@ -219,22 +241,11 @@ int open(char *name, u32 mode)
  */
 int read(int fd, char *buf, size_t len)
 {
-	struct thread_t *thread = CURRENT();
-	struct klist0_node *t;
 	struct file *file;
 	struct inode *inode;
 
-	if (fd > thread->last_fd)
-		return -EBADF;
-
-	/* find a corresponding file */
-	klist0_for_each(t, &thread->files) {
-		file = klist0_entry(t, struct file, f_tlist);
-		if (file->f_fd == fd)
-			break;
-	}
-
-	if (file->f_fd != fd)
+	file = fd2file(fd);
+	if (!file)
 		return -EBADF;
 
 	if (!file->f_inode)
@@ -245,5 +256,17 @@ int read(int fd, char *buf, size_t len)
 		return 0;
 
 	return file->f_ops->read(file, buf, len);
+}
+
+int close(fd)
+{
+	struct file *file;
+
+	file = fd2file(fd);
+	if (!file)
+		return -EBADF;
+	release_inode(file->f_inode);
+	
+	return file->f_ops->close(file);
 }
 
