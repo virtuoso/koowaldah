@@ -334,18 +334,26 @@ void test_fslookup()
 
 #ifdef OPT_TEST_ROOTFS
 typedef void (*_start_t)(void);
+_start_t _start;
 extern int pckbd_load();
+
+void init_thread()
+{
+	_start();
+	bug();
+}
 #endif
 
 void test_rootfs()
 {
 #ifdef OPT_TEST_ROOTFS
+	struct thread_t *thread;
 	struct direntry *dent;
 	struct inode *inode;
 	char *dst = (char *)0x4000; /* _start() load address */
-	_start_t _start = (_start_t)dst;
 	int i;
 
+	_start = (_start_t)dst;
 	pckbd_load();
 	dent = lookup_path("/sbin/init");
 	if (!dent) {
@@ -356,8 +364,16 @@ void test_rootfs()
 	inode = dent->d_inode;
 	i = memory_copy(dst, page_to_addr(inode->i_map.i_pages[1]), 4096);
 
-	_start();
-	bug();
+        thread = thread_create(&init_thread, "init");
+        if (!thread) {
+                kprintf("failed to create thread\n");
+		bug();
+        }
+
+        if (scheduler_enqueue(thread)) {
+                kprintf("failed to add thread to run queue\n");
+		bug();
+        }
 #endif
 }
 
