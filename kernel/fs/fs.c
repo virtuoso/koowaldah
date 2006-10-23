@@ -74,6 +74,8 @@ struct inode *fs_add_entry(struct inode *parent, char *name, u32 mode,
 	inode->i_ino = ++ino; /* XXX */
 	inode->i_mode = mode;
 	inode->i_dev = dev;
+	/* we want these inodes forever */
+	atomic_inc_u32(&inode->i_refcnt);
 
 	dent = new_direntry(name, inode);
 	if (!dent)
