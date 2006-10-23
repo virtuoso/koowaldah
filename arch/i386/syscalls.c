@@ -38,6 +38,7 @@
 #include <bug.h>
 #include <sys/errno.h>
 #include <file.h>
+#include <timers.h>
 
 u32 sys_call_gate(u32 eax, u32 ebx, u32 ecx, u32 edx)
 {
@@ -53,8 +54,8 @@ u32 sys_call_gate(u32 eax, u32 ebx, u32 ecx, u32 edx)
 		case 2:
 			return read((int)ebx, (char *)ecx, (size_t)edx);
 
-		/*case 3:
-			return tsleep(ebx);*/
+		case 3:
+			return tsleep(ebx);
 
 		default:
 			return -ENOSYS;
