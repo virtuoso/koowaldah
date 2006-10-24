@@ -80,6 +80,7 @@ struct inode *fs_add_entry(struct inode *parent, char *name, u32 mode,
 	dent = new_direntry(name, inode);
 	if (!dent)
 		bug();
+	atomic_inc_u32(&dent->d_refcnt);
 
 	klist0_append(&dent->d_siblings, &parent->i_children);
 	return inode;
