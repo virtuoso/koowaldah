@@ -38,6 +38,7 @@
 #include <config.h>
 
 extern u64 jiffies;
+extern u8 kernel_started;
 
 /* kernel component name length */
 #define KCOMPONENT_NAME_LEN 16
@@ -60,9 +61,10 @@ extern u64 jiffies;
 #define offsetof(TYPE, MEMBER) ((size_t) &((TYPE *)NULL)->MEMBER)
 #endif
 
-#define __init __attribute__((section(".init")))
+#define __init   __attribute__((section(".init")))
 #define __future __attribute__((unused))
 #define __inline __attribute__((always_inline)) inline
+#define __noprof __attribute__((no_instrument_function))
 
 typedef int (*initfn)(void);
 
