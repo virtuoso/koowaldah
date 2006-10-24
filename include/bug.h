@@ -73,5 +73,8 @@
 	panic("Bug in file %s, line %d", __FILE__, __LINE__); \
 } while (0)
 
+#define bug_on(cond) do {			\
+	if (cond) bug();			\
+} while (0);
 
 #endif /* __BUG_H__ */
