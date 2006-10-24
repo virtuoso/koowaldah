@@ -17,4 +17,5 @@ KOPTION(
 KOPTIONS_END
 #include "kernel/init/koption.inc"
 #include "kernel/fs/koption.inc"
+#include "kernel/debug/koption.inc"
 
