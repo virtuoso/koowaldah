@@ -1,7 +1,7 @@
 
 #### CONFIGURATION SECTION START ####
 
-
+-include konfig.mk
 ARCH = i386
 
 
@@ -11,8 +11,13 @@ ASM ?= nasm
 ASM_FLAGS += -g
 CC ?= gcc
 CC_FLAGS += -Wall -g 
+CC_FLAGS_KERN := $(CC_FLAGS)
 LD ?= ld
 OBJCOPY ?= objcopy
+
+ifeq ($(MK_INSTRUMENT_PROFILER),Y)
+  CC_FLAGS_KERN += -finstrument-functions
+endif
 
 
 SRC = 	kernel/init.c \
@@ -51,6 +56,10 @@ SRC = 	kernel/init.c \
 	arch/i386/mm.c \
 	arch/i386/paging.c
 
+ifeq ($(MK_INSTRUMENT_PROFILER),Y)
+  SRC += kernel/debug/profile.c
+endif
+
 OBJ = $(SRC:.c=.o)
 
 OBJ +=	arch/i386/asm/isr.o \
@@ -60,7 +69,14 @@ OBJ +=	arch/i386/asm/isr.o \
 all: kernel tests
 
 .c.o:
-	$(CC) $(CC_FLAGS) -Iinclude -ffreestanding -c $< -o $@
+	@echo -n "CC  $<... "
+	@if [ -n "`echo $@|grep '^kernel/'`" ]; then \
+		$(CC) $(CC_FLAGS_KERN) -Iinclude -ffreestanding -c $< -o $@; \
+		echo "KERNEL"; \
+	else \
+		$(CC) $(CC_FLAGS) -Iinclude -ffreestanding -c $< -o $@; \
+		echo "ARCH"; \
+	fi
 
 .S.o:
 	$(ASM) $(ASM_FLAGS) -f aout  $< -o $@
@@ -87,7 +103,8 @@ kernel-elf: $(OBJ) arch/i386/boot/multiboot.o
 	$(LD) -T arch/i386/kernel-elf.lds -o kuca-elf \
 		arch/i386/boot/multiboot.o $(OBJ) usr/rootfs.o
 	
-kernel: konfig initfs kernel-elf
+kernel: konfig initfs
+	$(MAKE) kernel-elf
 
 tests:
 	$(MAKE) -C tests test
@@ -106,7 +123,7 @@ clean:
 	rm -f arch/i386/boot/bootloader.bin
 	rm -fr arch/i386/*.o arch/i386/asm/*.o arch/i386/boot/*.o
 	rm -fr *.o kernel/*.o kernel/libs/*.o drivers/*.o kernel/fs/*.o
-	rm -fr kernel/init/*.o kernel/lib/*.o
+	rm -fr kernel/init/*.o kernel/lib/*.o kernel/debug/*.o
 	rm -fr drivers/*.o drivers/keyboard/*.o
 	rm -f include/koptions.h konfig/konfigure konfig/*.o konfig.mk
 
