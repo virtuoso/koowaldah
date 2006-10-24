@@ -33,6 +33,7 @@
 
 #include <kuca.h>
 #include <mm_zone.h>
+#include <textio.h>
 
 #include "multiboot_info.h"
 
@@ -47,6 +48,9 @@ void arch_init_boot_zone(struct mem_zone * zone)
 	
 	total_mem = multiboot_info->mem_upper * 1024;
 	total_mem -= ((u32)(&kernel_end) - 0x100000); /* mem_upper starts at 1Mb. */
+
+	kprintf("Got %d (0x%x) bytes of memory\n",
+		total_mem, total_mem);
 
 	zone->total_pages = total_mem / PAGE_SIZE;
 	
