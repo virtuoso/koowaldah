@@ -53,13 +53,18 @@ struct page {
 };
 
 struct page * alloc_pages(u32 flags, u32 order);
-char * get_pages(u32 flags, u32 order);
-char * page_to_addr(struct page * page);
+u32 * get_pages(u32 flags, u32 order);
+u32 * page_to_addr(struct page * page);
+struct page * addr_to_page(u32 * page);
 
 #define alloc_page(flags) alloc_pages(flags, 0) 
 #define get_page(flags) get_pages(flags, 0)
 
 void free_pages(struct page * pg);
+void put_pages(void * addr);
+
+#define free_page(page) free_pages(page)
+#define put_page(addr) put_pages(addr)
 
 void print_alloc_info();
 
