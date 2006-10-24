@@ -82,6 +82,16 @@ int main() {
 		TEST_PASSED(2);
 	separator();
 
+	TEST_DECLARE(3, "atomic_dec_and_test_u32()");
+	i = 5;
+	while (!atomic_dec_and_test_u32(&a32)) --i;
+	if (i != 1) {
+		printf("dec and test failed, i=%d\n", i);
+		TEST_FAILURE(3);
+	} else
+		TEST_PASSED(3);
+	separator();
+
 
 	printf("tests failed: %d, tests passed: %d\n",
 			TESTS_FAILED, TESTS_PASSED);
