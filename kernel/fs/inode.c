@@ -190,7 +190,7 @@ out:
  */
 void release_inode(struct inode *inode)
 {
-	if (!atomic_dec_and_test_u32(&inode->i_refcnt))
+	if (atomic_dec_and_test_u32(&inode->i_refcnt))
 		free_inode(inode);
 }
 
