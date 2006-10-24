@@ -26,6 +26,7 @@ SRC = 	kernel/init.c \
 	kernel/lib/klist.c \
 	kernel/lib/klib.c \
 	kernel/lib/vsnprintf.c \
+	kernel/lib/bitmask.c \
 	kernel/thread.c \
 	kernel/scheduler.c \
 	kernel/sched0.c \
