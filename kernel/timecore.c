@@ -85,7 +85,7 @@ int register_timer(timer_fn func, u32 delay, void *data)
         return 0;
 }
 
-void update_timers()
+void __noprof update_timers()
 {
         struct klist0_node *t, *d;
 	struct timer *timer;

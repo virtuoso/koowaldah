@@ -37,13 +37,13 @@
 #include <lib.h>
 #include <console.h>
 
-static void print(const char *message)
+static void __noprof print(const char *message)
 {
 	while (*message)
 		console_put_char(*(message++));
 }
 
-void hex_dump(char * ptr, u32 len)
+void __noprof hex_dump(char * ptr, u32 len)
 {
 	int i;
 	for (i = 0; i < len; i++) {
@@ -70,7 +70,7 @@ void hex_dump(char * ptr, u32 len)
 	kprintf("\n");
 }
 
-int kprintf(const char *fmt, ...)
+int __noprof kprintf(const char *fmt, ...)
 {
 	va_list args;
 	int i;
