@@ -65,6 +65,7 @@ extern void mm_init(void); /* legacy mm */
 
 /* this is also needed only once */
 extern void run_tests(void);
+u8 kernel_started = 0;
 
 void __init kern_start()
 {
@@ -110,7 +111,7 @@ void __init kern_start()
 extern initfn late_init_start;
 extern initfn late_init_end;
 
-void call_late_init()
+void __noprof call_late_init()
 {
 	initfn *fn;
 
@@ -122,7 +123,7 @@ void call_late_init()
 			kprintf("Late-init function %x failed\n", *fn);
 }
 
-void kernel_main_thread()
+void __noprof kernel_main_thread()
 {
 	struct thread_t *me;
 
@@ -143,6 +144,7 @@ void kernel_main_thread()
         kprintf("Starting the Prigrammable Interval Timer...");
         timer_init();
         kprintf("Done\n");
+	//kernel_started = 1;
 
 	call_late_init();
 

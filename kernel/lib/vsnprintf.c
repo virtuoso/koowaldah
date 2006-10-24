@@ -40,7 +40,7 @@
 
 static char *digits="0123456789ABCDEF";
 
-static size_t sprint_int_signed(char *buf, long i, char base)
+static size_t __noprof sprint_int_signed(char *buf, long i, char base)
 {
 	int pos = 0;
 	int n;
@@ -66,7 +66,7 @@ static size_t sprint_int_signed(char *buf, long i, char base)
 	return n;
 }
 
-static size_t sprint_int_unsigned(char *buf, unsigned long i, char base)
+static size_t __noprof sprint_int_unsigned(char *buf, unsigned long i, char base)
 {
 	int pos = 0;
 	int n;
@@ -87,7 +87,7 @@ static size_t sprint_int_unsigned(char *buf, unsigned long i, char base)
 	return n;
 }
 
-int vsnprintf(char *buf, size_t size, const char *format, va_list args)
+int __noprof vsnprintf(char *buf, size_t size, const char *format, va_list args)
 {
 	int flen = kstrlen((char *)format) + 1;
 	char *cur = (char *)format;

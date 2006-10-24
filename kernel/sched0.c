@@ -65,7 +65,7 @@ void sched0_dequeue(struct thread_t *thread)
 }
 
 /* fairly simple */
-void sched0_tick()
+void __noprof sched0_tick()
 {
 	struct thread_t *thread = CURRENT();
 	struct thread_t *next;
