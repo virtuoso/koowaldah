@@ -65,5 +65,12 @@ KOPTION(
 	"thread execution, i.e. kill the kernel.",
 	KOPT_BOOL,
 	'N'
+       ),
+KOPTION(
+	"TEST_SLICE",
+	"Test the slice allocator",
+	"",
+	KOPT_BOOL,
+	'N'
        )
 KOPTIONS_END
