@@ -1,4 +1,4 @@
-KOPTIONS_START(KERNEL_INIT, "Initialization options", 9)
+KOPTIONS_START(KERNEL_INIT, "Initialization options", 10)
 KOPTION(
 	"TEST_IRQS",
 	"Run irq serving test",
