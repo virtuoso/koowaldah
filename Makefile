@@ -33,6 +33,7 @@ SRC = 	kernel/init.c \
 	kernel/timecore.c \
 	kernel/mm_zone.c \
 	kernel/page_alloc.c \
+	kernel/slice.c \
 	kernel/fs/super.c \
 	kernel/fs/inode.c \
 	kernel/fs/file.c \

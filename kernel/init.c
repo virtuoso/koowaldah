@@ -61,6 +61,7 @@ extern void scheduler_init(void);
 extern void fs_init(void);
 
 extern void init_mem_info(void);
+extern void slice_init(void);
 extern void mm_init(void); /* legacy mm */ 
 
 /* this is also needed only once */
@@ -87,6 +88,7 @@ void __init kern_start()
         kprintf("Done\n");
 
 	init_mem_info();
+	slice_init();
 
 	thread_init();
 
