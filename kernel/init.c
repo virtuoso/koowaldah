@@ -143,7 +143,7 @@ void __noprof kernel_main_thread()
 
 	scheduler_start();
 
-        kprintf("Starting the Prigrammable Interval Timer...");
+        kprintf("Starting the Programmable Interval Timer...");
         timer_init();
         kprintf("Done\n");
 	//kernel_started = 1;
