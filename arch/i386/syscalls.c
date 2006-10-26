@@ -61,8 +61,9 @@ u32 sys_call_gate(u32 eax, u32 ebx, u32 ecx, u32 edx)
 			return tsleep(ebx);
 
 		default:
-			return -ENOSYS;
 			kprintf("syscall %d not implemented\n", eax);
+			arch_display_thread();
+			return -ENOSYS;
 	}
 	return -ENOSYS;
 }
