@@ -1,9 +1,9 @@
 default		0
 timeout		2
 color cyan/blue white/blue
-title		KucaOS-CURRENT
+title		KoowaldahOS-CURRENT
 root		(fd0)
-kernel		/boot/kuca-elf
+kernel		/boot/kos-elf
 savedefault
 boot
 
