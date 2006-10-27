@@ -76,6 +76,7 @@ void __init kern_start()
 
 	kprintf("KUCA KYKY\n");
 	
+	init_mem_info();
 	mm_init();
 
         kprintf("Setting isr table up...");
@@ -87,7 +88,6 @@ void __init kern_start()
 	trap_init();
         kprintf("Done\n");
 
-	init_mem_info();
 	slice_init();
 
 	thread_init();
