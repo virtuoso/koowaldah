@@ -1,0 +1,90 @@
+
+
+	Memory Management in Koowaldah.
+
+
+In the Koowaldah kernel, a number of memory management mechanisms
+are at your service. This document describes how to choose the one
+fitting best to your needs and how to use it.
+
+
+	The Page Allocator.
+	
+The page allocator is intended to allocate piles of physically
+contiguous pages. It does not remap any pages, so there is some
+probability that the allocation will fail, even if a sifficient
+number of pages is available.
+
+alloc_pages(flags, order) 
+	Get a page pile of the requested order e.g. with 2^order 
+	pages in it. The flag argument is not used right now.
+
+	Returns a struct page, corresponding to the first page in the
+	pile on success or NULL otherwise.
+
+get_pages(flags, order)
+	Same thing, but returns the first page's addres.
+
+alloc_page(flags)
+	Allocate exactly one page, returns struct page.
+
+get_page(flags)
+	Allocate one page, returns this page's address.
+
+free_pages(page)
+	Free pages, previously allocated with alloc_pages() or
+	get_pages. Takes a struct page.
+	
+put_pages(addr)
+	Free pages, given the first page's address.
+
+free_page(page)
+put_page(addr)
+	Theese two are identical to the two above and exist only for 
+	completeness.
+
+page_to_addr(page)
+	Get the page addres from given struct page.
+
+addr_to_page(addr)
+	Get the struct page, describing the page with given address.
+
+
+
+	The Slice Allocator.
+
+The slice allocator is good at allocating big quantitys of small objects, but
+in the present implementation it may waste some memory when allocating bigger
+ones (like some hundreds of bytes).
+
+slice_pool_create(flags, obj_size)
+	Create a pool to allocate slices from. flags are passed down to
+	the page allocator when the pool needs to be populated with
+	new pages.
+
+slice_pool_recycle(pool)
+	Destroy a slice pool. All the slices allocated from this pool
+	should be freed at this time.
+
+slice_alloc(pool)
+	Get a slice from the pool.
+	
+slice_free(slice, pool)
+	Return the slice to the pool.
+
+slice_pool_shrink(pool)
+	After a number of allocations and deallocations, the pool may have
+	some pages without a single allocated slice on them. Teese pages
+	may be returned to the page allocator by calling this function.
+
+
+
+	The Generic Allocator. (Yet to implement)
+
+Works good for in most situations, but may have a significant overheat on
+the smaller objects. 
+
+
+	The Virtual Memory Allocator (Yet to implement).
+
+
