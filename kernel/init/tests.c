@@ -677,7 +677,7 @@ void test_rootfs()
 	inode = dent->d_inode;
 	i = memory_copy(dst, page_to_addr(inode->i_map.i_pages[1]), 4096);
 
-        thread = thread_create(&init_thread, "init");
+        thread = thread_create_user(&init_thread, "init");
         if (!thread) {
                 kprintf("failed to create thread\n");
 		bug();
