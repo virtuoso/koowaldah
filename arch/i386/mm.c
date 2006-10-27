@@ -42,7 +42,7 @@
 #include <error.h>
 #include <textio.h>
 
-extern int paging_init();
+extern void paging_init();
 
 /* from arch/i386/kernel-*.lds */
 extern char alloc_mem_start;
