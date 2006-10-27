@@ -31,7 +31,7 @@
  *
  */
 
-#include <kuca.h>
+#include <koowaldah.h>
 #include <textio.h>
 #include <bitmask.h>
 

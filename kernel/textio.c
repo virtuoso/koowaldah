@@ -32,7 +32,7 @@
  */
 
 
-#include <kuca.h>
+#include <koowaldah.h>
 #include <textio.h>
 #include <lib.h>
 #include <console.h>

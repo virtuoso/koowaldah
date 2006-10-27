@@ -1,6 +1,6 @@
 
 /*
- * include/kuca.h
+ * include/koowaldah.h
  *
  * Copyright (C) 2005 Alexey Zaytsev
  *
@@ -31,8 +31,8 @@
  * 
  */
 
-#ifndef __KUCA_H__
-#define __KUCA_H__
+#ifndef __KOOWALDAH_H__
+#define __KOOWALDAH_H__
 
 #include <arch/types.h>
 #include <config.h>
@@ -71,5 +71,5 @@ typedef int (*initfn)(void);
 #define late_init(f) \
 	__attribute__((section(".init.late"))) initfn __ ##f## _late = f;
 
-#endif /* __KUCA_H_ */
+#endif /* __KOOWALDAH_H_ */
 

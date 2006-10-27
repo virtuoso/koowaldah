@@ -34,7 +34,7 @@
 #ifndef __ARCH_BUG_H__
 #define __ARCH_BUG_H__
 
-#include <kuca.h>
+#include <koowaldah.h>
 #include <thread.h>
 #include <arch/asm.h>
 

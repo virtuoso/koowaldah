@@ -34,7 +34,7 @@
  * Static instrumentation
  */
 
-#include <kuca.h>
+#include <koowaldah.h>
 #include <textio.h>
 
 void __noprof __cyg_profile_func_enter(void *this_fn, void *call_site)

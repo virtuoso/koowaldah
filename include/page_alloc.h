@@ -34,7 +34,7 @@
 #ifndef __PAGE_ALLOC_H__
 #define __PAGE_ALLOC_H__
 
-#include <kuca.h>
+#include <koowaldah.h>
 #include <klist0.h>
 #include <arch/asm.h>
 

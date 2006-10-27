@@ -31,7 +31,7 @@
  * 
  */
 
-#include <kuca.h>
+#include <koowaldah.h>
 #include <arch/asm.h>
 
 #define VGA_BASE (void *) 0xB8000
