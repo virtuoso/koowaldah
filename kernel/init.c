@@ -74,7 +74,7 @@ void __init kern_start()
 
 	early_console_init();
 
-	kprintf("KUCA KYKY\n");
+	kprintf("Starting Koowaldah kernel.\n");
 	
 	init_mem_info();
 	mm_init();
