@@ -44,6 +44,8 @@ void general_protection()
 
 void page_fault()
 {
+	u32 addr = read_cr2();
+	kprintf("### ADDRESS: %x\n", addr);
 	panic("PAGE_FAULT");
 }
 
