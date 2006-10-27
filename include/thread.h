@@ -62,6 +62,9 @@ struct thread_t {
 		/* whatever else thread_context */
 	} ctx;
 
+	/* memory mapping */
+	struct mapping				*map;
+
 	/* process related */
 	u32					pid;
 	u32					state;
@@ -74,6 +77,7 @@ struct thread_t {
 
 void dump_thread(struct thread_t *thread);
 struct thread_t *thread_create(void (*func)(), char *name);
+struct thread_t *thread_create_user(void (*func)(), char *name);
 
 /* arch */
 void thread_switch_to(struct thread_t *thread);
