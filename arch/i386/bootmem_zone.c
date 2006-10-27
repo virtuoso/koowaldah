@@ -39,6 +39,8 @@
 
 struct multiboot_info_t * multiboot_info; /* Is set from multiboot.S */
 extern u32 kernel_end; /* kerlen-elf.lds */
+extern u32 phys_mem;
+extern u32 phys_pgs;
 
 void arch_init_boot_zone(struct mem_zone * zone)
 {
@@ -46,13 +48,17 @@ void arch_init_boot_zone(struct mem_zone * zone)
 	u32 total_mem;
 	zone->base = &kernel_end; 
 	
+	phys_mem =
 	total_mem = multiboot_info->mem_upper * 1024;
 	total_mem -= ((u32)(&kernel_end) - 0x100000); /* mem_upper starts at 1Mb. */
+	phys_mem += 0x100000;
 
 	kprintf("Got %d (0x%x) bytes of memory\n",
 		total_mem, total_mem);
 
-	zone->total_pages = total_mem / PAGE_SIZE;
+	zone->total_pages = (total_mem / PAGE_SIZE) / KERN_ALLOWANCE;
+	phys_pgs = phys_mem / PAGE_SIZE;
+	kprintf("Total pages: %d\n", zone->total_pages);
 	
 	mem_zone_init(zone);
 	
