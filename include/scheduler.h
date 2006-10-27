@@ -34,7 +34,7 @@
 #ifndef __SCHEDULER_H__
 #define __SCHEDULER_H__
 
-#include <kuca.h>
+#include <koowaldah.h>
 #include <thread.h> /* for struct thread_t */
 #include <klist0.h>
 

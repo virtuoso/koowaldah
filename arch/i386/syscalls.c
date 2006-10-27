@@ -33,7 +33,7 @@
 /*
  * System calls
  */
-#include <kuca.h>
+#include <koowaldah.h>
 #include <textio.h>
 #include <bug.h>
 #include <sys/errno.h>

@@ -25,7 +25,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <kuca.h>
+#include <koowaldah.h>
 #include <bug.h>
 #include <error.h>
 #include <lib.h>

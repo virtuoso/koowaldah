@@ -30,7 +30,7 @@
  *
  */
 
-#include <kuca.h>
+#include <koowaldah.h>
 #include <textio.h>
 #include <error.h>
 #include <sys/stat.h>

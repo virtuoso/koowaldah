@@ -33,7 +33,7 @@
  *
  */
 
-#include <kuca.h>
+#include <koowaldah.h>
 #include <klist0.h>
 #include <textio.h>
 #include <irq.h>

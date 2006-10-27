@@ -30,7 +30,7 @@
  *
  */
 
-#include <kuca.h>
+#include <koowaldah.h>
 #include <super.h>
 #include <inode.h>
 #include <namespace.h>

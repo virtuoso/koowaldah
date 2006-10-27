@@ -53,7 +53,7 @@
   * on the next higher level.
   */
 
-#include <kuca.h>
+#include <koowaldah.h>
 #include <textio.h>
 #include <mm_zone.h>
 #include <page_alloc.h>

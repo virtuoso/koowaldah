@@ -3,7 +3,7 @@
 
 /* Stuff, passed to us by the multiboot loader. */
 
-#include <kuca.h>
+#include <koowaldah.h>
 
 #define INFO_MEM 1<<0
 #define INFO_BOOTDEV 1<<1
