@@ -67,10 +67,10 @@ void dump_thread(struct thread_t *thread)
 	);
 }
 
-struct thread_t * thread_create(void (*func)(), char *name)
+struct thread_t *thread_create(void (*func)(), char *name)
 {
 	void *page;
-	struct thread_t * thread;
+	struct thread_t *thread;
 	
 	/* allocate stack space */
 	page = get_pages(/*THREAD_STACK_LIMIT/PAGE_SIZE*/0, 0);
@@ -101,9 +101,25 @@ struct thread_t * thread_create(void (*func)(), char *name)
 	thread->last_fd = 0;
 	KLIST0_INIT(&thread->files);
 
+	/* use root memory mapping */
+	thread->map = &root_map;
+
 	/*kprintf("created thread, stack_base = %x, esp = %x, pid = %d\n", 
 			(u32) (tctx(thread).stack_base),
 			(u32) (tctx(thread).esp), thread->pid);*/
+
+	return thread;
+}
+
+struct thread_t *thread_create_user(void (*func)(), char *name)
+{
+	struct thread_t *thread;
+
+	thread = thread_create(func, name);
+	if (thread) {
+		thread->map = memory_alloc(sizeof(struct mapping));
+		init_user_map(thread->map);
+	}
 
 	return thread;
 }
