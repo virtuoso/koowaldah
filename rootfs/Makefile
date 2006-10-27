@@ -17,6 +17,6 @@ $(IMG_NAME): rootfs.tar
 	$(MKBIMAGE) -t $(IMG_TYPE) -f $<
 
 rootfs.tar: forge
-	cp -a ../kuca-elf forge/boot
+	cp -a ../kos-elf forge/boot
 	( cd forge; tar cf ../rootfs.tar ./* )
 
