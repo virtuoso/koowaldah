@@ -29,10 +29,6 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  * 
- * MM in KucaOS is a big fiction. I'll implement it later, and for now we 
- * have some functions who behave like real. In particular you can't allocate 
- * more than one page with pages_get(), and memory_release() does nothing.
- *
  */
 
 #include <koowaldah.h>
