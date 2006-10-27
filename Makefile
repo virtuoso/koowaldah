@@ -102,7 +102,7 @@ konfig: include/koptions.h
 .PHONY: konfig
 
 kernel-elf: $(OBJ) arch/i386/boot/multiboot.o
-	$(LD) -T arch/i386/kernel-elf.lds -o kuca-elf \
+	$(LD) -T arch/i386/kernel-elf.lds -o kos-elf \
 		arch/i386/boot/multiboot.o $(OBJ) usr/rootfs.o
 	
 kernel: konfig initfs
@@ -121,7 +121,7 @@ clean:
 	$(MAKE) clean -C rootfs
 	$(MAKE) clean -C usr
 	$(MAKE) clean -C tests
-	rm -f kernel/kernel.bin kuca-bin kuca-elf
+	rm -f kernel/kernel.bin kos-bin kos-elf
 	rm -f arch/i386/boot/bootloader.bin
 	rm -fr arch/i386/*.o arch/i386/asm/*.o arch/i386/boot/*.o
 	rm -fr *.o kernel/*.o kernel/libs/*.o drivers/*.o kernel/fs/*.o
