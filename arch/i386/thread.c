@@ -107,6 +107,9 @@ void thread_switch_context(struct thread_t * from, struct thread_t * to)
 
 	esp_from = &tctx(from).esp;
 	esp_to = &tctx(to).esp;
+
+	if (from->map != to->map)
+		switch_map(from->map, to->map);
 	
 	do_thread_switch_context(esp_from, esp_to);
 }
