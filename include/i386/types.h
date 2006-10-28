@@ -34,8 +34,6 @@
 #ifndef __ARCH_TYPES_H__
 #define __ARCH_TYPES_H__
 
-typedef unsigned long size_t;
-
 typedef signed char s8;
 typedef unsigned char u8;
 
