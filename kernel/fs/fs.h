@@ -44,7 +44,7 @@ extern char rootfs_start;
 extern char rootfs_end;
 
 int cpio_read();
-void fs_insert_entry(char *pathname, u32 mode, dev_t dev, char *buf,
+void fs_insert_entry(char *pathname, mode_t mode, dev_t dev, char *buf,
 		size_t len);
 void __init fs_init_super();
 int __init fs_init_inodes();

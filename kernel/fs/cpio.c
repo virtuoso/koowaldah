@@ -81,7 +81,7 @@ int cpio_read()
 	char *name;
 	char *body;
 	size_t fsize;
-	u32 mode;
+	mode_t mode;
 	int reverse = 0;
 
 	/* check byte order first */

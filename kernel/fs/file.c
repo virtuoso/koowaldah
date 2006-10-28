@@ -160,7 +160,7 @@ static struct file_operations generic_fops = {
  * @name -- full pathname of a file
  * @mode -- how to open it
  */
-int open(char *name, u32 mode)
+int open(char *name, mode_t mode)
 {
 	struct direntry *dent;
 	struct file *file;
