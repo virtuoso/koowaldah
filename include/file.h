@@ -37,8 +37,6 @@
 #include <super.h>
 #include <inode.h>
 
-typedef s32 off_t;
-
 struct file;
 
 struct file_operations {
@@ -57,7 +55,7 @@ struct file {
 	struct klist0_node f_tlist;
 };
 
-int open(char *name, u32 mode);
+int open(char *name, mode_t mode);
 int close(int fd);
 int read(int fd, char *buf, size_t len);
 #endif
