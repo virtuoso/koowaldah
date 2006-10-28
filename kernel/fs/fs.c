@@ -60,7 +60,7 @@ static void fs_write_inode(struct inode *inode)
 	 */
 }
 
-struct inode *fs_add_entry(struct inode *parent, char *name, u32 mode,
+struct inode *fs_add_entry(struct inode *parent, char *name, mode_t mode,
 		dev_t dev)
 {
 	struct superblock *sb = parent->i_sb;
@@ -108,7 +108,8 @@ static void fs_stuff_inode(struct inode *inode, char *src, off_t len)
 	inode->i_map.i_filled = npages;
 }
 
-void fs_insert_entry(char *pathname, u32 mode, dev_t dev, char *buf, size_t len)
+void fs_insert_entry(char *pathname, mode_t mode, dev_t dev, char *buf,
+		size_t len)
 {
 	struct inode *inode;
 	struct direntry *dent;
