@@ -50,8 +50,8 @@ struct x86_thread_context {
 #define THREAD(s) ( { \
 	unsigned long __q = (unsigned long)s; \
 	__q &= ~(PAGE_SIZE - 1); \
-	__q = __q + PAGE_SIZE - sizeof(struct thread_t); \
-	(struct thread_t *) __q; } )
+	__q = __q + PAGE_SIZE - sizeof(struct thread); \
+	(struct thread *) __q; } )
 #define CURRENT() ( { \
 	unsigned long __r; \
 	__asm__ __volatile__("mov %%esp, %0" : "=m"(__r)); \

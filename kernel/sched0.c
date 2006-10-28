@@ -44,21 +44,21 @@
 extern u64 jiffies;
 
 struct sched0_runqueue {
-	/* struct thread_t, linked via krunq */
+	/* struct thread, linked via krunq */
 	struct klist0_node queue;
 	u32 count;
 };
 
 static struct sched0_runqueue rq;
 
-void sched0_enqueue(struct thread_t *thread)
+void sched0_enqueue(struct thread *thread)
 {
 	thread->quantum = SCHED_MAX_QUANTUM;
 	klist0_append(&thread->krunq, &rq.queue);
 	rq.count++;
 }
 
-void sched0_dequeue(struct thread_t *thread)
+void sched0_dequeue(struct thread *thread)
 {
 	rq.count--;
 	thread->quantum = SCHED_MIN_QUANTUM;
@@ -67,8 +67,8 @@ void sched0_dequeue(struct thread_t *thread)
 /* fairly simple */
 void __noprof sched0_tick()
 {
-	struct thread_t *thread = CURRENT();
-	struct thread_t *next;
+	struct thread *thread = CURRENT();
+	struct thread *next;
 
 
 	/* this will hardly ever happen */
@@ -83,10 +83,10 @@ void __noprof sched0_tick()
 
 		if (thread->krunq.next == &rq.queue)
 			next = klist0_entry(rq.queue.next,
-					struct thread_t, krunq);
+					struct thread, krunq);
 		else
 			next = klist0_entry(thread->krunq.next,
-					struct thread_t, krunq);
+					struct thread, krunq);
 		thread->last_tick = jiffies;
 		/* in fact, we always have at least idle thread available */
 		thread_switch_context(thread, next);
@@ -95,9 +95,9 @@ void __noprof sched0_tick()
 
 void sched0_yield()
 {
-	struct thread_t *cur = CURRENT();
-	struct thread_t *next = klist0_entry(rq.queue.next,
-			struct thread_t, krunq);
+	struct thread *cur = CURRENT();
+	struct thread *next = klist0_entry(rq.queue.next,
+			struct thread, krunq);
 
 	next->quantum = MAX(next->quantum + cur->quantum, (u32)SCHED_MAX_QUANTUM);
 	cur->quantum = SCHED_MIN_QUANTUM;

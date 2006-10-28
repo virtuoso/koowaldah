@@ -70,7 +70,7 @@ u8 kernel_started = 0;
 
 void __init kern_start()
 {
-	struct thread_t * main_thread;
+	struct thread * main_thread;
 
 	early_console_init();
 
@@ -127,7 +127,7 @@ void __noprof call_late_init()
 
 void __noprof kernel_main_thread()
 {
-	struct thread_t *me;
+	struct thread *me;
 
 	me = CURRENT();
 	

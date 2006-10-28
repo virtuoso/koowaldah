@@ -53,7 +53,7 @@ static u32 read_idx, write_idx, users;
 
 /* let's assume that kbd can be opened by no more than 1 thread,
  * so no waitqueue here */
-static struct thread_t *sleeper = NULL;
+static struct thread *sleeper = NULL;
 
 static void pckbd_intr(u32 number)
 {
@@ -85,7 +85,7 @@ u16 pckbd_read()
 	disable_interrupts();
 
 	if (read_idx == write_idx) {
-		struct thread_t *thread = CURRENT();
+		struct thread *thread = CURRENT();
 	
 		thread->state = 0;
 		scheduler_dequeue(thread);

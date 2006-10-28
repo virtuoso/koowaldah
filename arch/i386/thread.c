@@ -48,7 +48,7 @@
 extern void do_thread_switch_context(u32 * from, u32 * to);
 extern void do_thread_switch_to(u32 * to);
 
-void thread_init_stack(struct thread_t * t, void (*func)(void))
+void thread_init_stack(struct thread * t, void (*func)(void))
 {
 	u32 *stack = (u32 *)(tctx(t).esp);
 	int i;
@@ -67,9 +67,9 @@ int __init thread_init()
         return 0;
 }
 
-struct thread_t * thread_get_current()
+struct thread * thread_get_current()
 {
-	struct thread_t * current;
+	struct thread * current;
 	u32 esp;
 	
 	asm volatile ("movl %%esp, %0":"=m"(esp));
@@ -87,7 +87,7 @@ struct thread_t * thread_get_current()
 	return CURRENT();
 }
 
-void thread_switch_context(struct thread_t * from, struct thread_t * to)
+void thread_switch_context(struct thread * from, struct thread * to)
 {
 
 	u32 * esp_from;
@@ -115,7 +115,7 @@ void thread_switch_context(struct thread_t * from, struct thread_t * to)
 }
 
 
-void thread_switch_to(struct thread_t * thread)
+void thread_switch_to(struct thread * thread)
 {
 	do_thread_switch_to((u32 *)tctx(thread).esp);
 }

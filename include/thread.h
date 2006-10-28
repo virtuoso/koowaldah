@@ -48,7 +48,7 @@
 
 typedef unsigned short prio_t;
 
-struct thread_t {
+struct thread {
 	/* scheduler data */
 	struct klist0_node			kthreads;
 	struct klist0_node			krunq;
@@ -75,12 +75,12 @@ struct thread_t {
 	int					last_fd;
 };
 
-void dump_thread(struct thread_t *thread);
-struct thread_t *thread_create(void (*func)(), char *name);
-struct thread_t *thread_create_user(void (*func)(), char *name);
+void dump_thread(struct thread *thread);
+struct thread *thread_create(void (*func)(), char *name);
+struct thread *thread_create_user(void (*func)(), char *name);
 
 /* arch */
-void thread_switch_to(struct thread_t *thread);
-void thread_switch_context(struct thread_t * from, struct thread_t * to);
+void thread_switch_to(struct thread *thread);
+void thread_switch_context(struct thread * from, struct thread * to);
 
 #endif /* __THREAD_H__ */

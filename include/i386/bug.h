@@ -100,7 +100,7 @@ void i386_dump_stack(u32 * stack);
 	} while (0)
 
 #define arch_display_thread() do { 		\
-	struct thread_t *thread;		\
+	struct thread *thread;		\
 	thread = CURRENT();			\
 	kprintf("Task: %s, pid: %d\n",		\
 			thread->name,		\
