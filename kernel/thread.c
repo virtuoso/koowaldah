@@ -44,7 +44,7 @@
 #include <page_alloc.h>
 
 /* each architecture should define this */
-extern void thread_init_stack(struct thread_t * t, void (*func)(void));
+extern void thread_init_stack(struct thread * t, void (*func)(void));
 
 /* omgwtf */
 u32 get_free_pid()
@@ -53,7 +53,7 @@ u32 get_free_pid()
 	return i++;
 }
 
-void dump_thread(struct thread_t *thread)
+void dump_thread(struct thread *thread)
 {
 	kprintf("Thread %x \"%s\":\n"
 		"\tpid: %d; stack: [%x..%x]\n"
@@ -67,10 +67,10 @@ void dump_thread(struct thread_t *thread)
 	);
 }
 
-struct thread_t *thread_create(void (*func)(), char *name)
+struct thread *thread_create(void (*func)(), char *name)
 {
 	void *page;
-	struct thread_t *thread;
+	struct thread *thread;
 	
 	/* allocate stack space */
 	page = get_pages(/*THREAD_STACK_LIMIT/PAGE_SIZE*/0, 0);
@@ -111,9 +111,9 @@ struct thread_t *thread_create(void (*func)(), char *name)
 	return thread;
 }
 
-struct thread_t *thread_create_user(void (*func)(), char *name)
+struct thread *thread_create_user(void (*func)(), char *name)
 {
-	struct thread_t *thread;
+	struct thread *thread;
 
 	thread = thread_create(func, name);
 	if (thread) {

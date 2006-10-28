@@ -110,7 +110,7 @@ struct direntry *lookup_direntry(char *name, struct inode *inode)
  */
 struct direntry *lookup_path(char *pathname)
 {
-	struct thread_t *me = CURRENT();
+	struct thread *me = CURRENT();
 	struct inode *inode = me->ns->n_inode;
 	struct direntry *dent;
 	char name[FILENAME_MAX];

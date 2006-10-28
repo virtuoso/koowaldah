@@ -35,7 +35,7 @@
 #define __SCHEDULER_H__
 
 #include <koowaldah.h>
-#include <thread.h> /* for struct thread_t */
+#include <thread.h> /* for struct thread */
 #include <klist0.h>
 
 #define SCHED_MAX_QUANTUM 100
@@ -48,8 +48,8 @@ extern struct klist0_node thread_list;
  */
 struct cpu_scheduler {
 	const char *name[KCOMPONENT_NAME_LEN];
-	void (*enqueue)(struct thread_t *thread);
-	void (*dequeue)(struct thread_t *thread);
+	void (*enqueue)(struct thread *thread);
+	void (*dequeue)(struct thread *thread);
 	void (*tick)();
 	void (*yield)();
 	void (*schedule)();
@@ -61,8 +61,8 @@ struct cpu_scheduler {
 
 int register_cpusched(struct cpu_scheduler *sched);
 /* int deregister_cpusched() to come as soon as it's needed */
-int scheduler_enqueue(struct thread_t *thread);
-int scheduler_dequeue(struct thread_t *thread);
+int scheduler_enqueue(struct thread *thread);
+int scheduler_dequeue(struct thread *thread);
 
 void scheduler_yield();
 void scheduler_tick();

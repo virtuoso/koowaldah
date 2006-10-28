@@ -166,7 +166,7 @@ int open(char *name, mode_t mode)
 	struct file *file;
 	struct device *device;
 	struct file_operations *fops = NULL;
-	struct thread_t *thread = CURRENT();
+	struct thread *thread = CURRENT();
 
 	dent = lookup_path(name);
 	if (!dent)
@@ -214,7 +214,7 @@ int open(char *name, mode_t mode)
  */
 static struct file *fd2file(int fd)
 {
-	struct thread_t *thread = CURRENT();
+	struct thread *thread = CURRENT();
 	struct klist0_node *t;
 	struct file *file;
 

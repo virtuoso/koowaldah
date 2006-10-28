@@ -68,11 +68,11 @@ struct klist0_node krunqueue;
 void list_threads()
 {
 	struct klist0_node *t;
-	struct thread_t *thread;
+	struct thread *thread;
 	int i = 0;
 
 	klist0_for_each(t, &thread_list) {
-		thread = klist0_entry(t, struct thread_t, kthreads);
+		thread = klist0_entry(t, struct thread, kthreads);
 		kprintf("# [%s] pid=%d, state=%x, last_tick=%d\n",
 				thread->name, thread->pid,
 				thread->state, thread->last_tick);
@@ -112,7 +112,7 @@ int register_cpusched(struct cpu_scheduler *sched)
  * Make sure it is not listed in any other run/waitqueue or
  * I will bite.
  */
-int scheduler_enqueue(struct thread_t *thread)
+int scheduler_enqueue(struct thread *thread)
 {
 	disable_interrupts();
 
@@ -130,7 +130,7 @@ int scheduler_enqueue(struct thread_t *thread)
 /*
  * Dequeue the thread.
  */
-int scheduler_dequeue(struct thread_t *thread)
+int scheduler_dequeue(struct thread *thread)
 {
 	disable_interrupts();
 

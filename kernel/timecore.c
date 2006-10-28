@@ -111,7 +111,7 @@ void __noprof update_timers()
 
 static void tsleep_alarm(void *data)
 {
-	struct thread_t *thread = (struct thread_t *)data;
+	struct thread *thread = (struct thread *)data;
 
 	scheduler_enqueue(thread);
 	thread->state = THREAD_RUNNABLE;
@@ -120,7 +120,7 @@ static void tsleep_alarm(void *data)
 /* sleep on timer ticks */
 int tsleep(u32 delay)
 {
-	struct thread_t *thread = CURRENT();
+	struct thread *thread = CURRENT();
 	int ret;
 
 	disable_interrupts();

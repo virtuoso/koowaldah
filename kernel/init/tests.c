@@ -512,7 +512,7 @@ void func2()
 void test_threads()
 {
 #ifdef OPT_TEST_THREADS
-	struct thread_t *thread;
+	struct thread *thread;
 
         thread = thread_create(&func1, "[thread A]");
         if (!thread) {
@@ -598,7 +598,7 @@ void kbd_reader()
 void test_pckbd()
 {
 #ifdef OPT_TEST_PCKBD
-	struct thread_t *thread;
+	struct thread *thread;
 
         thread = thread_create(&kbd_reader, "[keyboard]");
         if (!thread) {
@@ -661,7 +661,7 @@ void init_thread()
 void test_rootfs()
 {
 #ifdef OPT_TEST_ROOTFS
-	struct thread_t *thread;
+	struct thread *thread;
 	struct direntry *dent;
 	struct inode *inode;
 	char *dst = (char *)0x4000; /* _start() load address */
