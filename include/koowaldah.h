@@ -34,7 +34,7 @@
 #ifndef __KOOWALDAH_H__
 #define __KOOWALDAH_H__
 
-#include <arch/types.h>
+#include <types.h>
 #include <config.h>
 
 extern u64 jiffies;
