@@ -49,7 +49,7 @@
 extern struct mem_zone boot_zone;
 
 struct slice_swamp {
-	struct mem_zone * zone;
+	struct mem_zone *zone;
 	struct klist0_node slices;
 } boot_slice_swamp;
 
@@ -61,8 +61,8 @@ void slice_init()
 
 static void slice_page_info(struct page *pg, int obj_size)
 {
-	unsigned long * bmask;
-	u32 * pg_addr;
+	unsigned long *bmask;
+	u32 *pg_addr;
 	int nobjs = PAGE_SIZE / obj_size;
 	
 	pg_addr = page_to_addr(pg);
@@ -191,7 +191,7 @@ void slice_pool_recycle(struct slice_pool *pool)
 
 }
 
-u32 * slice_alloc(struct slice_pool * pool)
+u32 * slice_alloc(struct slice_pool *pool)
 {
 	/* XXX Locking! */
 
@@ -200,9 +200,9 @@ u32 * slice_alloc(struct slice_pool * pool)
 	if (klist0_empty(&pool->pages_active)) {
 
 		int bitmask_size;
-		unsigned long * bmask;
-		u32 * pg_addr;
-		struct page * pg;
+		unsigned long *bmask;
+		u32 *pg_addr;
+		struct page *pg;
 		
 		pg = alloc_page(0);
 		if (!pg)
@@ -287,10 +287,10 @@ void slice_free(u32 *slice, struct slice_pool *pool)
 {
 	u32 *pg_addr;
 	struct page *pg;
-	struct klist0_node * tmp;
+	struct klist0_node *tmp;
 	int slice_idx;
 	int nobjs;
-	unsigned long * bmask;
+	unsigned long *bmask;
 	
 	nobjs = PAGE_SIZE / pool->obj_size;
 
