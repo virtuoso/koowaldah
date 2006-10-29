@@ -107,6 +107,15 @@ void slice_pool_info(struct slice_pool *slice)
 struct slice_pool *slice_pool_create(u32 flags, int obj_size) 
 {
 	struct slice_pool *slice;
+
+	if (obj_size > PAGE_SIZE / 2 - sizeof(unsigned long)) {
+		/* 
+		 * Can't allocate slices that big, maybe fall back to the
+		 * page allocator, later.
+		 */
+		bug();
+	}
+
 	u32 * pg = get_page(flags);
 	if (!pg)
 		return NULL;
