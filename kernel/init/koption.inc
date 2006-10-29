@@ -1,4 +1,4 @@
-KOPTIONS_START(KERNEL_INIT, "Initialization options", 10)
+KOPTIONS_START(KERNEL_INIT, "Initialization options", 11)
 KOPTION(
 	"TEST_IRQS",
 	"Run irq serving test",
@@ -69,6 +69,13 @@ KOPTION(
 KOPTION(
 	"TEST_SLICE",
 	"Test the slice allocator",
+	"",
+	KOPT_BOOL,
+	'N'
+       ),
+KOPTION(
+	"TEST_GALLOC",
+	"Test the generic allocator",
 	"",
 	KOPT_BOOL,
 	'N'

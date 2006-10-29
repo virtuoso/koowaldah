@@ -35,6 +35,7 @@
 #include <console.h>
 #include <page_alloc.h>
 #include <slice.h>
+#include <galloc.h>
 #include <mm_zone.h>
 #include <arch/asm.h>
 #include <arch/isr.h>
@@ -433,6 +434,61 @@ void test_slice_alloc()
 #endif /* OPT_TEST_SLICE */
 }
 
+u32 * tmp[2044];
+
+
+void test_galloc()
+{
+#ifdef OPT_TEST_GALLOC
+
+	int i;
+
+	for (i = 0; i < 2044; i++) {
+		kprintf("Allocating chunk, size = %d\n", i);
+
+		tmp[i] = galloc(0, i);
+		if (!tmp[i]) {
+			kprintf("Failed!\n");
+			bug();
+		}
+	}
+
+	for (i = 0; i < 2044; i = i + 2) {
+
+		kprintf("Freeing chunk %d (0x%x) \n", i, (u32) tmp[i]);
+		
+
+		gfree(tmp[i]);
+	
+	}
+	for (i = 1; i < 2044; i = i + 2) {
+
+		kprintf("Freeing chunk %d\n", i);
+
+		gfree(tmp[i]);
+	
+	}
+
+	for (i = 0; i < 100; i++) {
+		tmp[i] = galloc(0, PAGE_SIZE * i);
+		if (!tmp[i]) {
+			kprintf("Failed\n");
+			bug();
+		}
+	}
+
+	for (i = 0; i < 100; i++) {
+		kprintf("Freeing chunk %d\n", i);
+		gfree(tmp[i]);
+	}
+
+	kprintf("Done.");
+
+
+
+#endif
+}
+
 void test_klist()
 {
 #ifdef OPT_TEST_KLIST
@@ -701,6 +757,7 @@ void run_tests()
 {
 	test_mm();
 	test_slice_alloc();
+	test_galloc();
 	test_klist();
 	test_threads();
 	test_pckbd();

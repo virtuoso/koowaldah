@@ -62,6 +62,7 @@ extern void fs_init(void);
 
 extern void init_mem_info(void);
 extern void slice_init(void);
+extern void galloc_init(void);
 extern void mm_init(void); /* legacy mm */ 
 
 /* this is also needed only once */
@@ -89,6 +90,8 @@ void __init kern_start()
         kprintf("Done\n");
 
 	slice_init();
+
+	galloc_init();
 
 	thread_init();
 
