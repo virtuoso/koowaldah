@@ -7,7 +7,8 @@ SOURCES := \
 	timecore.c \
 	mm_zone.c \
 	page_alloc.c \
-	slice.c
+	slice.c \
+	galloc.c
 
 SUBDIRS := fs init lib
 
