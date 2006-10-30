@@ -58,4 +58,5 @@ struct file {
 int open(char *name, mode_t mode);
 int close(int fd);
 int read(int fd, char *buf, size_t len);
+int write(int fd, char *buf, size_t len);
 #endif
