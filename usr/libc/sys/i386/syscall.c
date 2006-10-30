@@ -60,6 +60,11 @@ int sys_read(int fd, char *buf, unsigned int len)
 	return sys_call(SYS_read, (u32)fd, (u32)buf, len);
 }
 
+int sys_write(int fd, char *buf, unsigned int len)
+{
+	return sys_call(SYS_write, (u32)fd, (u32)buf, len);
+}
+
 int sys_tsleep(unsigned int t)
 {
 	return sys_call(SYS_tsleep, t, 0, 0);
