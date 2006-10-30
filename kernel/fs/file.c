@@ -258,6 +258,23 @@ int read(int fd, char *buf, size_t len)
 	return file->f_ops->read(file, buf, len);
 }
 
+int write(int fd, char *buf, size_t len)
+{
+	struct file *file;
+	struct inode *inode;
+
+	file = fd2file(fd);
+	if (!file)
+		return -EBADF;
+
+	if (!file->f_inode)
+		bug();
+
+	inode = file->f_inode;
+
+	return file->f_ops->write(file, buf, len);
+}
+
 int close(fd)
 {
 	struct file *file;
