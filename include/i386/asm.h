@@ -34,6 +34,15 @@
 #ifndef __ARCH_ASM_H__
 #define __ARCH_ASM_H__
 
+/*
+ * segment descriptors related 
+ */
+#define KERN_CODE 0x08
+#define KERN_DATA 0x10
+#define USER_CODE 0x18
+#define USER_DATA 0x20
+#define GDT_ENTRIES 5 /* add null entry */
+
 /* allow kernel to consume 1/KERN_ALLOWANCE of available physical memory */
 #define KERN_ALLOWANCE 8
 
