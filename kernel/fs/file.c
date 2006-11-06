@@ -200,11 +200,12 @@ int open(char *name, mode_t mode)
 
 	if (fops)
 		file->f_ops = fops;
-	else if (dent->d_inode->i_fops) {
+	else if (dent->d_inode->i_fops)
 		file->f_ops = dent->d_inode->i_fops;
-		file->f_ops->open(file);
-	} else
+	else
 		file->f_ops = &generic_fops;
+
+	file->f_ops->open(file);
 
 	return file->f_fd;
 }
