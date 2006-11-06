@@ -6,7 +6,7 @@
 -include konfig.mk
 CC ?= gcc
 LD ?= ld
-ASM ?= nasm
+ASM ?= gcc
 MAKE ?= make
 
 # some variables useful for building stuff
@@ -73,7 +73,7 @@ DO_LINK = echo -n "  LD $(2)... "; \
 # $(2) -- output
 # $(3) -- options
 DO_ASM =  echo -n "  AS $(1)... "; \
-	$(ASM) $(3) -f elf  $(1) -o $(2); \
+	$(ASM) $(3) -c $(1) -o $(2); \
 	if [ $$? != "0" ]; then \
 		echo "FAILED"; \
 		false; \
@@ -86,7 +86,7 @@ DO_ASM =  echo -n "  AS $(1)... "; \
 all: all-local
 
 # make dependencies, objects and call itself for subdirectories
-build: deps objects
+build: build-local deps objects
 
 # make dependencies
 deps: $(DEPS)
@@ -149,12 +149,14 @@ $(OBJDIR)/%.d:
 	fi
 
 ifneq ($(NODEPS),1)
+ifneq ($(DEPS),)
 -include $(DEPS)
+endif
 endif
 
 $(OBJDIR)/%.o:
 	@if [ "$(subst .c,,$<)" != "$<" ]; then \
-		$(call DO_CC,$<,$@,-I$(PRJROOT)/include -ffreestanding); \
+		$(call DO_CC,$<,$@,$(CC_FLAGS) -I$(PRJROOT)/include -ffreestanding); \
 	else \
 		$(call DO_ASM,$<,$@,$(ASM_FLAGS)); \
 	fi
@@ -176,4 +178,4 @@ printobjs:
 killobjs:
 	rm -f $(OBJDIR)/OBJECTS
 
-.PHONY: build deps objects subdirs-deps subdirs-build clean clean-local printobjs init killobjs
+.PHONY: build build-local deps objects subdirs-deps subdirs-build clean clean-local printobjs init killobjs
