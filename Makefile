@@ -9,10 +9,10 @@ ARCH = i386
 
 #### CONFIGURATION SECTION END ####
 
-ASM ?= nasm
-ASM_FLAGS += -g
+ASM ?= gcc
+ASM_FLAGS += -g -ffreestanding
 CC ?= gcc
-CC_FLAGS += -Wall -g 
+CC_FLAGS += -Wall -g
 CC_FLAGS_KERN := $(CC_FLAGS)
 LD ?= ld
 OBJCOPY ?= objcopy
