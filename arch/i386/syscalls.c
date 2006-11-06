@@ -42,7 +42,6 @@
 
 u32 sys_call_gate(u32 eax, u32 ebx, u32 ecx, u32 edx)
 {
-	kprintf("# SYSCALL %d\n", eax);
 	switch (eax) {
 		case 0:
 			kprintf("# %s\n", (char *)ebx);
@@ -58,6 +57,9 @@ u32 sys_call_gate(u32 eax, u32 ebx, u32 ecx, u32 edx)
 			return read((int)ebx, (char *)ecx, (size_t)edx);
 
 		case 4:
+			return write((int)ebx, (char *)ecx, (size_t)edx);
+
+		case 5:
 			return tsleep(ebx);
 
 		default:
