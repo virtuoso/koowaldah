@@ -29,6 +29,8 @@
  *  SUCH DAMAGE.
  */
 
+#include <i386/asm.h>
+
 .extern kern_start
 .extern kernel_stack
 .extern multiboot_info
@@ -52,7 +54,54 @@ MultiBootHeader:
 multiboot_start:
 	movl $(multiboot_info), %ebx
 	movl $(kernel_stack), %esp
+	lgdt gdt_desc		/* load gdt */
+	ljmp $KERN_CODE, $l1	/* set %cs */
+l1:	movl $KERN_DATA, %eax	/* set the rest */
+	movl %eax, %ds
+	movl %eax, %es
+	movl %eax, %fs
+	movl %eax, %gs
+	movl %eax, %ss
 	jmp kern_start
 	cli
 	hlt
+
+/* GDT size and ptr */
+gdt_desc:
+	.word GDT_ENTRIES * 8 - 1
+	.long gdt_table
+
+/* the GDT */
+.globl gdt_table
+gdt_table:
+	/* null entry */
+	.quad 0x0000000000000000
+	/* kernel CS (KERN_CODE) */
+	.word 0xffff
+	.word 0x0000
+	.byte 0x00
+	.byte 0x9a
+	.byte 0xcf
+	.byte 0x00
+	/* kernel DS (KERN_DATA) */
+	.word 0xffff
+	.word 0x0000
+	.byte 0x00
+	.byte 0x92
+	.byte 0xcf
+	.byte 0x00
+	/* user CS (USER_CODE) */
+	.word 0xffff
+	.word 0x0000
+	.byte 0x00
+	.byte 0xfa
+	.byte 0xcf
+	.byte 0x00
+	/* user DS (USER_DATA) */
+	.word 0xffff
+	.word 0x0000
+	.byte 0x00
+	.byte 0xf2
+	.byte 0xcf
+	.byte 0x00
 
