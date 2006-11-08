@@ -190,4 +190,14 @@ static inline u32 write_eflags()
 }
 #endif /* __ASSEMBLY__ */
 
+static inline void disable_interrupts()
+{
+        asm volatile ("cli");
+}
+
+static inline void enable_interrupts()
+{
+        asm volatile ("sti");
+}
+
 #endif /* __ARCH_ASM_H__ */
