@@ -48,6 +48,7 @@
 #include <namespace.h>
 #include <lib.h>
 #include <bug.h>
+#include <kqueue.h>
 
 struct page *pages[2048];
 
@@ -545,6 +546,47 @@ void test_klist()
 #endif /* OPT_TEST_KLIST */
 }
 
+void test_kqueue()
+{
+#ifdef OPT_TEST_KQUEUE
+	struct kqueue_t *q;
+	/*
+	char p1 = 0xA1;
+	char p2 = 0xA2;
+	char p3 = 0xA3;
+	char p4 = 0xA4;
+	*/
+	int i, t;
+
+	q = kqueue_create();
+
+	kprintf("Pushing 10000 numbers into the queue.\n");
+	for (i = 0; i < 10000; i++) {
+		kprintf("%d ", i);
+
+		kqueue_push(q, &i, sizeof(int));
+	//	kqueue_info(q);
+	}
+	kqueue_info(q);
+
+
+	kprintf("\nDone.");
+
+	kprintf("Now getting them back.\n");
+
+	for (i = 0; i < 10000; i++) {
+		kqueue_pull_tail(q, &t, sizeof(int));
+		kprintf("%d ", t);
+	}
+
+	kprintf("\nDone.\n");
+	kqueue_info(q);
+
+	kqueue_destroy(q);
+
+#endif /* OPT_TEST_KQUEUE */
+}
+
 #ifdef OPT_TEST_THREADS
 extern int tsleep(u32 delay);
 
@@ -651,6 +693,63 @@ void kbd_reader()
 }
 #endif /* OPT_TEST_PCKBD */
 
+#ifdef OPT_TEST_SERIAL
+void do_test_serial()
+{
+	int fd;
+	int tmp;
+	char buffer[11];
+
+	kprintf("Serial driver test.\n");
+	fd = open("/dev/serial", 0);
+	if (fd < 0) {
+		kprintf("Error opening /dev/serial_8250: %d\n", fd);
+		bug();
+	}
+	
+	kprintf("Reading 10 bytes from the serial port.\n");
+	tmp = read(fd, buffer, 10);
+	kprintf("result = %d\n", tmp);
+	buffer[10] = '\0';
+
+	kprintf("Buffer = \"%s\"\n", buffer);
+
+	kprintf("Writing them back.\n");
+
+	tmp = write(fd, buffer, 10);
+
+	kprintf("result = %d\n", tmp);
+
+	kprintf("Serial Input: ");
+	for (;;) {
+		tmp = read(fd, buffer, 1);
+		if (tmp != 1)
+			bug();
+		buffer[1] = '\0';
+
+		kprintf("%s", buffer);
+	}
+
+	
+	kprintf("Done.\n");
+}
+#endif /* OPT_TEST_SERIAL */
+
+void test_serial()
+{
+#ifdef OPT_TEST_SERIAL
+	struct thread *thread;
+	
+	thread = thread_create(&do_test_serial, "[serial]");
+	if (!thread)
+		bug();
+	if (scheduler_enqueue(thread)) {
+		bug();
+	}
+#endif
+
+}
+
 void test_pckbd()
 {
 #ifdef OPT_TEST_PCKBD
@@ -702,6 +801,7 @@ void test_fslookup()
 	} while (l == 100);
 #endif
 }
+
 
 #ifdef OPT_TEST_ROOTFS
 typedef void (*_start_t)(void);
@@ -759,8 +859,10 @@ void run_tests()
 	test_slice_alloc();
 	test_galloc();
 	test_klist();
+	test_kqueue();
 	test_threads();
 	test_pckbd();
+	test_serial();
 	test_irqs();
 	test_rootfs();
 	test_fslookup();
