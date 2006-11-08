@@ -1,4 +1,4 @@
-KOPTIONS_START(KERNEL_INIT, "Initialization options", 11)
+KOPTIONS_START(KERNEL_INIT, "Initialization options", 13)
 KOPTION(
 	"TEST_IRQS",
 	"Run irq serving test",
@@ -30,6 +30,13 @@ KOPTION(
 	'N'
        ),
 KOPTION(
+	"TEST_KQUEUE",
+	"Run the kernel queue tests",
+	"",
+	KOPT_BOOL,
+	'N'
+       ),
+KOPTION(
 	"PAGE_ALLOCATOR_TEST",
 	"Run page allocator tests",
 	"Test page allocator and produce a lot of semiinteresting output.",
@@ -41,6 +48,13 @@ KOPTION(
 	"Test pc keyboard driver",
 	"Install a thread which reads keyboard input via "
 	"pc-kbd driver and prints it right away.",
+	KOPT_BOOL,
+	'N'
+       ),
+KOPTION(
+	"TEST_SERIAL",
+	"Test the 8250 serial port.",
+	"",
 	KOPT_BOOL,
 	'N'
        ),
