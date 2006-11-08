@@ -41,6 +41,7 @@
 #include <timer.h>
 #include <textio.h>
 #include <klist.h>
+#include <kqueue.h>
 #include <thread.h>
 #include <scheduler.h>
 #include <bug.h>
@@ -52,6 +53,7 @@ void kernel_main_thread();
  * since we don't want to expose those to the rest of
  * the kernel
  */
+extern void interrupts_init(void);
 extern void trap_init(void);
 extern void early_console_init(void);
 extern void thread_init(void);
@@ -63,7 +65,8 @@ extern void fs_init(void);
 extern void init_mem_info(void);
 extern void slice_init(void);
 extern void galloc_init(void);
-extern void mm_init(void); /* legacy mm */ 
+extern void mm_init(void); /* legacy mm */
+extern void kqueue_init(void);
 
 /* this is also needed only once */
 extern void run_tests(void);
@@ -92,6 +95,7 @@ void __init kern_start()
 	slice_init();
 
 	galloc_init();
+	kqueue_init();
 
 	thread_init();
 
