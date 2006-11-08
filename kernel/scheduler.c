@@ -149,9 +149,9 @@ int scheduler_dequeue(struct thread *thread)
 
 void scheduler_tick()
 {
-	disable_interrupts();
+	/* disable_interrupts(); */
 	reg_sched->tick();
-	enable_interrupts();
+	/* enable_interrupts(); */
 }
 
 void scheduler_yield()
