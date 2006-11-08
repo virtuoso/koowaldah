@@ -58,7 +58,7 @@ struct chunk_info {
  * Chunk Info is places before the returned chunk to
  * let gfree() know from where it came.
  */
-#define CI_SIZE ((sizeof (struct chunk_info) + 3 & ~3))
+#define CI_SIZE (((sizeof (struct chunk_info) + 3) & ~3))
 
 
 #define NPOOLS 9
@@ -97,8 +97,6 @@ static inline u32 *galloc_from_pages(u32 flags, size_t size)
 
 	int i;
 	struct chunk_info *ci;
-
-	u32 * ret;
 
 
 	for (i = 0; i < MAX_ORDER; i++) {
@@ -161,7 +159,7 @@ void gfree(u32 *chunk)
 	}
 }
 
-int galloc_init()
+void galloc_init()
 {
 	int i;
 
