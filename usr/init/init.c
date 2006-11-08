@@ -41,7 +41,7 @@ void _start()
 {
 	int fd, l;
 	unsigned short c;
-	char *p = 0x40000000; /* 1GB virtual */
+	char *p = (char *)0x40000000; /* 1GB virtual */
 
 	for (l = 0; l < 16; l++) buf[l] = '\0';
 	sys_debug("Init process starting!");
