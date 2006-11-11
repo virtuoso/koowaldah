@@ -56,14 +56,14 @@ static void vga_scroll()
         }
 }
 
-static void set_cursor(unsigned short cursor)
+void vga_set_cursor(unsigned short cursor)
 {
         io_port_out(0x3D5, (unsigned char)(cursor));
         io_port_out(0x3D4, 14);
         io_port_out(0x3D5, (unsigned char)(cursor >> 8));
 }
 
-static unsigned short get_cursor()
+unsigned short vga_get_cursor()
 {
         unsigned short cursor;
 
@@ -90,7 +90,7 @@ void early_vga_put_char(char c)
 {
         unsigned short cursor;
 
-        cursor = get_cursor();
+        cursor = vga_get_cursor();
 
 	if('\n' == c){
 		if(cursor < VGA_COLUMNS * (VGA_LINES - 1)){
@@ -113,6 +113,6 @@ void early_vga_put_char(char c)
 
 		cursor++;
 	}
-	set_cursor(cursor);
+	vga_set_cursor(cursor);
 }
 
