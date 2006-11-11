@@ -820,7 +820,7 @@ void test_rootfs()
 	struct thread *thread;
 	struct direntry *dent;
 	struct inode *inode;
-	char *dst = (char *)0x4000; /* _start() load address */
+	char *dst = (char *)0x40000000; /* _start() load address */
 	int i;
 
 	_start = (_start_t)dst;
@@ -831,13 +831,17 @@ void test_rootfs()
 	}
 
 	inode = dent->d_inode;
-	i = memory_copy(dst, page_to_addr(inode->i_map.i_pages[1]), 4096);
 
         thread = thread_create_user(&init_thread, "init");
         if (!thread) {
                 kprintf("failed to create thread\n");
 		bug();
         }
+
+	/* "load" init process where it belongs */
+	switch_map(&root_map, thread->map);
+	i = memory_copy(dst, page_to_addr(inode->i_map.i_pages[1]), 4096);
+	switch_map(thread->map, &root_map);
 
         if (scheduler_enqueue(thread)) {
                 kprintf("failed to add thread to run queue\n");
