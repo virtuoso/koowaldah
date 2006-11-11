@@ -188,7 +188,6 @@ static inline u32 write_eflags()
 	__asm__ __volatile__("pushl %0; popfl" : : "r"(f));
 	return f;
 }
-#endif /* __ASSEMBLY__ */
 
 static inline void disable_interrupts()
 {
@@ -199,5 +198,7 @@ static inline void enable_interrupts()
 {
         asm volatile ("sti");
 }
+#endif /* __ASSEMBLY__ */
 
 #endif /* __ARCH_ASM_H__ */
+
