@@ -62,12 +62,12 @@ void slice_init()
 static void slice_page_info(struct page *pg, int obj_size)
 {
 	unsigned long *bmask;
-	u32 *pg_addr;
+	char *pg_addr;
 	int nobjs = PAGE_SIZE / obj_size;
 	
-	pg_addr = page_to_addr(pg);
+	pg_addr = (char *) page_to_addr(pg);
 
-	bmask = (unsigned long *) (((char *)pg_addr) + PAGE_SIZE -
+	bmask = (unsigned long *) ((pg_addr) + PAGE_SIZE -
 		BITS_TO_LONGS(nobjs) * sizeof(unsigned long));
 
 	kprintf("Page: 0x%x, addr: 0x%x\n", (u32) pg, (u32) pg_addr);
@@ -200,7 +200,7 @@ void slice_pool_recycle(struct slice_pool *pool)
 
 }
 
-u32 * slice_alloc(struct slice_pool *pool)
+char * slice_alloc(struct slice_pool *pool)
 {
 	/* XXX Locking! */
 
@@ -255,7 +255,7 @@ u32 * slice_alloc(struct slice_pool *pool)
 
 		klist0_append(&pg->list, &pool->pages_active);
 
-		return (u32 *) (((char *)pg_addr) + (nobjs - 1) * pool->obj_size);
+		return (((char *)pg_addr) + (nobjs - 1) * pool->obj_size);
 
 	} else {
 		struct page *pg;
@@ -286,13 +286,13 @@ u32 * slice_alloc(struct slice_pool *pool)
 			klist0_append(&pg->list, &pool->pages_inactive);
 		}
 
-		return (u32 *) (((char *)pg_addr) + number * pool->obj_size);
+		return (char *)(((char *)pg_addr) + number * pool->obj_size);
 	}
 	
 	return NULL;
 }
 
-void slice_free(u32 *slice, struct slice_pool *pool)
+void slice_free(void *slice, struct slice_pool *pool)
 {
 	u32 *pg_addr;
 	struct page *pg;

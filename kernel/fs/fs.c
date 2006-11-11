@@ -177,6 +177,7 @@ void __init fs_init()
 	p = fs_add_entry(root, "dev", S_IFDIR, NODEV);
 	fs_add_entry(p, "tty0", S_IFCHR, DEV_DEVICE(4, 0));
 	fs_add_entry(p, "pckbd", S_IFCHR, DEV_DEVICE(13, 128));
+	fs_add_entry(p, "serial", S_IFCHR, DEV_DEVICE(12, 34));
 	p = fs_add_entry(root, "initfs", S_IFDIR, NODEV);
 	p = fs_add_entry(root, "mnt", S_IFDIR, NODEV);
 

@@ -1,20 +1,21 @@
+
 /*
- * usr/init/init.c
+ * include/kqueue.h
  *
- * Copyright (C) 2006 Alexander Shishkin
+ * Copyright (C) 2006 Alexey Zaytsev
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
  *
  * 1. Redistributions of source code must retain the above copyright
- * notice, this list of conditions and the following disclaimer.
+ *    notice, this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright
- * notice, this list of conditions and the following disclaimer in the
- * documentation and/or other materials provided with the distribution.
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
  * 3. Neither the name of the Koowaldah developers nor the names of theyr
- * contributors may be used to endorse or promote products derived from
- * this software without specific prior written permission.
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE DEVELOPERS AND CONTRIBUTORS ``AS IS'' AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -29,31 +30,30 @@
  * SUCH DAMAGE.
  *
  */
+#ifndef __KQUEUE_H__
+#define __KQUEUE_H__
 
-#include <syscalls.h>
+#include <koowaldah.h>
 
-/*
- * The init program.
- */
 
-char buf[16];
-void _start()
-{
-	int fd, l;
-	unsigned short c;
-	char *p = (char *)0x40000000; /* 1GB virtual */
+struct kqueue_t *kqueue_create();
+void kqueue_destroy(struct kqueue_t *q);
 
-	for (l = 0; l < 16; l++) buf[l] = '\0';
-	sys_debug("Init process starting!");
-	*p = 'z'; /* we shouldn't pagefault here */
-	fd = sys_open("/init", 0);
-	l = sys_read(fd, buf, 12);
-	sys_debug(buf);
-	sys_close(fd);
+void kqueue_info(struct kqueue_t *q);
 
-	for (;;) {
-		sys_debug("waking up");
-		sys_tsleep(1000);
-	}
-}
+size_t kqueue_size(struct kqueue_t *q);
+
+size_t queue_shrink(struct kqueue_t *q, size_t len);
+size_t queue_shrink_tail(struct kqueue_t *q, size_t len);
+
+int kqueue_push(struct kqueue_t *q, char *data, size_t len);
+int kqueue_push_tail(struct kqueue_t *q, char *data, size_t len);
+
+size_t kqueue_pull(struct kqueue_t *q, char *data, size_t len);
+size_t kqueue_pull_tail(struct kqueue_t *q, char *data, size_t len);
+
+size_t kqueue_peek(struct kqueue_t *q, char *data, size_t len);
+size_t kqueue_peek_tail(struct kqueue_t *q, char *data, size_t len);
+
+#endif /* __KQUEUE_H__ */
 
