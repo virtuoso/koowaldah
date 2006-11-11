@@ -52,8 +52,8 @@ void slice_pool_info(struct slice_pool *);
 struct slice_pool *slice_pool_create(u32 flags, int obj_size);
 void slice_pool_shrink(struct slice_pool *pool);
 void slice_pool_recycle(struct slice_pool *pool);
-u32 *slice_alloc(struct slice_pool *pool);
-void slice_free(u32 *slice, struct slice_pool *pool);
+char *slice_alloc(struct slice_pool *pool);
+void slice_free(void *slice, struct slice_pool *pool);
 
 #endif /* __SLICE_H__ */
 

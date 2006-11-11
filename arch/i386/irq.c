@@ -118,14 +118,5 @@ void unregister_irq_handler(u32 number){
 	irq_handler_table[number] = NULL;
 }
 
-inline void disable_interrupts()
-{
-        asm volatile ("cli");
-}
-
-inline void enable_interrupts()
-{
-        asm volatile ("sti");
-}
 
 

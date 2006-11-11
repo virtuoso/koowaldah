@@ -49,7 +49,7 @@ initfs:
 
 konfig: include/koptions.h
 
-SUBDIRS := arch/$(ARCH) kernel drivers/keyboard
+SUBDIRS := arch/$(ARCH) kernel drivers/keyboard drivers/serial
 kernel-elf: deps objects printobjs
 	cat $(OBJDIR)/OBJECTS | \
 		xargs $(LD) -T arch/$(ARCH)/kernel-elf.lds -o kos-elf
