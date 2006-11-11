@@ -73,7 +73,7 @@ DO_LINK = echo -n "  LD $(2)... "; \
 # $(2) -- output
 # $(3) -- options
 DO_ASM =  echo -n "  AS $(1)... "; \
-	$(ASM) $(3) -c $(1) -o $(2); \
+	$(ASM) -D__ASSEMBLY__ $(3) -c $(1) -o $(2); \
 	if [ $$? != "0" ]; then \
 		echo "FAILED"; \
 		false; \
@@ -158,7 +158,7 @@ $(OBJDIR)/%.o:
 	@if [ "$(subst .c,,$<)" != "$<" ]; then \
 		$(call DO_CC,$<,$@,$(CC_FLAGS) -I$(PRJROOT)/include -ffreestanding); \
 	else \
-		$(call DO_ASM,$<,$@,$(ASM_FLAGS)); \
+		$(call DO_ASM,$<,$@,$(ASM_FLAGS) -I$(PRJROOT)/include -ffreestanding); \
 	fi
 
 printobjs:
