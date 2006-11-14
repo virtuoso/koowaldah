@@ -156,9 +156,9 @@ endif
 
 $(OBJDIR)/%.o:
 	@if [ "$(subst .c,,$<)" != "$<" ]; then \
-		$(call DO_CC,$<,$@,$(CC_FLAGS) -I$(PRJROOT)/include -ffreestanding); \
+		$(call DO_CC,$<,$@,$(CC_FLAGS) -I$(PRJROOT)/include); \
 	else \
-		$(call DO_ASM,$<,$@,$(ASM_FLAGS) -I$(PRJROOT)/include -ffreestanding); \
+		$(call DO_ASM,$<,$@,$(ASM_FLAGS) -I$(PRJROOT)/include); \
 	fi
 
 printobjs:
