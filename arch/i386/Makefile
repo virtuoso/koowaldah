@@ -19,13 +19,5 @@ SOURCES := \
 	asm/irq.S \
 	asm/context_switch.S
 
-build-local:
-	for i in `seq 0 255`; do \
-		echo "default_isr($$i)"; \
-	done > asm/isr_table.h
-
-clean-local:
-	rm -f asm/isr_table.h
-
 include $(PRJROOT)/tools/main.mk
 
