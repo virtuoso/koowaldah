@@ -804,12 +804,18 @@ void test_fslookup()
 
 
 #ifdef OPT_TEST_ROOTFS
-typedef void (*_start_t)(void);
-_start_t _start;
+extern void start_user(void);
+
+/* big fat XXX */
+#include <i386/segments.h>
+extern struct tss_segment root_tss;
 
 void init_thread()
 {
-	_start();
+	/* it is ABSOLUTELY obligatory to fill esp0 before switching */
+	__asm__ __volatile__("mov %%esp, %%eax\nmov %%eax, %0" :
+			"=r"(root_tss.esp0));
+	start_user();
 	bug();
 }
 #endif
@@ -823,7 +829,6 @@ void test_rootfs()
 	char *dst = (char *)0x40000000; /* _start() load address */
 	int i;
 
-	_start = (_start_t)dst;
 	dent = lookup_path("/sbin/init");
 	if (!dent) {
 		kprintf("Init not found.\n");
