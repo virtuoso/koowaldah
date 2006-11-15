@@ -36,10 +36,10 @@
 #include <irq.h>
 #include <lib.h>
 #include <arch/pic.h>
-#include <arch/isr.h>
 #include <irq.h>
 #include <scheduler.h>
 #include <textio.h>
+#include <i386/segments.h>
 
 extern void irq_pre_handler0();
 extern void irq_pre_handler1();
@@ -63,29 +63,26 @@ static void (*irq_handler_table[16])(unsigned int number);
 
 void __init interrupts_init()
 {
-
-	memory_set(irq_handler_table, 0, sizeof(irq_handler_table));
-
 	disable_interrupts();
 
 	pic_clear();
 
-	isr_insert_entry(32, irq_pre_handler0);
-	isr_insert_entry(33, irq_pre_handler1);
-	isr_insert_entry(34, irq_pre_handler2);
-	isr_insert_entry(35, irq_pre_handler3);
-	isr_insert_entry(36, irq_pre_handler4);
-	isr_insert_entry(37, irq_pre_handler5);
-	isr_insert_entry(38, irq_pre_handler6);
-	isr_insert_entry(39, irq_pre_handler7);
-	isr_insert_entry(40, irq_pre_handler8);
-	isr_insert_entry(41, irq_pre_handler9);
-	isr_insert_entry(42, irq_pre_handler10);
-	isr_insert_entry(43, irq_pre_handler11);
-	isr_insert_entry(44, irq_pre_handler12);
-	isr_insert_entry(45, irq_pre_handler13);
-	isr_insert_entry(46, irq_pre_handler14);
-	isr_insert_entry(47, irq_pre_handler15);
+	intgate_init(32, irq_pre_handler0);
+	intgate_init(33, irq_pre_handler1);
+	intgate_init(34, irq_pre_handler2);
+	intgate_init(35, irq_pre_handler3);
+	intgate_init(36, irq_pre_handler4);
+	intgate_init(37, irq_pre_handler5);
+	intgate_init(38, irq_pre_handler6);
+	intgate_init(39, irq_pre_handler7);
+	intgate_init(40, irq_pre_handler8);
+	intgate_init(41, irq_pre_handler9);
+	intgate_init(42, irq_pre_handler10);
+	intgate_init(43, irq_pre_handler11);
+	intgate_init(44, irq_pre_handler12);
+	intgate_init(45, irq_pre_handler13);
+	intgate_init(46, irq_pre_handler14);
+	intgate_init(47, irq_pre_handler15);
 	
 	enable_interrupts();
 }

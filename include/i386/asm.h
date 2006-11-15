@@ -34,15 +34,6 @@
 #ifndef __ARCH_ASM_H__
 #define __ARCH_ASM_H__
 
-/*
- * segment descriptors related 
- */
-#define KERN_CODE 0x08
-#define KERN_DATA 0x10
-#define USER_CODE 0x18
-#define USER_DATA 0x20
-#define GDT_ENTRIES 5 /* add null entry */
-
 /* allow kernel to consume 1/KERN_ALLOWANCE of available physical memory */
 #define KERN_ALLOWANCE 8
 
@@ -96,12 +87,41 @@ static inline void write_ ##reg(unsigned long v) \
 	__asm__ __volatile__("movl %0, " REG : : "r"(v)); \
 }
 
+/* read segment registers */
+#define READ_SEGREG(reg, OP) \
+static inline unsigned short read_ ##reg() \
+{ \
+	unsigned short r; \
+	__asm__ __volatile__(OP "\nmovw %%ax, %0" : "=r"(r)); \
+	return r; \
+}
+
+/* write segment registers */
+#define WRITE_SEGREG(reg, OP) \
+static inline void write_ ##reg(unsigned short v) \
+{ \
+	__asm__ __volatile__("movw %0, %%ax\n" OP : : "m"(v)); \
+}
+
 READ_REG(cr0, "%%cr0")
 READ_REG(cr2, "%%cr2")
 READ_REG(cr3, "%%cr3")
 WRITE_REG(cr0, "%%cr0")
 WRITE_REG(cr2, "%%cr2")
 WRITE_REG(cr3, "%%cr3")
+
+WRITE_SEGREG(tr, "ltr %%ax")
+READ_SEGREG(cs, "movw %%cs, %%ax")
+READ_SEGREG(ss, "movw %%ss, %%ax")
+READ_SEGREG(ds, "movw %%ds, %%ax")
+READ_SEGREG(es, "movw %%es, %%ax")
+READ_SEGREG(fs, "movw %%fs, %%ax")
+READ_SEGREG(gs, "movw %%gs, %%ax")
+WRITE_SEGREG(ss, "movw %%ax, %%ss")
+WRITE_SEGREG(ds, "movw %%ax, %%ds")
+WRITE_SEGREG(es, "movw %%ax, %%es")
+WRITE_SEGREG(fs, "movw %%ax, %%fs")
+WRITE_SEGREG(gs, "movw %%ax, %%gs")
 
 /*
  * Lookup the virtual __page__ address in the directory.
