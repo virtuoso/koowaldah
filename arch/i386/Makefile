@@ -7,7 +7,6 @@ SOURCES := \
 	serial_console.c \
 	vga_console.c \
 	console.c \
-	isr.c \
 	irq.c \
 	trap.c \
 	timer.c \
@@ -15,7 +14,8 @@ SOURCES := \
 	bootmem_zone.c \
 	mm.c \
 	paging.c \
-	asm/isr.S \
+	segments.c \
+	asm/syscall.S \
 	asm/irq.S \
 	asm/context_switch.S
 
