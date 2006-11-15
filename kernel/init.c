@@ -67,6 +67,7 @@ extern void slice_init(void);
 extern void galloc_init(void);
 extern void mm_init(void); /* legacy mm */
 extern void kqueue_init(void);
+extern void init_root_tss(void);
 
 /* this is also needed only once */
 extern void run_tests(void);
@@ -83,9 +84,7 @@ void __init kern_start()
 	init_mem_info();
 	mm_init();
 
-        kprintf("Setting isr table up...");
-        isr_init();
-        kprintf("Done\n");
+	init_root_tss();
 
         kprintf("Setting interrupts up...");
         interrupts_init();
