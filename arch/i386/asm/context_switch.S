@@ -30,6 +30,8 @@
  *  SUCH DAMAGE.
  */
 
+#include <i386/segments.h>
+
 .globl do_thread_switch_context
 do_thread_switch_context:
 	pushf 
@@ -58,3 +60,27 @@ do_thread_switch_to:
 	popf
 	ret
 	
+/* XXX: stuff hardcoded until we have a proper elf parser */
+.globl start_user
+start_user:
+	pushl %ebp
+	movl %esp, %ebp
+
+	movl $(USER_DATA)+3, %eax
+	pushl %eax
+
+	movl $0x40010000, %eax
+	pushl %eax
+
+	movl $(USER_CODE)+3, %eax
+	pushl %eax
+
+	movl $0x40000000, %eax
+	pushl %eax
+
+	movl $(USER_DATA), %eax
+	mov %bx, %ds
+	mov %bx, %es
+
+	lret
+

@@ -7,7 +7,6 @@ SOURCES := \
 	serial_console.c \
 	vga_console.c \
 	console.c \
-	isr.c \
 	irq.c \
 	trap.c \
 	timer.c \
@@ -15,17 +14,10 @@ SOURCES := \
 	bootmem_zone.c \
 	mm.c \
 	paging.c \
-	asm/isr.S \
+	segments.c \
+	asm/syscall.S \
 	asm/irq.S \
 	asm/context_switch.S
-
-build-local:
-	for i in `seq 0 255`; do \
-		echo "default_isr($$i)"; \
-	done > asm/isr_table.h
-
-clean-local:
-	rm -f asm/isr_table.h
 
 include $(PRJROOT)/tools/main.mk
 

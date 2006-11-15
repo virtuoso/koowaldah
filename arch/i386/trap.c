@@ -35,22 +35,33 @@
 #include <koowaldah.h>
 #include <textio.h>
 #include <bug.h>
-
+#include <i386/segments.h>
 
 void general_protection()
 {
-	panic("GENERAL PROTACTION FAULT");
+	u32 *frame;
+
+	__asm__ __volatile__("mov %%esp, %%eax\nmov %%eax, %0" : "=m"(frame));
+	kprintf("### EIP=%x\n", frame[16]);
+	panic("GENERAL PROTECTION FAULT");
 }
 
 void page_fault()
 {
 	u32 addr = read_cr2();
+	u32 *frame;
+
+	__asm__ __volatile__("mov %%esp, %%eax\nmov %%eax, %0" : "=m"(frame));
+	kprintf("### EIP=%x\n", frame[16]);
 	kprintf("### ADDRESS: %x\n", addr);
 	panic("PAGE_FAULT");
 }
 
+extern void sys_call_entry();
 void __init trap_init(void)
 {
-	/* set_trap_handler(13, general_protection); */
+	trapgate_init(13, general_protection);
+	trapgate_init(14, page_fault);
+	intgate_init(0x40, sys_call_entry);
 }
 

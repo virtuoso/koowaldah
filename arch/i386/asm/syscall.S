@@ -1,7 +1,7 @@
 /*
- * arch/i386/asm/isr.S
+ * arch/i386/asm/syscall.S
  *
- * Copyright (C) 2005 Alexey Zaytsev
+ * Copyright (C) 2006 Alexander Shishkin
  *
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions
@@ -29,30 +29,28 @@
  *  SUCH DAMAGE.
  */
 
-.globl isr_table
+#include <i386/segments.h>
 
-#define default_isr(n) \
-.globl default_isr ## n; \
-default_isr ## n: \
-	pushl %esp; \
-	pushl %ebp; \
-	pushl %edi; \
-	pushl %esi; \
-	pushl %edx; \
-	pushl %ecx; \
-	pushl %ebx; \
-	pushl %eax; \
-	pushl $##n; \
-	jmp quit_isr
+/*
+ * from syscalls.c:
+ * u32 sys_call_gate(u32 eax, u32 ebx, u32 ecx, u32 edx)
+ */
+.extern sys_call_gate
+.globl sys_call_entry
+sys_call_entry:
+	/* save stack and prepare arguments for sys_call_gate() */
+	pushl %esp
+	pushl %ebp
+	pushl %edi
+	pushl %esi
+	pushl %edx
+	pushl %ecx
+	pushl %ebx
+	pushl %eax
 
-.extern default_interrupt_handler
+	call sys_call_gate
 
-#include "isr_table.h"
-
-quit_isr:
-	call default_interrupt_handler
 	/* leave eax intact for it holds the return value */
-	popl %ebx		/* remove the int number */
 	popl %ebx		/* remove arguments */
 	popl %ebx		/* remove arguments */
 	popl %ecx		/* remove arguments */
@@ -63,5 +61,3 @@ quit_isr:
 	popl %esp		/* remove arguments */
 	iret
 
-isr_table:
-	.fill 1024,4,0

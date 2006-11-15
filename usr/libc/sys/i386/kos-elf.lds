@@ -3,8 +3,8 @@ ENTRY (_start)
 
 SECTIONS
 {
-
-	. = 0x4000;
+	/* we'll assume for now that our userspace loads at 1GB address */
+	. = 0x40000000;
 	.text :
 	{
 		*(.text)
