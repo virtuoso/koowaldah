@@ -29,7 +29,7 @@
  *  SUCH DAMAGE.
  */
 
-#include <i386/asm.h>
+#include <i386/segments.h>
 
 .extern kern_start
 .extern kernel_stack
@@ -62,6 +62,7 @@ l1:	movl $KERN_DATA, %eax	/* set the rest */
 	movl %eax, %fs
 	movl %eax, %gs
 	movl %eax, %ss
+	lidt idt_desc
 	jmp kern_start
 	cli
 	hlt
@@ -75,33 +76,27 @@ gdt_desc:
 .globl gdt_table
 gdt_table:
 	/* null entry */
-	.quad 0x0000000000000000
+	SEGDESC_EMPTY
 	/* kernel CS (KERN_CODE) */
-	.word 0xffff
-	.word 0x0000
-	.byte 0x00
-	.byte 0x9a
-	.byte 0xcf
-	.byte 0x00
+	SEGDESC(0, 0x0fffff, ST_RX_CODE, DPL_KERN)
 	/* kernel DS (KERN_DATA) */
-	.word 0xffff
-	.word 0x0000
-	.byte 0x00
-	.byte 0x92
-	.byte 0xcf
-	.byte 0x00
+	SEGDESC(0, 0x0fffff, ST_RW_DATA, DPL_KERN)
 	/* user CS (USER_CODE) */
-	.word 0xffff
-	.word 0x0000
-	.byte 0x00
-	.byte 0xfa
-	.byte 0xcf
-	.byte 0x00
+	SEGDESC(0, 0x0fffff, ST_RX_CODE, DPL_USER)
 	/* user DS (USER_DATA) */
-	.word 0xffff
-	.word 0x0000
-	.byte 0x00
-	.byte 0xf2
-	.byte 0xcf
-	.byte 0x00
+	SEGDESC(0, 0x0fffff, ST_RW_DATA, DPL_USER)
+	/* TSS */
+	SEGDESC_EMPTY
+	/* call gate (CALL_GATE) */
+	SEGDESC_EMPTY
+
+/* IDT size and ptr */
+idt_desc:
+	.word IDT_ENTRIES * 8 - 1
+	.long idt_table
+
+/* the IDT */
+.globl idt_table
+idt_table:
+	.fill IDT_ENTRIES,8,0
 
