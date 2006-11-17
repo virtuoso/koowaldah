@@ -58,19 +58,19 @@ static void vga_scroll()
 
 void vga_set_cursor(unsigned short cursor)
 {
-        io_port_out(0x3D5, (unsigned char)(cursor));
-        io_port_out(0x3D4, 14);
-        io_port_out(0x3D5, (unsigned char)(cursor >> 8));
+        outb(0x3D5, (unsigned char)(cursor));
+        outb(0x3D4, 14);
+        outb(0x3D5, (unsigned char)(cursor >> 8));
 }
 
 unsigned short vga_get_cursor()
 {
         unsigned short cursor;
 
-        io_port_out(0x3D4, 14);
-        cursor = io_port_in(0x3D5) << 8;
-        io_port_out(0x3D4, 15);
-        cursor |= io_port_in(0x3D5);
+        outb(0x3D4, 14);
+        cursor = inb(0x3D5) << 8;
+        outb(0x3D4, 15);
+        cursor |= inb(0x3D5);
 
         return cursor;
 }

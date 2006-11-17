@@ -63,9 +63,9 @@ void timer_set_divisor(u16 divisor){
 		.counter = 0  	/* counter	- counter 0 */
 	};
 #endif
-	io_port_out(TIMER_COMMAND_PORT, 0x36);	
-	io_port_out(TIMER_COUNTER_0_PORT, divisor & 0xFF);
-	io_port_out(TIMER_COUNTER_0_PORT, divisor >> 8);
+	outb(TIMER_COMMAND_PORT, 0x36);	
+	outb(TIMER_COUNTER_0_PORT, divisor & 0xFF);
+	outb(TIMER_COUNTER_0_PORT, divisor >> 8);
 
 	jiffies = 0;
 }
