@@ -57,7 +57,7 @@ static struct thread *sleeper = NULL;
 
 static void pckbd_intr(u32 number)
 {
-	u8 scancode = io_port_in(KEYBOARD_IO);
+	u8 scancode = inb(KEYBOARD_IO);
 
 	/* skip key releases for now */
 	if (scancode & 0x80)
