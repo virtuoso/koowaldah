@@ -147,18 +147,18 @@ int serial_8250_read(struct file *file, char *buf, off_t size)
 
 static void enable_tx_irq()
 {
-	u8 t = io_port_in(SERIO_REG_IER);
+	u8 t = inb(SERIO_REG_IER);
 	
 	t |= IER_TX;
-	io_port_out(SERIO_REG_IER, t);
+	outb(SERIO_REG_IER, t);
 }
 
 static void disable_tx_irq()
 {
-	u8 t = io_port_in(SERIO_REG_IER);
+	u8 t = inb(SERIO_REG_IER);
 	
 	t &= ~IER_TX;
-	io_port_out(SERIO_REG_IER, t);
+	outb(SERIO_REG_IER, t);
 }
 
 
@@ -195,12 +195,12 @@ static void serial_8250_intr(u32 number)
 	
 	DPRINT("Interrupt!\n");
 
-	line_status = io_port_in(SERIO_1_BASE + 5);
+	line_status = inb(SERIO_1_BASE + 5);
 
 	DPRINT("line status = 0x%x\n", line_status);
 		
 	if (line_status & LSR_READY) {
-		c = io_port_in(SERIO_1_BASE);
+		c = inb(SERIO_1_BASE);
 		DPRINT("Got byte: 0x%x\n", c);
 
 		if (read_queue) {
@@ -221,7 +221,7 @@ static void serial_8250_intr(u32 number)
 			t = kqueue_pull_tail(write_queue, (char *)&c, 1);
 			if (t) {
 				DPRINT("Writing byte 0x%x, t = %d\n", c, t);
-				io_port_out(SERIO_1_BASE, c);
+				outb(SERIO_1_BASE, c);
 			} else {
 				disable_tx_irq();
 				
@@ -266,20 +266,20 @@ int __init serial_8250_load()
 	
 	register_irq_handler(SERIO_1_IRQ, serial_8250_intr);
 	
-	io_port_out(SERIO_1_BASE + 3, 0x80); /* DLAB = 1 */
+	outb(SERIO_1_BASE + 3, 0x80); /* DLAB = 1 */
 
 	/* When DLAB is set, reg0 and reg1 are used to set the baud rate. */
-	io_port_out(SERIO_1_BASE + 0, 1); /* Baud rate divisor, low byte. */
-	io_port_out(SERIO_1_BASE + 1, 0); /* Baud rate divisor, high byte. */
+	outb(SERIO_1_BASE + 0, 1); /* Baud rate divisor, low byte. */
+	outb(SERIO_1_BASE + 1, 0); /* Baud rate divisor, high byte. */
 	
-	io_port_out(SERIO_1_BASE + 3, 0x03);	/* Bits = 8
+	outb(SERIO_1_BASE + 3, 0x03);	/* Bits = 8
 						 * Stopbits = 1
 						 * Flow control = none
 						 * DLAB = 0 */
 	
 	/* Now DLAB is unset and we use reg1 as the Interrupt Enable Register.*/
-	io_port_out(SERIO_REG_IER, IER_RX); 
-	io_port_out(SERIO_REG_MCR, 0x00); /* No modem control */
+	outb(SERIO_REG_IER, IER_RX); 
+	outb(SERIO_REG_MCR, 0x00); /* No modem control */
 	
 	register_device(&serial_8250_dev);
 
