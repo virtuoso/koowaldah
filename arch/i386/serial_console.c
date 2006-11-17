@@ -39,23 +39,23 @@
 void __init early_serial_init()
 {
 
-	io_port_out(SERIO_1_BASE + 3, 0x80); /* DLAB = 1 */
+	outb(SERIO_1_BASE + 3, 0x80); /* DLAB = 1 */
 
-	io_port_out(SERIO_1_BASE + 0, 12);
-	io_port_out(SERIO_1_BASE + 1, 0); /* set speed 115200 / 12 = 9600 */
+	outb(SERIO_1_BASE + 0, 12);
+	outb(SERIO_1_BASE + 1, 0); /* set speed 115200 / 12 = 9600 */
 	
-	io_port_out(SERIO_1_BASE + 3, 0x03); 	/* Bits = 8
+	outb(SERIO_1_BASE + 3, 0x03); 	/* Bits = 8
 					 * Stopbits = 1
 					 * Flow control = none
 					 * DLAB = 0
 					 */
-	io_port_out(SERIO_1_BASE + 1, 0x00); /* Disable serial interrupts */
-	io_port_out(SERIO_1_BASE + 4, 0x00); /* No modem control */
+	outb(SERIO_1_BASE + 1, 0x00); /* Disable serial interrupts */
+	outb(SERIO_1_BASE + 4, 0x00); /* No modem control */
 
 } 
 
 void early_serial_put_char(char c)
 {
-	io_port_out(SERIO_1_BASE, c);
+	outb(SERIO_1_BASE, c);
 }
 

@@ -46,20 +46,20 @@ static u8 pic2_mask;
 
 void pic_clear(){
 	
-	io_port_out(PIC1_BASE_PORT, 0x11);
-	io_port_out(PIC2_BASE_PORT, 0x11);
+	outb(PIC1_BASE_PORT, 0x11);
+	outb(PIC2_BASE_PORT, 0x11);
 
-	io_port_out(PIC1_BASE_PORT + 1, 0x20);
-	io_port_out(PIC2_BASE_PORT + 1, 0x28);
+	outb(PIC1_BASE_PORT + 1, 0x20);
+	outb(PIC2_BASE_PORT + 1, 0x28);
 
-	io_port_out(PIC1_BASE_PORT + 1, 0x04);
-	io_port_out(PIC2_BASE_PORT + 1, 0x02);
+	outb(PIC1_BASE_PORT + 1, 0x04);
+	outb(PIC2_BASE_PORT + 1, 0x02);
 
-	io_port_out(PIC1_BASE_PORT + 1, 0x01);
-	io_port_out(PIC2_BASE_PORT + 1, 0x01);
+	outb(PIC1_BASE_PORT + 1, 0x01);
+	outb(PIC2_BASE_PORT + 1, 0x01);
 
-	io_port_out(PIC1_BASE_PORT + 1, 0xFF);
-	io_port_out(PIC2_BASE_PORT + 1, 0xFF);
+	outb(PIC1_BASE_PORT + 1, 0xFF);
+	outb(PIC2_BASE_PORT + 1, 0xFF);
 
 	pic1_mask = 0xFF;
 	pic2_mask = 0xFF;
@@ -77,11 +77,11 @@ void pic_mask_interrupt(u32 number){
 		number -= 8;
 		tmp = 1 << number;
 		pic2_mask |= tmp;
-		io_port_out(PIC2_BASE_PORT + 1, pic2_mask);
+		outb(PIC2_BASE_PORT + 1, pic2_mask);
 	}else{
 		tmp = 1 << number;
 		pic1_mask |= tmp;
-		io_port_out(PIC1_BASE_PORT + 1, pic1_mask);
+		outb(PIC1_BASE_PORT + 1, pic1_mask);
 	}
 
 //	kprintf("after running pic1_mask = %x, pic2_mask = %x\n", pic1_mask, pic2_mask);
@@ -101,12 +101,12 @@ void pic_unmask_interrupt(u32 number){
 		tmp = 1 << number;
 		tmp = ~tmp;
 		pic2_mask &= tmp;
-		io_port_out(PIC2_BASE_PORT + 1, pic2_mask);
+		outb(PIC2_BASE_PORT + 1, pic2_mask);
 	}else{
 		tmp = 1 << number;
 		tmp = ~tmp;
 		pic1_mask &= tmp;
-		io_port_out(PIC1_BASE_PORT + 1, pic1_mask);
+		outb(PIC1_BASE_PORT + 1, pic1_mask);
 	}
 //	kprintf("after running pic1_mask = %x, pic2_mask = %x\n", pic1_mask, pic2_mask);
 }
@@ -115,10 +115,10 @@ inline void pic_do_eoi(u32 number){
 	if(number > 15)
 		return;
 	
-	io_port_out(PIC1_BASE_PORT, PIC_EOI);
+	outb(PIC1_BASE_PORT, PIC_EOI);
 	
 	if(number >= 8)
-		io_port_out(PIC2_BASE_PORT, PIC_EOI);
+		outb(PIC2_BASE_PORT, PIC_EOI);
 }
 
 
