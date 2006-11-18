@@ -33,19 +33,42 @@
 
 
 #include <koowaldah.h>
-#include <arch/asm.h>
+#include <machine.h>
+#include <console.h>
+#include <i386/asm.h>
+#include <timer.h>
 
-/* IO operations */
+u32 mach_state = MACH_BOOTUP;
 
-inline u8 io_port_in(u16 port)
+void interrupts_init(void);
+void trap_init(void);
+void early_console_init(void);
+void init_root_tss(void);
+
+/*
+ * Finalize boot-time hw initialization
+ */
+void __init mach_start()
 {
-	u8 result;
-	asm("in %%dx, %%al" : "=a" (result) : "d" (port));
-	return result;
+	/* + means of output */
+	early_console_init();
+
+	/* + x86 segmentation */
+	init_root_tss();
+
+	/* + irq handlers */
+        interrupts_init();
+
+	/* + cpu traps */
+	trap_init();
+
+	/* + hw timer */
+        timer_init();
 }
 
-inline void io_port_out(u16 port, u8 data)
+void mach_running()
 {
-	asm("out %%al, %%dx" : :"a" (data), "d" (port));
+	enable_interrupts();
+	mach_state = MACH_RUNNING;
 }
 
