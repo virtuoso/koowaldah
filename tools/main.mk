@@ -114,6 +114,9 @@ objects: $(OBJECTS) $(SUBDIRS)
 			CC_FLAGS="$(CC_FLAGS)" \
 			NODEPS=0 \
 			-C $$d; \
+		if [ "$$?" != "0" ]; then \
+			exit 1; \
+		fi; \
 	done
 
 # clean -- removes current source dir's object and dependency
@@ -159,6 +162,10 @@ $(OBJDIR)/%.o:
 		$(call DO_CC,$<,$@,$(CC_FLAGS) -I$(PRJROOT)/include); \
 	else \
 		$(call DO_ASM,$<,$@,$(ASM_FLAGS) -I$(PRJROOT)/include); \
+	fi; \
+	if [ "$$?" != "0" ]; then \
+		rm -f "$@"; \
+		exit 2; \
 	fi
 
 printobjs:
