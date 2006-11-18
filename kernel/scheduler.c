@@ -112,25 +112,33 @@ int register_cpusched(struct cpu_scheduler *sched)
  * Make sure it is not listed in any other run/waitqueue or
  * I will bite.
  */
-int scheduler_enqueue(struct thread *thread)
+int scheduler_enqueue_nolock(struct thread *thread)
 {
-	disable_interrupts();
-
 	/* a thread should be removed from any run/waitqueues */
 	if (!klist0_empty(&thread->krunq)) {
 		dump_thread(thread);
 		bug();
 	}
 	reg_sched->enqueue(thread);
-	enable_interrupts();
 
 	return 0;
+}
+
+int scheduler_enqueue(struct thread *thread)
+{
+	int r;
+
+	disable_interrupts();
+	r = scheduler_enqueue_nolock(thread);
+	enable_interrupts();
+
+	return r;
 }
 
 /*
  * Dequeue the thread.
  */
-int scheduler_dequeue(struct thread *thread)
+int scheduler_dequeue_nolock(struct thread *thread)
 {
 	disable_interrupts();
 
@@ -145,6 +153,17 @@ int scheduler_dequeue(struct thread *thread)
 	enable_interrupts();
 
 	return 0;
+}
+
+int scheduler_dequeue(struct thread *thread)
+{
+	int r;
+
+	disable_interrupts();
+	r = scheduler_dequeue_nolock(thread);
+	enable_interrupts();
+
+	return r;
 }
 
 void scheduler_tick()
