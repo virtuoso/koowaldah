@@ -68,7 +68,7 @@ void __init mach_start()
 
 void mach_running()
 {
-	enable_interrupts();
 	mach_state = MACH_RUNNING;
+	enable_interrupts();
 }
 
