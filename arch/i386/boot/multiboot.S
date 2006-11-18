@@ -52,6 +52,7 @@ MultiBootHeader:
 	.long CHECKSUM
 
 multiboot_start:
+	cli
 	movl $(multiboot_info), %ebx
 	movl $(kernel_stack), %esp
 	lgdt gdt_desc		/* load gdt */
