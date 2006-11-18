@@ -190,9 +190,29 @@ void copy_map(struct mapping *dst, struct mapping *map);
 void init_user_map(struct mapping *map);
 void switch_map(struct mapping *from, struct mapping *to);
 
-inline u8 io_port_in(u16 port);
+static inline u8 inb(u16 port)
+{
+	u8 r;
+	__asm__ __volatile__("inb %w1, %0" : "=a"(r) : "d"(port));
+	return r;
+}
 
-inline void io_port_out(u16 port, u8 data);
+static inline void outb(u16 port, u8 data)
+{
+	__asm__ __volatile__("outb %0, %w1" : : "a"(data), "d"(port));
+}
+
+static inline u16 inw(u16 port)
+{
+	u16 r;
+	__asm__ __volatile__("inw %w1, %0" : "=a"(r) : "d"(port));
+	return r;
+}
+
+static inline void outw(u16 port, u16 data)
+{
+	__asm__ __volatile__("outb %0, %w1" : : "a"(data), "d"(port));
+}
 
 /* read/write cpu flags */
 static inline u32 read_eflags()
