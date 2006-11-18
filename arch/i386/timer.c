@@ -33,6 +33,7 @@
 
 #include <koowaldah.h>
 #include <irq.h>
+#include <machine.h>
 #include <i386/asm.h>
 #include <textio.h>
 #include <i386/asm.h>
