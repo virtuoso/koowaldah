@@ -52,7 +52,7 @@
 
 struct page *pages[2048];
 
-void test_mm()
+static void test_mm()
 {
 #ifdef OPT_PAGE_ALLOCATOR_TEST
 	struct page *pg[7];
@@ -188,7 +188,7 @@ void test_mm()
 }
 
 u32 * slices[1024];
-void test_slice_alloc()
+static void test_slice_alloc()
 {
 #ifdef OPT_TEST_SLICE
 	struct slice_pool *slice;
@@ -438,7 +438,7 @@ void test_slice_alloc()
 u32 * tmp[2044];
 
 
-void test_galloc()
+static void test_galloc()
 {
 #ifdef OPT_TEST_GALLOC
 
@@ -490,7 +490,7 @@ void test_galloc()
 #endif
 }
 
-void test_klist()
+static void test_klist()
 {
 #ifdef OPT_TEST_KLIST
         struct klist * list = NULL;
@@ -546,7 +546,7 @@ void test_klist()
 #endif /* OPT_TEST_KLIST */
 }
 
-void test_kqueue()
+static void test_kqueue()
 {
 #ifdef OPT_TEST_KQUEUE
 	struct kqueue_t *q;
@@ -590,7 +590,7 @@ void test_kqueue()
 #ifdef OPT_TEST_THREADS
 extern int tsleep(u32 delay);
 
-void func1()
+static void func1()
 {
 	for (;;) {
 		kprintf("A");
@@ -598,7 +598,7 @@ void func1()
 	}
 }
 
-void func2()
+static void func2()
 {
 	for (;;) {
 		kprintf("B");
@@ -607,7 +607,7 @@ void func2()
 }
 #endif /* OPT_TEST_THREADS */
 
-void test_threads()
+static void test_threads()
 {
 #ifdef OPT_TEST_THREADS
 	struct thread *thread;
@@ -641,7 +641,7 @@ void test_threads()
 }
 
 #ifdef OPT_TEST_IRQS
-void keyboard_irq_handler(u32 number)
+static void keyboard_irq_handler(u32 number)
 {
         unsigned char c;
 
@@ -663,7 +663,7 @@ void keyboard_irq_handler(u32 number)
 }
 #endif /* OPT_TEST_IRQS */
 
-void test_irqs()
+static void test_irqs()
 {
 #ifdef OPT_TEST_IRQS
         kprintf("Registering dummy keyboard interrupt service routine...");
@@ -674,7 +674,7 @@ void test_irqs()
 
 #ifdef OPT_TEST_PCKBD
 
-void kbd_reader()
+static void kbd_reader()
 {
 	int fd;
 	u16 buf;
@@ -694,7 +694,7 @@ void kbd_reader()
 #endif /* OPT_TEST_PCKBD */
 
 #ifdef OPT_TEST_SERIAL
-void do_test_serial()
+static void do_test_serial()
 {
 	int fd;
 	int tmp;
@@ -735,7 +735,7 @@ void do_test_serial()
 }
 #endif /* OPT_TEST_SERIAL */
 
-void test_serial()
+static void test_serial()
 {
 #ifdef OPT_TEST_SERIAL
 	struct thread *thread;
@@ -750,7 +750,7 @@ void test_serial()
 
 }
 
-void test_pckbd()
+static void test_pckbd()
 {
 #ifdef OPT_TEST_PCKBD
 	struct thread *thread;
@@ -770,7 +770,7 @@ void test_pckbd()
 #endif /* OPT_TEST_PCKBD */
 }
 
-void test_fslookup()
+static void test_fslookup()
 {
 #ifdef OPT_TEST_FSLOOKUP
 	struct direntry *dent = lookup_path("/sbin/init");
@@ -810,7 +810,7 @@ extern void start_user(void);
 #include <i386/segments.h>
 extern struct tss_segment root_tss;
 
-void init_thread()
+static void init_thread()
 {
 	/* it is ABSOLUTELY obligatory to fill esp0 before switching */
 	__asm__ __volatile__("mov %%esp, %%eax\nmov %%eax, %0" :
@@ -820,7 +820,7 @@ void init_thread()
 }
 #endif
 
-void test_rootfs()
+static void test_rootfs()
 {
 #ifdef OPT_TEST_ROOTFS
 	struct thread *thread;
@@ -855,7 +855,7 @@ void test_rootfs()
 #endif
 }
 
-void test_bug()
+static void test_bug()
 {
 #ifdef OPT_TEST_BUG
 	bug();
