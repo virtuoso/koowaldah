@@ -33,6 +33,7 @@
 
 #include <koowaldah.h>
 #include <machine.h>
+#include <bug.h>
 #include <irq.h>
 #include <lib.h>
 #include <i386/pic.h>
@@ -63,8 +64,6 @@ static void (*irq_handler_table[16])(unsigned int number);
 
 void __init interrupts_init()
 {
-	disable_interrupts();
-
 	pic_clear();
 
 	intgate_init(32, irq_pre_handler0);
@@ -83,8 +82,6 @@ void __init interrupts_init()
 	intgate_init(45, irq_pre_handler13);
 	intgate_init(46, irq_pre_handler14);
 	intgate_init(47, irq_pre_handler15);
-	
-	enable_interrupts();
 }
 
 void main_irq_handler(u32 number)
