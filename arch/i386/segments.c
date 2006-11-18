@@ -113,7 +113,6 @@ void gatedesc_init(u32 idx, u32 offset, u8 type, u8 priv)
 
 void __init init_root_tss()
 {
-	struct gatedesc *g = &idt_table;
 	root_tss.ss0 = KERN_DATA;
 
 	syssegdesc_init(TSS, (u32)&root_tss, 104, GT_FREE_TSS, DPL_KERN);
