@@ -45,10 +45,10 @@
 #include <timer.h>
 #include <i386/asm.h>
 
-extern void do_thread_switch_context(u32 * from, u32 * to);
-extern void do_thread_switch_to(u32 * to);
+extern void do_thread_switch_context(u32 *from, u32 *to);
+extern void do_thread_switch_to(u32 *to);
 
-void thread_init_stack(struct thread * t, void (*func)(void))
+void thread_init_stack(struct thread *t, void (*func)(void))
 {
 	u32 *stack = (u32 *)(tctx(t).esp);
 	int i;
@@ -62,36 +62,11 @@ void thread_init_stack(struct thread * t, void (*func)(void))
 	t->state &= ~THREAD_NEW;
 }
 
-int __init thread_init()
-{
-        return 0;
-}
-
-struct thread * thread_get_current()
-{
-	struct thread * current;
-	u32 esp;
-	
-	asm volatile ("movl %%esp, %0":"=m"(esp));
-
-	esp &= ~0xFFF;
-
-	if(!page_is_allocated((u32 *) esp))
-		return NULL;
-	
-	current = THREAD(esp);
-
-	/*kprintf("got current, stack_base = %x, esp = %x, pid = %d\n",
-			(u32) current->ctx.stack_base, (u32) current->ctx.esp, current->pid);*/
-
-	return CURRENT();
-}
-
-void thread_switch_context(struct thread * from, struct thread * to)
+void thread_switch_context(struct thread *from, struct thread *to)
 {
 
-	u32 * esp_from;
-	u32 * esp_to;
+	u32 *esp_from;
+	u32 *esp_to;
 
 /*
 	kprintf("Switching context\n");
@@ -115,7 +90,7 @@ void thread_switch_context(struct thread * from, struct thread * to)
 }
 
 
-void thread_switch_to(struct thread * thread)
+void thread_switch_to(struct thread *thread)
 {
 	do_thread_switch_to((u32 *)tctx(thread).esp);
 }
