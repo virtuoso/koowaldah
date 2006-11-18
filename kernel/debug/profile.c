@@ -39,13 +39,13 @@
 
 void __noprof __cyg_profile_func_enter(void *this_fn, void *call_site)
 {
-	if (kernel_started)
+	if (mach_state == MACH_RUNNING)
 		kprintf("ENTER: %x from %x\n", this_fn, call_site);
 }
 
 void __noprof __cyg_profile_func_exit(void *this_fn, void *call_site)
 {
-	if (kernel_started)
+	if (mach_state == MACH_RUNNING)
 		kprintf("LEAVE: %x to %x\n", this_fn, call_site);
 }
 
