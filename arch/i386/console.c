@@ -41,7 +41,7 @@ extern void early_vga_init(void);
  * This is an early console in fact, we'll have a proper console
  * once mm is initialized
  */
-int __init early_console_init()
+void __init early_console_init()
 {
 #if CONFIG_SERIAL_CONSOLE
 	early_serial_init();
@@ -50,7 +50,6 @@ int __init early_console_init()
 #if CONFIG_VGA_CONSOLE
 	early_vga_init();
 #endif /* CONFIG_VGA_CONSOLE */
-	return 0;
 }
 
 extern void early_serial_put_char(char c);
