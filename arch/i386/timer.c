@@ -33,9 +33,9 @@
 
 #include <koowaldah.h>
 #include <irq.h>
-#include <arch/asm.h>
+#include <i386/asm.h>
 #include <textio.h>
-#include <arch/asm.h>
+#include <i386/asm.h>
 
 u64 jiffies;
 
@@ -54,7 +54,8 @@ struct timer_command{
 #endif
 
 
-void timer_set_divisor(u16 divisor){
+void timer_set_divisor(u16 divisor)
+{
 #if 0
 	struct timer_command command = {
 		.bcd = 0, 	/* bcd		- 16-bit counter */
@@ -77,13 +78,14 @@ extern void update_timers();
 static void timer_interrupt_handler()
 {
 	jiffies++;
-	update_timers();
+	if (mach_state == MACH_RUNNING)
+		update_timers();
 }
 
-int __init timer_init(){
+int __init timer_init()
+{
 	timer_set_divisor(4096);
 	register_irq_handler(0, timer_interrupt_handler);
 	return 0;
 }
-
 
