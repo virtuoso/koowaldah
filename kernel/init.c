@@ -95,9 +95,6 @@ void __init kern_start()
 		kprintf("Failed to create main kernel thread\n");
 		bug();
 	}
-	kprintf("Main kernel thread created\n");
-	
-	kprintf("Switching to the main kernel thread\n");
 	thread_switch_to(main_thread);	
 
 	bug();
@@ -120,15 +117,14 @@ void __noprof call_late_init()
 
 void __noprof kernel_main_thread()
 {
-	struct thread *me;
-
-	mach_running();
-	me = CURRENT();
+	struct thread *me = CURRENT();
 	
-        if (scheduler_enqueue(me)) {
+        if (scheduler_enqueue_nolock(me)) {
                 kprintf("Failed to add main kernel thread to run queue\n");
 		bug();
         }
+
+	mach_running();
 
 	kprintf("Initializing vfs core... ");
 	fs_init();
