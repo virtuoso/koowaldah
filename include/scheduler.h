@@ -61,6 +61,8 @@ struct cpu_scheduler {
 
 int register_cpusched(struct cpu_scheduler *sched);
 /* int deregister_cpusched() to come as soon as it's needed */
+int scheduler_enqueue_nolock(struct thread *thread);
+int scheduler_dequeue_nolock(struct thread *thread);
 int scheduler_enqueue(struct thread *thread);
 int scheduler_dequeue(struct thread *thread);
 
