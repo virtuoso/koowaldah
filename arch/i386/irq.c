@@ -32,10 +32,10 @@
  */
 
 #include <koowaldah.h>
-
+#include <machine.h>
 #include <irq.h>
 #include <lib.h>
-#include <arch/pic.h>
+#include <i386/pic.h>
 #include <irq.h>
 #include <scheduler.h>
 #include <textio.h>
@@ -87,21 +87,19 @@ void __init interrupts_init()
 	enable_interrupts();
 }
 
-void main_irq_handler(u32 number){
-//	kprintf("Got irq %d\n", number);
-	if(irq_handler_table[number]){
-//		kprintf("Found handler, executing...");
+void main_irq_handler(u32 number)
+{
+	if(irq_handler_table[number])
 		irq_handler_table[number](number);
-//		kprintf("Done\n");
-	}else{
-//		kprintf("No irq handler found.\n");
-	}
+
+	if (mach_state == MACH_RUNNING)
+		scheduler_tick();
+
 	pic_do_eoi(number);
-	scheduler_tick();
 }
 
-int register_irq_handler(u32 number, void (*handler)(u32 number)){
-	
+int register_irq_handler(u32 number, void (*handler)(u32 number))
+{
 	if(irq_handler_table[number])
 		return 1;		/* first unregister previous handler */
 	
@@ -110,10 +108,9 @@ int register_irq_handler(u32 number, void (*handler)(u32 number)){
 	return 0;
 }
 
-void unregister_irq_handler(u32 number){
+void unregister_irq_handler(u32 number)
+{
 	pic_mask_interrupt(number);
 	irq_handler_table[number] = NULL;
 }
-
-
 
