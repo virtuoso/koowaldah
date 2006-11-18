@@ -36,7 +36,6 @@
 #include <page_alloc.h>
 #include <mm_zone.h>
 #include <arch/asm.h>
-#include <arch/isr.h>
 #include <irq.h>
 #include <timer.h>
 #include <textio.h>
@@ -53,50 +52,38 @@ void kernel_main_thread();
  * since we don't want to expose those to the rest of
  * the kernel
  */
-extern void interrupts_init(void);
-extern void trap_init(void);
-extern void early_console_init(void);
-extern void thread_init(void);
-extern void timers_init(void);
-extern void sched0_load(void);
-extern void scheduler_init(void);
-extern void fs_init(void);
+void timers_init(void);
+void sched0_load(void);
+void scheduler_init(void);
+void fs_init(void);
 
-extern void init_mem_info(void);
-extern void slice_init(void);
-extern void galloc_init(void);
-extern void mm_init(void); /* legacy mm */
-extern void kqueue_init(void);
-extern void init_root_tss(void);
+void init_mem_info(void);
+void slice_init(void);
+void galloc_init(void);
+void mm_init(void); /* legacy mm */
+void kqueue_init(void);
 
 /* this is also needed only once */
-extern void run_tests(void);
-u8 kernel_started = 0;
+void run_tests(void);
+
+extern void mach_start();
+extern void mach_running();
 
 void __init kern_start()
 {
-	struct thread * main_thread;
+	struct thread *main_thread;
 
-	early_console_init();
+	mach_start();
 
 	kprintf("Starting Koowaldah kernel.\n");
 	
+	/* memory allocation machinery */
 	init_mem_info();
 	mm_init();
-
-	init_root_tss();
-
-        kprintf("Setting interrupts up...");
-        interrupts_init();
-	trap_init();
-        kprintf("Done\n");
-
 	slice_init();
-
 	galloc_init();
-	kqueue_init();
 
-	thread_init();
+	kqueue_init();
 
 	timers_init();
 
@@ -135,24 +122,19 @@ void __noprof kernel_main_thread()
 {
 	struct thread *me;
 
+	mach_running();
 	me = CURRENT();
 	
         if (scheduler_enqueue(me)) {
                 kprintf("Failed to add main kernel thread to run queue\n");
 		bug();
         }
-        kprintf("Main kernel thread added to run queue.\n");
 
 	kprintf("Initializing vfs core... ");
 	fs_init();
 	kprintf("Done.\n");
 
 	scheduler_start();
-
-        kprintf("Starting the Programmable Interval Timer...");
-        timer_init();
-        kprintf("Done\n");
-	//kernel_started = 1;
 
 	call_late_init();
 
