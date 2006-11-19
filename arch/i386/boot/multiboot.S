@@ -53,7 +53,7 @@ MultiBootHeader:
 
 multiboot_start:
 	cli
-	movl $(multiboot_info), %ebx
+	movl %ebx, (multiboot_info)
 	movl $(kernel_stack), %esp
 	lgdt gdt_desc		/* load gdt */
 	ljmp $KERN_CODE, $l1	/* set %cs */
