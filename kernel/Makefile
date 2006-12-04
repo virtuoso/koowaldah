@@ -2,6 +2,7 @@ SOURCES := \
 	init.c \
 	textio.c \
 	thread.c \
+	fork.c \
 	scheduler.c \
 	sched0.c \
 	timecore.c \
