@@ -193,7 +193,6 @@ void fake_getpage_init()
                 if(!tmp)
                         bug();
                 *tmp->data = (u32) page_array + (0x1000 * i);
-		kprintf("[%x]", *(u32*)tmp->data);
 
                 klist_add(tmp, &page_list);
 //              kprintf("added entry, tmp->data = %x\n", (u32) tmp->data);
