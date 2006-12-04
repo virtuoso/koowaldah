@@ -75,7 +75,7 @@ unsigned short vga_get_cursor()
         return cursor;
 }
 
-void early_vga_init()
+void __init early_vga_init()
 {
 	/* bogus man! */
 	vga_color = 0x0f;
