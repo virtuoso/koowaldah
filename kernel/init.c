@@ -40,6 +40,7 @@
 #include <timer.h>
 #include <textio.h>
 #include <klist.h>
+#include <lib.h>
 #include <kqueue.h>
 #include <thread.h>
 #include <scheduler.h>
@@ -90,8 +91,8 @@ void __init kern_start()
 	sched0_load();
 	scheduler_init();
 	
-	main_thread = thread_create(&kernel_main_thread, "GOD");
-	if(!main_thread){
+	main_thread = thread_create(&kernel_main_thread, "GOD", NULL);
+	if (!main_thread) {
 		kprintf("Failed to create main kernel thread\n");
 		bug();
 	}
@@ -115,11 +116,58 @@ void __noprof call_late_init()
 			kprintf("Late-init function %x failed\n", *fn);
 }
 
-void __noprof kernel_main_thread()
+/* vvv big fat XXX */
+#include <i386/segments.h>
+extern struct tss_segment root_tss;
+/* ^^^ big fat XXX */
+
+static void __attribute__((noreturn)) init_thread(void *data)
 {
-	struct thread *me = CURRENT();
+	/* disregard everything on the current stack
+	 * as start_user() never returns */
+	root_tss.esp0 = (u32)CURRENT() - 4;
+	start_user();
+	bug();
+}
+
+static void load_init()
+{
+	struct thread *thread;
+	char *dst = (char *)USERMEM_VIRT;
+	struct direntry *dent;
+	struct inode *inode;
+
+        thread = thread_create_user(&init_thread, "init", NULL, 1, 1);
+        if (!thread) {
+                kprintf("failed to create thread\n");
+		bug();
+        }
+
+	dent = lookup_path("/sbin/init");
+	if (!dent) {
+		kprintf("Init not found.\n");
+		panic();
+	}
+
+	inode = dent->d_inode;
+
+	/* "load" init process where it belongs */
+	switch_map(&root_map, thread->map);
+	memory_copy(dst, page_to_addr(inode->i_map.i_pages[1]), PAGE_SIZE);
+	switch_map(thread->map, &root_map);
+
+        if (scheduler_enqueue(thread)) {
+                kprintf("failed to add thread to run queue\n");
+		bug();
+        }
+
+}
+
+void __noprof kernel_main_thread(void *data)
+{
+	struct thread *thread = CURRENT();
 	
-        if (scheduler_enqueue_nolock(me)) {
+        if (scheduler_enqueue_nolock(thread)) {
                 kprintf("Failed to add main kernel thread to run queue\n");
 		bug();
         }
@@ -135,6 +183,8 @@ void __noprof kernel_main_thread()
 	call_late_init();
 
 	run_tests();
+
+	load_init();
 
 	for (;;)
 		__asm__ __volatile__("sti; hlt");
