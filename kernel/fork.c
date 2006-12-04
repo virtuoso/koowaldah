@@ -34,6 +34,8 @@
 #include <textio.h>
 #include <sys/errno.h>
 #include <bug.h>
+#include <scheduler.h>
+#include <lib.h>
 
 /* vvv big fat XXX */
 #include <i386/segments.h>
@@ -43,7 +45,6 @@ extern struct tss_segment root_tss;
 static void __attribute__((noreturn)) forker(void *data)
 {
 	u32 *p = (u32 *)data;
-	u32 i;
 
 	/* disregard everything on the current stack
 	 * as start_user() never returns */
@@ -58,7 +59,6 @@ pid_t fork()
 	struct thread *me = CURRENT();
 	u32 virt = USERMEM_VIRT, phys, i;
 	u32 *p = __builtin_frame_address(1);
-	u32 addr;
 
 	thread = thread_create_user(&forker, me->name, (void *)p[0],
 			me->map->m_cp, me->map->m_dp);
@@ -70,7 +70,7 @@ pid_t fork()
 		switch_map(me->map, thread->map);
 		phys = __virt2physpg(virt);
 		switch_map(thread->map, me->map);
-		memory_copy(phys, virt, PAGE_SIZE);
+		memory_copy((char *)phys, (char *)virt, PAGE_SIZE);
 		virt += PAGE_SIZE;
 	}
 
