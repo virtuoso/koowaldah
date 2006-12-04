@@ -36,11 +36,7 @@ include $(PRJROOT)/tools/verbosity.mk
 # $(2) -- .o output
 # $(3) -- CFLAGS to use
 DO_GENDEPS = \
-	$(CC) -M $(3) -c $(1) -MT $(2:.d=.o) -MF $(2); \
-	$(call OUTPUT,$(CC) -M $(3) -c $(1) -MT $(2:.d=.o) -MF $(2),GENDEPS $(1)... ); \
-	if [ $$? != "0" ]; then \
-		false; \
-	fi
+	$(call OUTPUT,$(CC) -M $(3) -c $(1) -MT $(2:.d=.o) -MF $(2),GENDEPS $(1)... )
 
 # call compiler to generate an object file
 # $(1) -- .c source
@@ -48,33 +44,21 @@ DO_GENDEPS = \
 # $(3) -- CFLAGS to use
 # echo -n "  CC  $(1)... ";
 DO_CC = \
-	$(CC) $(3) -c $(1) -o $(2); \
-	$(call OUTPUT,$(CC) $(3) -c $(1) -o $(2),CC $(1)... ); \
-	if [ $$? != "0" ]; then \
-		false; \
-	fi
+	$(call OUTPUT,$(CC) $(3) -c $(1) -o $(2),CC $(1)... )
 
 # call linker
 # $(1) -- list of objects to link
 # $(2) -- output
 # $(3) -- linker options
 DO_LINK = \
-	$(LD) $(3) -o $(2) $(1); \
-	$(call OUTPUT,$(LD) $(3) -o $(2) $(1),LD $(1)... ); \
-	if [ $$? != "0" ]; then \
-		false; \
-	fi
+	$(call OUTPUT,$(LD) $(3) -o $(2) $(1),LD $(1)... )
 
 # call assembler
 # $(1) -- input
 # $(2) -- output
 # $(3) -- options
 DO_ASM = \
-	$(ASM) -D__ASSEMBLY__ $(3) -c $(1) -o $(2); \
-	$(call OUTPUT,$(ASM) -D__ASSEMBLY__ $(3) -c $(1) -o $(2),AS $(1)... ); \
-	if [ $$? != "0" ]; then \
-		false; \
-	fi
+	$(call OUTPUT,$(ASM) -D__ASSEMBLY__ $(3) -c $(1) -o $(2),AS $(1)... )
 
 # rules to build, clean etc
 # -------------------------
