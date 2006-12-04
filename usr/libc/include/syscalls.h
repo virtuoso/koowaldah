@@ -40,6 +40,8 @@
 #define SYS_read 3
 #define SYS_write 4
 #define SYS_tsleep 5
+#define SYS_fork 6
+#define SYS_yield 7
 
 int sys_debug(char *str);
 int sys_open(char *name, unsigned int mode);
@@ -47,4 +49,5 @@ int sys_close(int fd);
 int sys_read(int fd, char *buf, unsigned int len);
 int sys_write(int fd, char *buf, unsigned int len);
 int sys_tsleep(unsigned int t);
+int sys_fork();
 
