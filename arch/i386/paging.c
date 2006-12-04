@@ -32,9 +32,11 @@
  */
 
 #include <koowaldah.h>
-#include <arch/asm.h>
+#include <i386/asm.h>
 #include <page_alloc.h>
+#include <mm_zone.h>
 #include <textio.h>
+#include <error.h>
 
 struct mapping root_map;
 
@@ -68,10 +70,9 @@ static void init_rootmap()
 	pgtable = get_pages(0, log2(tablesz));
 
 	for (d = 0; d < tablesz; d++) {
-		for (t = 0; t < PGT_ENTRIES; t++) {
-			pgtable[t] = (pgaddr++ << PAGE_SHIFT) |
-				PTF_PRESENT | PTF_RW;
-		}
+		for (t = 0; t < PGT_ENTRIES; t++)
+			pgtable[t] = PTE_DESC(pgaddr++, PTF_PRESENT | PTF_RW);
+
 		pgdir[d] = (u32)pgtable | PTF_PRESENT | PTF_RW;
 		pgtable += PAGE_SIZE / PTE_BYTES;
 	}
@@ -98,49 +99,62 @@ void copy_map(struct mapping *dst, struct mapping *map)
 			/* copy all ptes */
 			for (t = 0; t < PGT_ENTRIES; t++)
 				pgtable[t] = src[t];
-
-			pgtable += PAGE_SIZE / PTE_BYTES;
 		}
+
+		/* leave holes in page table for quicker access */
+		pgtable += PAGE_SIZE / PTE_BYTES;
 	}
 }
 
-void init_user_map(struct mapping *map)
+void map_page(struct mapping *map, u32 virt, u32 phys, u16 flags)
 {
-	int d, t;
-	u32 *pgtable;
-	u32 pgaddr = 0x00000000;
+	u32 *pgtable = (u32 *)(map->m_pgdir[PGDIDX(virt)] & NOPAGE_MASK);
 
-	map->m_pgdir = get_pages(0, 0);
-	map->m_pgtable = pgtable = get_pages(0, 
-			log2((phys_pgs)/PGT_ENTRIES));
+	map->m_pgdir[PGDIDX(virt)] |= PTF_PRESENT;
+	pgtable[PGTIDX(virt)] =
+		phys | PTF_PRESENT | PTF_USER | flags;
+}
 
-	for (d = 0; d < 8; d++) {
-		for (t = 0; t < PGT_ENTRIES; t++) {
-			pgtable[t] = (pgaddr++ << PAGE_SHIFT) |
-				PTF_PRESENT | PTF_RW;
-		}
-		map->m_pgdir[d] = (u32)pgtable |
-			PTF_PRESENT | PTF_RW;
-		pgtable += PAGE_SIZE / PTE_BYTES;
-	}
+void map_pages(struct mapping *map, u32 virt, u32 phys, u32 n, u16 flags)
+{
+	u32 i;
 
-	/* skip to 1GB */
-	for (; d < 0x100; d++)
-		map->m_pgdir[d] = 0;
+	for (i = 0; i < n; i++)
+		map_page(map, virt + PAGE_SIZE*i, phys + PAGE_SIZE*i, flags);
+}
 
-	for (; d < 0x108; d++) {
-		for (t = 0; t < PGT_ENTRIES; t++) {
-			pgtable[t] = (pgaddr++ << PAGE_SHIFT) |
-				PTF_USER | PTF_PRESENT | PTF_RW;
-		}
-		map->m_pgdir[d] = (u32)pgtable |
-			PTF_USER | PTF_PRESENT | PTF_RW;
-		pgtable += PAGE_SIZE / PTE_BYTES;
-	}
+/*
+ * Initialize a mapping for user task
+ * @map -- mapping to be tweaked
+ * @cp  -- amount of requested code pages
+ * @dp  -- amount of requested data pages
+ * Note that this is always called when zones are already set up
+ */
+int init_user_map(struct mapping *map, u32 cp, u32 dp)
+{
+	u32 pgaddr;
 
-	/* the rest is not present either */
-	for (; d < PGD_ENTRIES; d++)
-		map->m_pgdir[d] = 0;
+	/* explicitly copy the root mapping */
+	copy_map(map, &root_map);
+
+	pgaddr = get_pages(ZONE_USER, log2(cp));
+	if (!pgaddr)
+		return -ENOMEM;
+
+	/*kprintf("### first user code page: %x\n", pgaddr);*/
+	map_pages(map, USERMEM_VIRT, pgaddr, cp, PTF_RW);
+
+	pgaddr = get_pages(ZONE_USER, log2(dp));
+	if (!pgaddr)
+		return -ENOMEM;
+
+	/*kprintf("### first user data page: %x\n", pgaddr);*/
+	map_pages(map, USERMEM_VIRT + cp * PAGE_SIZE, pgaddr, dp, PTF_RW);
+
+	map->m_cp = cp;
+	map->m_dp = dp;
+
+	return 0;
 }
 
 void switch_map(struct mapping *from, struct mapping *to)
