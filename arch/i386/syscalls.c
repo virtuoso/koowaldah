@@ -39,6 +39,7 @@
 #include <sys/errno.h>
 #include <file.h>
 #include <timers.h>
+#include <scheduler.h>
 
 u32 __attribute__((regparm(0))) sys_call_gate(u32 eax, u32 ebx, u32 ecx, u32 edx)
 {
