@@ -69,7 +69,7 @@ start_user:
 	movl $(USER_DATA)+3, %eax
 	pushl %eax
 
-	movl $0x40010000, %eax
+	movl $0x40001ffb, %eax
 	pushl %eax
 
 	movl $(USER_CODE)+3, %eax
@@ -78,9 +78,42 @@ start_user:
 	movl $0x40000000, %eax
 	pushl %eax
 
-	movl $(USER_DATA), %eax
+	movl $(USER_DATA)+3, %ebx
 	mov %bx, %ds
 	mov %bx, %es
+
+	lret
+
+/*
+ * start_user_forked(eip, ebp, esp, val)
+ */
+.globl start_user_forked
+.type start_user_forked,%function
+.align 4
+start_user_forked:
+	pushl %ebp
+	movl %esp, %ebp
+
+	movl $(USER_DATA)+3, %eax
+	pushl %eax
+
+	movl 16(%ebp), %eax /* stack ptr */
+	pushl %eax
+
+	movl $(USER_CODE)+3, %eax
+	pushl %eax
+
+	movl 8(%ebp), %eax  /* call address */
+	pushl %eax
+
+	movl 20(%ebp), %ecx /* return value */
+	movl 12(%ebp), %eax /* set ebp */
+	movl %eax, %ebp
+
+	movl $(USER_DATA)+3, %ebx
+	mov %bx, %ds
+	mov %bx, %es
+	movl %ecx, %eax
 
 	lret
 
