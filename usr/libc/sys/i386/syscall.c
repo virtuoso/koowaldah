@@ -70,3 +70,13 @@ int sys_tsleep(unsigned int t)
 	return sys_call(SYS_tsleep, t, 0, 0);
 }
 
+int sys_fork()
+{
+	return sys_call(SYS_fork, 0, 0, 0);
+}
+
+int sys_yield()
+{
+	return sys_call(SYS_yield, 0, 0, 0);
+}
+
