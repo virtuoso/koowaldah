@@ -44,7 +44,7 @@
 #include <page_alloc.h>
 
 /* each architecture should define this */
-extern void thread_init_stack(struct thread * t, void (*func)(void));
+extern void thread_init_stack(struct thread *t, thread_t func, void *data);
 
 /* omgwtf */
 u32 get_free_pid()
@@ -67,7 +67,7 @@ void dump_thread(struct thread *thread)
 	);
 }
 
-struct thread *thread_create(void (*func)(), char *name)
+struct thread *thread_create(thread_t func, char *name, void *data)
 {
 	void *page;
 	struct thread *thread;
@@ -87,7 +87,7 @@ struct thread *thread_create(void (*func)(), char *name)
 	/* stack pointers */
 	tctx(thread).stack_base = (u32 *)thread - 1;
 	tctx(thread).esp = (u32)tctx(thread).stack_base;
-	thread_init_stack(thread, func);
+	thread_init_stack(thread, func, data);
 
 	thread->pid = get_free_pid();
 	thread->state = THREAD_RUNNABLE;
@@ -111,14 +111,19 @@ struct thread *thread_create(void (*func)(), char *name)
 	return thread;
 }
 
-struct thread *thread_create_user(void (*func)(), char *name)
+struct thread *thread_create_user(thread_t func, char *name, void *data,
+		u32 cp, u32 dp)
 {
 	struct thread *thread;
 
-	thread = thread_create(func, name);
+	thread = thread_create(func, name, data);
 	if (thread) {
 		thread->map = memory_alloc(sizeof(struct mapping));
-		init_user_map(thread->map);
+		if (init_user_map(thread->map, cp, dp)) {
+			memory_release(thread->map);
+			/*thread_destroy(thread)*/
+			return NULL;
+		}
 	}
 
 	return thread;
