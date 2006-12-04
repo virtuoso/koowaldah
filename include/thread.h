@@ -47,6 +47,7 @@
 #define THREAD_WAIT     (0x8) /* sleeping on condition */
 
 typedef unsigned short prio_t;
+typedef void (*thread_t)(void *);
 
 struct thread {
 	/* scheduler data */
@@ -76,11 +77,15 @@ struct thread {
 };
 
 void dump_thread(struct thread *thread);
-struct thread *thread_create(void (*func)(), char *name);
-struct thread *thread_create_user(void (*func)(), char *name);
+struct thread *thread_create(thread_t func, char *name, void *data);
+struct thread *thread_create_user(thread_t func, char *name, void *data,
+		u32 cp, u32 dp);
+pid_t fork();
 
 /* arch */
 void thread_switch_to(struct thread *thread);
-void thread_switch_context(struct thread * from, struct thread * to);
+void thread_switch_context(struct thread *from, struct thread *to);
+void start_user(void);
+void start_user_forked(u32 eip, u32 ebp, u32 esp, u32 val);
 
 #endif /* __THREAD_H__ */
