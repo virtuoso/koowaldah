@@ -37,6 +37,8 @@
 /* allow kernel to consume 1/KERN_ALLOWANCE of available physical memory */
 #define KERN_ALLOWANCE 8
 
+#define USERMEM_VIRT 0x40000000
+
 /* page size, bits, mask, unmask */
 #define PAGE_SHIFT 12
 #define PAGE_SIZE (1UL << PAGE_SHIFT)
@@ -53,6 +55,9 @@
 #define PGD_MASK 0xffc00000
 #define PGT_MASK 0x003ff000
 
+#define PGDIDX(addr) ((addr) >> PGD_SHIFT)
+#define PGTIDX(addr) (((addr) & PGT_MASK) >> PGT_SHIFT)
+
 /* page table flags */
 #define PTF_PRESENT  (1 << 0)
 #define PTF_RW       (1 << 1)
@@ -63,11 +68,19 @@
 #define PTF_DIRTY    (1 << 6)
 /* more to come as needed */
 
+#define PTE_DESC(addr, attrs)      \
+	(                          \
+	 ((addr) << PAGE_SHIFT)  | \
+	 (attrs)                   \
+	)
+
 #ifndef __ASSEMBLY__
 /* memory mapping/page directory */
 struct mapping {
 	u32 *m_pgdir;
 	u32 *m_pgtable;
+	u32 m_cp;       /* code pages */
+	u32 m_dp;       /* data pages */
 };
 
 extern struct mapping root_map;
@@ -187,7 +200,7 @@ static inline u32 __virt2phys(u32 addr)
 }
 
 void copy_map(struct mapping *dst, struct mapping *map);
-void init_user_map(struct mapping *map);
+int init_user_map(struct mapping *map, u32 cp, u32 dp);
 void switch_map(struct mapping *from, struct mapping *to);
 
 static inline u8 inb(u16 port)
