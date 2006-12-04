@@ -76,10 +76,11 @@ static inline int idx_order(u32 index)
 
 
 extern struct mem_zone boot_zone;
+extern struct mem_zone user_zone;
 
 struct mem_info global_mem_info;
 
-void print_alloc_info()
+void print_alloc_info(struct mem_zone *zone)
 {
 	int i;
 	int total = 0;
@@ -87,24 +88,22 @@ void print_alloc_info()
 	for(i = 0; i < MAX_ORDER; i++) {
 		int j = 0;
 		
-		struct klist0_node * tmp;
-		struct page * pg;
+		struct klist0_node *tmp;
+		struct page *pg;
 		
 		kprintf("Alloc level %d:", i);
-		klist0_for_each(tmp, &boot_zone.alloc_levels[i]) {
+		klist0_for_each(tmp, &zone->alloc_levels[i]) {
 			pg = klist0_entry(tmp, struct page, list);
 			kprintf(" [0x%x - 0x%x(lvl %d)]",
-				pg->index * PAGE_SIZE,
-				(pg->index + (1 << i) - 1) * PAGE_SIZE,
+				(u32)zone->base + pg->index * PAGE_SIZE,
+				(u32)zone->base + (pg->index + (1 << i) - 1) * PAGE_SIZE,
 				idx_order(pg->index));
 
-			if (pg->private.order != i) {
+			if (pg->private.order != i)
 				bug();
-			}
 
-			if (idx_order(pg->index) < i){
+			if (idx_order(pg->index) < i)
 				bug();
-			}
 
 			j++;
 		}
@@ -117,11 +116,11 @@ void print_alloc_info()
 }
 
 
-void mem_zone_init(struct mem_zone * zone)
+void mem_zone_init(struct mem_zone *zone)
 {
 	u32 i;
 	u32 consumed_pages;
-	struct page * p_pool = (struct page *) zone->base;
+	struct page *p_pool = (struct page *) zone->base;
 
 	/* Init a struct page for each page in the zone. 
 	 * A number of pages is consumed to hold the array
@@ -133,9 +132,8 @@ void mem_zone_init(struct mem_zone * zone)
 		p_pool[i].index = i;
 	}
 
-	for (i = 0; i < MAX_ORDER; i++) {
+	for (i = 0; i < MAX_ORDER; i++)
 		KLIST0_INIT(&zone->alloc_levels[i]);
-	}
 
 	KLIST0_INIT(&zone->list);
 
@@ -171,11 +169,12 @@ void mem_zone_init(struct mem_zone * zone)
 
 		i += (1 << order);
 	}
+	kprintf("### last page base: %x\n", page_to_addr(&p_pool[zone->total_pages-1]));
 	
 	klist0_append(&zone->list, &global_mem_info.zone_list);
 	
 #if DEBUG
-	print_alloc_info();
+	print_alloc_info(zone);
 #endif
 	
 }
@@ -215,21 +214,22 @@ struct page * __alloc_pages(u32 flags, struct mem_zone * zone, u32 order)
 /*
  * Allocate 2^order pages.
  */
-inline struct page * alloc_pages(u32 flags, u32 order)
+inline struct page *alloc_pages(u32 flags, u32 order)
 {
-	return __alloc_pages(flags, &boot_zone, order);
+	struct mem_zone *zone = (flags & ZONE_USER) ? &user_zone : &boot_zone;
+	return __alloc_pages(flags, zone, order);
 }
 
-u32 * page_to_addr(struct page * page)
+u32 *page_to_addr(struct page *page)
 {
 	return (u32 *) (((char *) page->zone->base) + page->index * PAGE_SIZE);
 }
 
 
-struct page * addr_to_page(u32 * addr)
+struct page *addr_to_page(u32 *addr)
 {
-	struct klist0_node * tmp;
-	struct mem_zone * zone;
+	struct klist0_node *tmp;
+	struct mem_zone *zone;
 	/*
 	 * Traverse the global memory zone list to find a zone from which this
 	 * page was allocated.
