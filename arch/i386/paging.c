@@ -137,14 +137,14 @@ int init_user_map(struct mapping *map, u32 cp, u32 dp)
 	/* explicitly copy the root mapping */
 	copy_map(map, &root_map);
 
-	pgaddr = get_pages(ZONE_USER, log2(cp));
+	pgaddr = (u32)get_pages(ZONE_USER, log2(cp));
 	if (!pgaddr)
 		return -ENOMEM;
 
 	/*kprintf("### first user code page: %x\n", pgaddr);*/
 	map_pages(map, USERMEM_VIRT, pgaddr, cp, PTF_RW);
 
-	pgaddr = get_pages(ZONE_USER, log2(dp));
+	pgaddr = (u32)get_pages(ZONE_USER, log2(dp));
 	if (!pgaddr)
 		return -ENOMEM;
 
