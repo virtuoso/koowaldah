@@ -41,19 +41,32 @@ void _start()
 {
 	int fd, l;
 	unsigned short c;
-	char *p = (char *)0x40000000; /* 1GB virtual */
 
 	for (l = 0; l < 16; l++) buf[l] = '\0';
 	sys_debug("Init process starting!");
-	*p = 'z'; /* we shouldn't pagefault here */
 	fd = sys_open("/init", 0);
+	if (fd < 0)
+		sys_debug("can't open /init");
 	l = sys_read(fd, buf, 12);
 	sys_debug(buf);
 	sys_close(fd);
 
+	l = sys_fork();
+	if (l == 0)
+		sys_debug("CHILD");
+	else
+		sys_debug("PARENT!");
+
+	l = sys_fork();
+	if (l == 0)
+		sys_debug("CHILD[2]");
+	else
+		sys_debug("PARENT[2]!");
+
 	for (;;) {
 		sys_debug("waking up");
 		sys_tsleep(1000);
+		/*sys_yield();*/
 	}
 }
 
