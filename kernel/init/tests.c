@@ -590,7 +590,7 @@ static void test_kqueue()
 #ifdef OPT_TEST_THREADS
 extern int tsleep(u32 delay);
 
-static void func1()
+static void func1(void *data)
 {
 	for (;;) {
 		kprintf("A");
@@ -598,7 +598,7 @@ static void func1()
 	}
 }
 
-static void func2()
+static void func2(void *data)
 {
 	for (;;) {
 		kprintf("B");
@@ -612,7 +612,7 @@ static void test_threads()
 #ifdef OPT_TEST_THREADS
 	struct thread *thread;
 
-        thread = thread_create(&func1, "[thread A]");
+        thread = thread_create(&func1, "[thread A]", NULL);
         if (!thread) {
                 kprintf("failed to create thread\n");
 		bug();
@@ -625,7 +625,7 @@ static void test_threads()
         }
         kprintf("Thread A added to run queue.\n");
 
-        thread = thread_create(&func2, "[thread B]");
+        thread = thread_create(&func2, "[thread B]", NULL);
         if (!thread) {
                 kprintf("failed to create thread\n");
 		bug();
@@ -803,55 +803,14 @@ static void test_fslookup()
 }
 
 
-#ifdef OPT_TEST_ROOTFS
-extern void start_user(void);
-
-/* big fat XXX */
-#include <i386/segments.h>
-extern struct tss_segment root_tss;
-
-static void init_thread()
-{
-	/* it is ABSOLUTELY obligatory to fill esp0 before switching */
-	__asm__ __volatile__("mov %%esp, %%eax\nmov %%eax, %0" :
-			"=r"(root_tss.esp0));
-	start_user();
-	bug();
-}
-#endif
-
 static void test_rootfs()
 {
 #ifdef OPT_TEST_ROOTFS
-	struct thread *thread;
 	struct direntry *dent;
-	struct inode *inode;
-	char *dst = (char *)0x40000000; /* _start() load address */
-	int i;
 
-	dent = lookup_path("/sbin/init");
-	if (!dent) {
-		kprintf("Init not found.\n");
-		panic();
-	}
-
-	inode = dent->d_inode;
-
-        thread = thread_create_user(&init_thread, "init");
-        if (!thread) {
-                kprintf("failed to create thread\n");
-		bug();
-        }
-
-	/* "load" init process where it belongs */
-	switch_map(&root_map, thread->map);
-	i = memory_copy(dst, page_to_addr(inode->i_map.i_pages[1]), 4096);
-	switch_map(thread->map, &root_map);
-
-        if (scheduler_enqueue(thread)) {
-                kprintf("failed to add thread to run queue\n");
-		bug();
-        }
+	dent = lookup_path("/dev/console");
+	if (!dent)
+		kprintf("/dev/console not found.\n");
 #endif
 }
 
