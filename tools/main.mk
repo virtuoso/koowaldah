@@ -27,58 +27,53 @@ OBJ2SRC = $(subst .o,.c,$(subst $(OBJDIR)/$(subst /,+,$(THISDIR))+,,$(1)))
 # the same, but convert dependency file names instead
 DEP2SRC = $(subst +,/,$(subst .d,.c,$(subst $(OBJDIR)/$(subst /,+,$(THISDIR))+,,$(1))))
 
+include $(PRJROOT)/tools/verbosity.mk
+
 # functions that do actual work
 # -----------------------------
 # call compiler to generate dependencies file
 # $(1) -- .c source
 # $(2) -- .o output
 # $(3) -- CFLAGS to use
-DO_GENDEPS = echo -n "  GENDEPS  $(1)... "; \
+DO_GENDEPS = \
 	$(CC) -M $(3) -c $(1) -MT $(2:.d=.o) -MF $(2); \
+	$(call OUTPUT,$(CC) -M $(3) -c $(1) -MT $(2:.d=.o) -MF $(2),GENDEPS $(1)... ); \
 	if [ $$? != "0" ]; then \
-		echo "FAILED"; \
 		false; \
-	else \
-		echo "OK"; \
 	fi
 
 # call compiler to generate an object file
 # $(1) -- .c source
 # $(2) -- .o output
 # $(3) -- CFLAGS to use
-DO_CC = echo -n "  CC  $(1)... "; \
+# echo -n "  CC  $(1)... ";
+DO_CC = \
 	$(CC) $(3) -c $(1) -o $(2); \
+	$(call OUTPUT,$(CC) $(3) -c $(1) -o $(2),CC $(1)... ); \
 	if [ $$? != "0" ]; then \
-		echo "FAILED"; \
 		false; \
-	else \
-		echo "OK"; \
 	fi
 
 # call linker
 # $(1) -- list of objects to link
 # $(2) -- output
 # $(3) -- linker options
-DO_LINK = echo -n "  LD $(2)... "; \
+DO_LINK = \
 	$(LD) $(3) -o $(2) $(1); \
+	$(call OUTPUT,$(LD) $(3) -o $(2) $(1),LD $(1)... ); \
 	if [ $$? != "0" ]; then \
-		echo "FAILED"; \
 		false; \
-	else \
-		echo "OK"; \
 	fi
 
 # call assembler
 # $(1) -- input
 # $(2) -- output
 # $(3) -- options
-DO_ASM =  echo -n "  AS $(1)... "; \
+DO_ASM = \
 	$(ASM) -D__ASSEMBLY__ $(3) -c $(1) -o $(2); \
+	$(call OUTPUT,$(ASM) -D__ASSEMBLY__ $(3) -c $(1) -o $(2),AS $(1)... ); \
 	if [ $$? != "0" ]; then \
-		echo "FAILED"; \
 		false; \
-	else \
-		echo "OK"; \
 	fi
 
 # rules to build, clean etc
