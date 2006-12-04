@@ -140,8 +140,6 @@ int scheduler_enqueue(struct thread *thread)
  */
 int scheduler_dequeue_nolock(struct thread *thread)
 {
-	disable_interrupts();
-
 	/* likewise */
 	if (klist0_empty(&thread->krunq))
 		bug();
@@ -149,8 +147,6 @@ int scheduler_dequeue_nolock(struct thread *thread)
 	klist0_unlink(&thread->krunq);
 	if (reg_sched->dequeue)
 		reg_sched->dequeue(thread);
-
-	enable_interrupts();
 
 	return 0;
 }
