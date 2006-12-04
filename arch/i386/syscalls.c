@@ -62,6 +62,13 @@ u32 __attribute__((regparm(0))) sys_call_gate(u32 eax, u32 ebx, u32 ecx, u32 edx
 		case 5:
 			return tsleep(ebx);
 
+		case 6:
+			return fork();
+
+		case 7:
+			scheduler_yield();
+			return 0;
+
 		default:
 			kprintf("syscall %d not implemented\n", eax);
 			arch_display_thread();
