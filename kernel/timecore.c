@@ -113,7 +113,7 @@ static void tsleep_alarm(void *data)
 {
 	struct thread *thread = (struct thread *)data;
 
-	scheduler_enqueue(thread);
+	scheduler_enqueue_nolock(thread);
 	thread->state = THREAD_RUNNABLE;
 }
 
@@ -127,7 +127,7 @@ int tsleep(u32 delay)
 
 	/* remove the thread from scheduler's candidates */
 	thread->state = 0;
-	scheduler_dequeue(thread);
+	scheduler_dequeue_nolock(thread);
 	//thread->state &= ~THREAD_RUNNABLE;
 	//thread->state = THREAD_WAIT;
 
@@ -135,9 +135,11 @@ int tsleep(u32 delay)
 	ret = register_timer(tsleep_alarm, delay, (void *)thread);
 
 	/* quit running immediately */
-	if (!ret)
+	if (!ret) {
+		enable_interrupts();
 		scheduler_yield();
-	enable_interrupts();
+	} else
+		enable_interrupts();
 
 	return ret;
 }
