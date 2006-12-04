@@ -31,13 +31,16 @@
  * 
  */
 #ifndef __MM_ZONE_H__
-#define __MM_ZOME_H__
+#define __MM_ZONE_H__
 
 #include <page_alloc.h>
 #include <klist0.h>
 
+#define ZONE_BOOT 0x0
+#define ZONE_USER 0x1
+
 struct mem_zone {
-	u32 * base;
+	u32 *base;
 	u32 total_pages;
 	u32 free_pages;
 	struct klist0_node alloc_levels[MAX_ORDER];
