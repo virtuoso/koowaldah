@@ -44,15 +44,19 @@
 #include <mm.h>
 #include <timer.h>
 #include <i386/asm.h>
+#include <i386/segments.h>
 
 extern void do_thread_switch_context(u32 *from, u32 *to);
 extern void do_thread_switch_to(u32 *to);
+extern struct tss_segment root_tss;
 
-void thread_init_stack(struct thread *t, void (*func)(void))
+void thread_init_stack(struct thread *t, thread_t func, void *data)
 {
 	u32 *stack = (u32 *)(tctx(t).esp);
 	int i;
 	
+	*stack-- = (u32)data;
+	*stack-- = 0;
 	*stack-- = (u32)func;
 	*stack = read_eflags();
 	for(i = 0; i < 8; i++)
@@ -82,6 +86,7 @@ void thread_switch_context(struct thread *from, struct thread *to)
 
 	esp_from = &tctx(from).esp;
 	esp_to = &tctx(to).esp;
+	root_tss.esp0 = tctx(to).esp;
 
 	if (from->map != to->map)
 		switch_map(from->map, to->map);
