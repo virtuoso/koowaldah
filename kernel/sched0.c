@@ -41,8 +41,6 @@
 #include <thread.h>
 #include <klist0.h>
 
-extern u64 jiffies;
-
 struct sched0_runqueue {
 	/* struct thread, linked via krunq */
 	struct klist0_node queue;
