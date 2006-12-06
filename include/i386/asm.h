@@ -75,6 +75,7 @@
 	)
 
 #ifndef __ASSEMBLY__
+
 /* memory mapping/page directory */
 struct mapping {
 	u32 *m_pgdir;
@@ -235,22 +236,22 @@ static inline u32 read_eflags()
 	return f;
 }
 
-static inline u32 write_eflags()
+static inline void write_eflags(u32 f)
 {
-	u32 f;
 	__asm__ __volatile__("pushl %0; popfl" : : "r"(f));
-	return f;
+}
+#define EFLAGS_IF	0x0200
+
+static inline void local_irq_disable()
+{
+        __asm__ __volatile__ ("cli");
 }
 
-static inline void disable_interrupts()
+static inline void local_irq_enable()
 {
-        asm volatile ("cli");
+        __asm__ __volatile__ ("sti");
 }
 
-static inline void enable_interrupts()
-{
-        asm volatile ("sti");
-}
 #endif /* __ASSEMBLY__ */
 
 #endif /* __ARCH_ASM_H__ */
