@@ -38,7 +38,7 @@
 #include <textio.h>
 #include <i386/asm.h>
 
-u64 jiffies;
+u64 __volatile__ jiffies;
 
 #define TIMER_COMMAND_PORT 0x43
 #define TIMER_COUNTER_0_PORT 0x40
