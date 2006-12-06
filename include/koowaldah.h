@@ -37,7 +37,7 @@
 #include <types.h>
 #include <config.h>
 
-extern u64 jiffies;
+extern u64 __volatile__ jiffies;
 extern u8 kernel_started;
 
 /* kernel component name length */
