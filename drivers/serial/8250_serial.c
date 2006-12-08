@@ -33,6 +33,7 @@
 
 #include <koowaldah.h>
 #include <bug.h>
+#include <irq.h>
 #include <arch/asm.h>
 #include <thread.h>
 #include <file.h>
@@ -73,9 +74,7 @@
 #define LSR_EMPT_DHR	(1 << 6) /* Empty Data Holding Registers */
 #define LSR_EFIFO	(1 << 7) /* Error in Received FIFO */
 
-
-/* Blame pc-kbd.c */
-static struct thread *sleeper = NULL;
+static struct thread_queue tq;
 
 static struct kqueue_t *read_queue = NULL;
 static struct kqueue_t *write_queue = NULL;
@@ -96,19 +95,21 @@ int serial_8250_open(struct file *file)
 		kqueue_destroy(read_queue);
 		return -ENOMEM;
 	}
-	
+
+	tq_init(&tq);
+
 	return 1;
 }
 
 int serial_8250_close(struct file *file)
 {
-	sleeper = NULL;
-
-
 	kqueue_destroy(read_queue);
 	/* Should we delay the write queue destruction? Later. */
 	kqueue_destroy(write_queue);
-	
+
+	/* There should be no threads waiting. */
+	bug_on(scheduler_enqueue(&tq));
+
 	return 0;
 }
 
@@ -129,18 +130,12 @@ int serial_8250_read(struct file *file, char *buf, off_t size)
 
 		if (!t) {
 			/* No bytes yet arrived, take a break */
-			struct thread *thread = CURRENT();
-
 			DPRINT("No bytes to read, goind to sleep.\n");
-		
-			thread->state = 0;
-			scheduler_dequeue(thread);
-			sleeper = thread;
-			enable_interrupts(); 
+
+			scheduler_dequeue(&tq);
 			scheduler_yield();
 		}
 	}
-	sleeper = NULL;
 
 	return num_read;
 }
@@ -174,17 +169,12 @@ int serial_8250_write(struct file *file, char *buf, off_t size)
 	enable_tx_irq();
 
 	while (kqueue_size(write_queue)) {
-		struct thread *thread = CURRENT();
-
 		DPRINT("Sleep until all those bytes are written.\n");
-	
-		thread->state = 0;
-		scheduler_dequeue(thread);
-		sleeper = thread;
-		enable_interrupts(); 
+
+		scheduler_dequeue(&tq);
 		scheduler_yield();
 	}
-	
+
 	return size;
 }
 
@@ -205,13 +195,9 @@ static void serial_8250_intr(u32 number)
 
 		if (read_queue) {
 			kqueue_push(read_queue, (char *)&c, 1);
-			if (sleeper) {
-				scheduler_enqueue(sleeper);
-				sleeper->state = THREAD_RUNNABLE;
-				sleeper = NULL;
-			}
+			scheduler_enqueue(&tq);
 		}
-	
+
 	} else if (line_status & (LSR_EMPT_THR | LSR_EMPT_DHR)) {
 		int t;
 		if (write_queue) {
@@ -224,12 +210,7 @@ static void serial_8250_intr(u32 number)
 				outb(SERIO_1_BASE, c);
 			} else {
 				disable_tx_irq();
-				
-				if (sleeper) {
-					scheduler_enqueue(sleeper);
-					sleeper->state = THREAD_RUNNABLE;
-					sleeper = NULL;
-				}
+				scheduler_enqueue(&tq);
 			}
 		} else {
 			/* Should no be reachable at all. */
@@ -262,28 +243,25 @@ static struct device serial_8250_dev = {
 int __init serial_8250_load()
 {
 	kprintf("Loading the serial 8250 driver.\n");
-	disable_interrupts();
-	
-	register_irq_handler(SERIO_1_IRQ, serial_8250_intr);
-	
+
+
 	outb(SERIO_1_BASE + 3, 0x80); /* DLAB = 1 */
 
 	/* When DLAB is set, reg0 and reg1 are used to set the baud rate. */
 	outb(SERIO_1_BASE + 0, 1); /* Baud rate divisor, low byte. */
 	outb(SERIO_1_BASE + 1, 0); /* Baud rate divisor, high byte. */
-	
-	outb(SERIO_1_BASE + 3, 0x03);	/* Bits = 8
-						 * Stopbits = 1
-						 * Flow control = none
-						 * DLAB = 0 */
-	
-	/* Now DLAB is unset and we use reg1 as the Interrupt Enable Register.*/
-	outb(SERIO_REG_IER, IER_RX); 
-	outb(SERIO_REG_MCR, 0x00); /* No modem control */
-	
-	register_device(&serial_8250_dev);
 
-	enable_interrupts();
+	outb(SERIO_1_BASE + 3, 0x03);	/* Bits = 8
+					 * Stopbits = 1
+					 * Flow control = none
+					 * DLAB = 0 */
+
+	/* Now DLAB is unset and we use reg1 as the Interrupt Enable Register.*/
+	outb(SERIO_REG_IER, IER_RX);
+	outb(SERIO_REG_MCR, 0x00); /* No modem control */
+
+	register_irq_handler(SERIO_1_IRQ, serial_8250_intr);
+	register_device(&serial_8250_dev);
 
 	kprintf("Serial driver for the 8250 loaded.\n");
 
