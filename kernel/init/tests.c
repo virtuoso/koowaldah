@@ -588,24 +588,22 @@ static void test_kqueue()
 #endif /* OPT_TEST_KQUEUE */
 }
 
-#ifdef OPT_TEST_THREADS
-
-static void func1(void *data)
+static void __future func1(void *data)
 {
 	for (;;) {
 		kprintf("A");
 		tsleep(50);
 	}
+
 }
 
-static void func2(void *data)
+static void __future func2(void *data)
 {
 	for (;;) {
 		kprintf("B");
 		tsleep(70);
 	}
 }
-#endif /* OPT_TEST_THREADS */
 
 static void test_threads()
 {
@@ -626,6 +624,7 @@ static void test_threads()
         scheduler_enqueue(&q);
 
         kprintf("Thread A added to run queue.\n");
+
         thread = thread_create(&func2, "[thread B]", NULL);
         if (!thread) {
                 kprintf("failed to create thread\n");
@@ -741,7 +740,7 @@ static void test_serial()
 	struct thread *thread;
 	struct thread_queue q;
 
-	thread = thread_create(&do_test_serial, "[serial]");
+	thread = thread_create(&do_test_serial, "[serial]", NULL);
 	if (!thread)
 		bug();
 
@@ -759,7 +758,7 @@ static void test_pckbd()
 	struct thread *thread;
 	struct thread_queue q;
 
-        thread = thread_create(&kbd_reader, "[keyboard]");
+        thread = thread_create(&kbd_reader, "[keyboard]", NULL);
         if (!thread) {
                 kprintf("failed to create thread\n");
 		bug();
