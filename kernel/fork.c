@@ -57,6 +57,7 @@ pid_t fork()
 {
 	struct thread *thread;
 	struct thread *me = CURRENT();
+	struct thread_queue tmp_q;
 	u32 virt = USERMEM_VIRT, phys, i;
 	u32 *p = __builtin_frame_address(1);
 
@@ -74,8 +75,10 @@ pid_t fork()
 		virt += PAGE_SIZE;
 	}
 
-	if (scheduler_enqueue(thread))
-		bug();
+	tq_init(&tmp_q);
+	tq_insert_head(thread, &tmp_q);
+
+	bug_on(!scheduler_enqueue(&tmp_q));
 
 	return thread->pid;
 }
