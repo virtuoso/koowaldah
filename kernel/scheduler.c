@@ -1,3 +1,4 @@
+
 /*
  * kernel/scheduler.c
  *
@@ -38,6 +39,7 @@
 #include <klist0.h>
 #include <sys/errno.h>
 #include <scheduler.h>
+#include <spinlock.h>
 #include <thread.h>
 #include <bug.h>
 
@@ -57,9 +59,12 @@ static struct cpu_scheduler *reg_sched = NULL;
 static int sched_active = 0;
 
 /* system-wide list of threads */
-struct klist0_node thread_list;
+struct thread_queue thread_list;
 
 struct klist0_node krunqueue;
+
+u32 need_reschedule;
+struct thread *next_thread;
 
 /*
  * List all threads in the system
@@ -70,14 +75,17 @@ void list_threads()
 	struct klist0_node *t;
 	struct thread *thread;
 	int i = 0;
+	u32 flags;
 
-	klist0_for_each(t, &thread_list) {
+	spin_lock_irqsave(&thread_list.lock, flags);
+	klist0_for_each(t, &thread_list.threads) {
 		thread = klist0_entry(t, struct thread, kthreads);
 		kprintf("# [%s] pid=%d, state=%x, last_tick=%d\n",
 				thread->name, thread->pid,
 				thread->state, thread->last_tick);
 		if (i++ > MAX_THREADS) bug();
 	}
+	spin_unlock_irqrestore(&thread_list.lock, flags);
 }
 
 /*
@@ -90,6 +98,7 @@ int register_cpusched(struct cpu_scheduler *sched)
 	if (!sched           ||
 	    !sched->name     ||
 	    !sched->enqueue  ||
+	    !sched->dequeue  ||
 	    !sched->tick     ||
 	    !sched->yield    ||
 	    !sched->schedule ||
@@ -107,92 +116,63 @@ int register_cpusched(struct cpu_scheduler *sched)
 	return 0;
 }
 
-/*
- * Add the thread to the execution queue.
- * Make sure it is not listed in any other run/waitqueue or
- * I will bite.
- */
-int scheduler_enqueue_nolock(struct thread *thread)
+int scheduler_enqueue(struct thread_queue *from_q)
 {
-	/* a thread should be removed from any run/waitqueues */
-	if (!klist0_empty(&thread->krunq)) {
-		dump_thread(thread);
-		bug();
-	}
-	reg_sched->enqueue(thread);
-
-	return 0;
-}
-
-int scheduler_enqueue(struct thread *thread)
-{
-	int r;
-
-	disable_interrupts();
-	r = scheduler_enqueue_nolock(thread);
-	enable_interrupts();
-
-	return r;
+	bug_on(!reg_sched->enqueue);
+	return reg_sched->enqueue(from_q);
 }
 
 /*
- * Dequeue the thread.
+ * Move the CURRENT thread to the tail of to_q.
  */
-int scheduler_dequeue_nolock(struct thread *thread)
+void scheduler_dequeue(struct thread_queue *to_q)
 {
-	/* likewise */
-	if (klist0_empty(&thread->krunq))
-		bug();
+	bug_on(!reg_sched->dequeue);
 
-	klist0_unlink(&thread->krunq);
-	if (reg_sched->dequeue)
-		reg_sched->dequeue(thread);
-
-	return 0;
-}
-
-int scheduler_dequeue(struct thread *thread)
-{
-	int r;
-
-	disable_interrupts();
-	r = scheduler_dequeue_nolock(thread);
-	enable_interrupts();
-
-	return r;
+	reg_sched->dequeue(to_q);
 }
 
 void scheduler_tick()
 {
-	/* disable_interrupts(); */
+	bug_on(!reg_sched->tick);
+
 	reg_sched->tick();
-	/* enable_interrupts(); */
 }
 
 void scheduler_yield()
 {
+	bug_on(!reg_sched->yield);
+
 	reg_sched->yield();
 }
 
 void schedule()
 {
+	bug_on(!reg_sched->schedule);
+
 	reg_sched->schedule();
 }
 
 void scheduler_start()
 {
+	bug_on(!reg_sched->start);
+
 	sched_active = 1;
 	reg_sched->start();
 }
 
 void scheduler_stop()
 {
+	bug_on(!reg_sched->stop);
+
 	reg_sched->stop();
 	sched_active = 0;
 }
 
 void scheduler_init()
 {
-	KLIST0_INIT(&thread_list);
+	KLIST0_INIT(&thread_list.threads);
+	spinlock_init(&thread_list.lock);
+	need_reschedule = 0;
 }
 

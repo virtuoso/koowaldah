@@ -1,8 +1,10 @@
+
 /*
  * kernel/sched0.c
  *
  * Copyright (C) 2006 Alexander Shishkin
- * 
+ * Copyright (C) 2006 Alexey Zaytsev
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -41,66 +43,107 @@
 #include <thread.h>
 #include <klist0.h>
 
-struct sched0_runqueue {
-	/* struct thread, linked via krunq */
-	struct klist0_node queue;
-	u32 count;
+struct sched0_runqueue { /* Not mush stuff here, yet. */
+	struct thread_queue queue;
 };
 
 static struct sched0_runqueue rq;
 
-void sched0_enqueue(struct thread *thread)
+int sched0_enqueue(struct thread_queue *from_q)
 {
-	thread->quantum = SCHED_MAX_QUANTUM;
-	klist0_append(&thread->krunq, &rq.queue);
-	rq.count++;
+	struct thread *t;
+	struct thread_queue *to_q = &rq.queue;
+	u32 flags;
+
+	local_irq_save(flags);
+
+	spin_lock(&from_q->lock);
+	t = __tq_remove_head(from_q);
+	spin_unlock(&from_q->lock);
+
+	if (t) {
+		t->quantum = SCHED_MAX_QUANTUM;
+		spin_lock(&to_q->lock);
+		__tq_insert_head(t, &rq.queue);
+		spin_unlock(&to_q->lock);
+	}
+
+	local_irq_restore(flags);
+
+	return !!t;
 }
 
-void sched0_dequeue(struct thread *thread)
+void sched0_dequeue(struct thread_queue *to_q)
 {
-	rq.count--;
-	thread->quantum = SCHED_MIN_QUANTUM;
+	u32 flags;
+	struct thread *current, *next;
+	struct thread_queue *from_q = &rq.queue;
+
+	local_irq_save(flags);
+
+	current = CURRENT();
+	bug_on(current->krunq_head != from_q);
+
+	spin_lock(&from_q->lock);
+	__tq_remove_thread(current);
+	next = __tq_remove_head(from_q);
+	bug_on(!next);
+	__tq_insert_tail(next, from_q);
+	spin_unlock(&from_q->lock);
+
+	current->quantum = SCHED_MAX_QUANTUM;
+	current->last_tick = jiffies;
+
+	spin_lock(&to_q->lock);
+	__tq_insert_tail(current, to_q);
+	spin_unlock(&to_q->lock);
+
+	local_irq_restore(flags);
 }
 
-/* fairly simple */
+/* Is only called from interrupt context. */
 void __noprof sched0_tick()
 {
-	struct thread *thread = CURRENT();
-	struct thread *next;
+	struct thread *prev, *next;
+	prev = CURRENT();
 
+	bug_on(tq_is_empty(&rq.queue));
 
-	/* this will hardly ever happen */
-	if (klist0_empty(&rq.queue))
-		bug();
+	if (!--prev->quantum) {
+		prev->quantum = SCHED_MAX_QUANTUM;
 
-	/* the thread ran out of time */
-	if ((thread->state & THREAD_RUNNABLE) && !--thread->quantum) {
-		thread->quantum = SCHED_MAX_QUANTUM;
-		klist0_unlink(&thread->krunq);
-		klist0_prepend(&thread->krunq, &rq.queue);
+		spin_lock(&rq.queue.lock);
+		next = __tq_remove_head(&rq.queue);
+		bug_on(!next);
+		__tq_insert_tail(next, &rq.queue);
+		spin_unlock(&rq.queue.lock);
 
-		if (thread->krunq.next == &rq.queue)
-			next = klist0_entry(rq.queue.next,
-					struct thread, krunq);
-		else
-			next = klist0_entry(thread->krunq.next,
-					struct thread, krunq);
-		thread->last_tick = jiffies;
-		/* in fact, we always have at least idle thread available */
-		thread_switch_context(thread, next);
+		if (prev != next) {
+			need_reschedule = 1;
+			next_thread = next;
+		}
 	}
+
+	prev->last_tick = jiffies;
 }
 
 void sched0_yield()
 {
-	struct thread *cur = CURRENT();
-	struct thread *next = klist0_entry(rq.queue.next,
-			struct thread, krunq);
+	struct thread *next, *prev;
+	u32 flags;
 
-	next->quantum = MAX(next->quantum + cur->quantum, (u32)SCHED_MAX_QUANTUM);
-	cur->quantum = SCHED_MIN_QUANTUM;
-	cur->last_tick = jiffies;
-	thread_switch_context(cur, next);
+	prev = CURRENT();
+
+	prev->quantum = SCHED_MAX_QUANTUM;
+	prev->last_tick = jiffies;
+
+	spin_lock_irqsave(&rq.queue.lock, flags);
+	next = __tq_remove_head(&rq.queue);
+	bug_on(!next);
+	__tq_insert_tail(next, &rq.queue);
+	spin_unlock_irqrestore(&rq.queue.lock, flags);
+
+	thread_switch_context(prev, next);
 }
 
 void sched0_schedule()
@@ -109,7 +152,7 @@ void sched0_schedule()
 
 void sched0_start()
 {
-	sched0_yield();
+	/* sched0_yield(); */
 }
 
 void sched0_stop()
@@ -118,8 +161,7 @@ void sched0_stop()
 
 void sched0_init()
 {
-	KLIST0_INIT(&rq.queue);
-	rq.count = 0;
+	tq_init(&rq.queue);
 }
 
 void sched0_exit()
