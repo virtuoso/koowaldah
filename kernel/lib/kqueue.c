@@ -111,11 +111,13 @@ size_t kqueue_size(struct kqueue_t *q)
 size_t queue_shrink(struct kqueue_t *q, size_t len)
 {
 	bug();
+	return 0;
 }
 
 size_t queue_shrink_tail(struct kqueue_t *q, size_t len)
 {
 	bug();
+	return 0;
 }
 
 int kqueue_push(struct kqueue_t *q, char *data, size_t len)
