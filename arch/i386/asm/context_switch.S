@@ -1,7 +1,7 @@
+
 /*
- *
  *  arch/i386/context_switch.S
- * 
+ *
  *  Copyright (C) 2006 Alexey Zaytsev
  *  
  *  Redistribution and use in source and binary forms, with or without
@@ -32,34 +32,66 @@
 
 #include <i386/segments.h>
 
+/*
+ * The saved stack should look like:
+ * | .......... |
+ * | .......... |
+ * |   EFLAGS   |
+ * | SEGMENT ID |
+ * |  RET ADDR  |
+ * |    EAX     |
+ * |    ECX     |
+ * |    EDX     |
+ * |    EBX     |
+ * |    ESP     |
+ * |    EBP     |
+ * |    ESI     |
+ * |    EDI     |
+ * `------------
+ *
+ * Because we want both direct and deffered
+ * context switches, and on interrupt, we get:
+ *
+ * | .......... |
+ * | .......... |
+ * |   EFLAGS   |
+ * | SEGMENT ID |
+ * |  RET ADDR  |
+ * `------------
+ *
+ * we toss the stack in the direct switch case, because
+ * it's considered to be the less frequent one.
+ *
+ */
+
 .globl do_thread_switch_context
 do_thread_switch_context:
-	pushf 
+/*
+ * This function is marked with __attrubute__ ((regparm(2))), so it's
+ * arguments are passed in %eax and %edx, and not on the stack.
+ */
+	pop %ebx
+	pushf
+	pushl %cs
+	pushl %ebx
 	pusha
-
-	movl 0x28(%esp), %eax
-	movl %esp, (%eax)
-	movl 0x2c(%esp), %eax
-	movl (%eax), %esp
+	movl %esp, (%eax)	/* Save the current stack */
+	movl (%edx), %esp	/* Load a new one */
 	popa
-	popf 
-	ret
+	iret
 
 /*
- * This functions does not save the current conteext. Its only purpose is to 
- * run main kernel thread during system initialization.
+ * This function does not save the current context. Its only purpose is to
+ * run the main kernel thread during system initialization.
  */
 
 .globl do_thread_switch_to
 do_thread_switch_to:
-	pushf
-	pusha
-	movl 0x28(%esp), %eax
+	/* Yes, we also use registers to pass params. */
 	movl %eax, %esp
 	popa
-	popf
-	ret
-	
+	iret
+
 /* XXX: stuff hardcoded until we have a proper elf parser */
 .globl start_user
 start_user:

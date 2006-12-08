@@ -1,7 +1,7 @@
 /*
  * arch/i386/asm/irq.S
  *
- * Copyright (C) 2005 Alexey Zaytsev
+ * Copyright (C) 2005, 2006 Alexey Zaytsev
  *
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions
@@ -31,12 +31,14 @@
 
 .extern main_irq_handler
 
-#define irqhandle(n) \
-.globl irq_pre_handler ## n; \
-irq_pre_handler ## n: \
-	pusha; \
-	pushl $##n; \
-	jmp quit_irq
+.extern need_reschedule
+
+#define irqhandle(n)		\
+.globl irq_pre_handler ## n;	\
+irq_pre_handler ## n:		\
+	pusha;			\
+	pushl $##n;		\
+	jmp do_handle_irq
 
 irqhandle(0)
 irqhandle(1)
@@ -55,9 +57,18 @@ irqhandle(13)
 irqhandle(14)
 irqhandle(15)
 
-quit_irq:
+do_handle_irq:
 	call main_irq_handler
 	popl %eax
+	movl need_reschedule, %eax
+	test %eax, %eax
+	jz quit
+	xor %eax, %eax
+	movl %eax, need_reschedule
+	push %esp
+	call prepare_deffered_context_switch
+	movl %eax, %esp
+quit:
 	popa
 	iret
 
