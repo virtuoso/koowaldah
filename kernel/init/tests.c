@@ -40,7 +40,7 @@
 #include <arch/asm.h>
 #include <arch/isr.h>
 #include <irq.h>
-#include <timer.h>
+#include <timers.h>
 #include <textio.h>
 #include <klist.h>
 #include <thread.h>
@@ -49,6 +49,7 @@
 #include <lib.h>
 #include <bug.h>
 #include <kqueue.h>
+#include <spinlock.h>
 
 struct page *pages[2048];
 
@@ -588,7 +589,6 @@ static void test_kqueue()
 }
 
 #ifdef OPT_TEST_THREADS
-extern int tsleep(u32 delay);
 
 static void func1(void *data)
 {
@@ -611,6 +611,9 @@ static void test_threads()
 {
 #ifdef OPT_TEST_THREADS
 	struct thread *thread;
+	struct thread_queue q;
+
+	tq_init(&q);
 
         thread = thread_create(&func1, "[thread A]", NULL);
         if (!thread) {
@@ -619,12 +622,10 @@ static void test_threads()
         }
         kprintf("Thread A created.\n");
 
-        if (scheduler_enqueue(thread)) {
-                kprintf("failed to add thread to run queue\n");
-		bug();
-        }
-        kprintf("Thread A added to run queue.\n");
+	tq_insert_head(thread, &q);
+        scheduler_enqueue(&q);
 
+        kprintf("Thread A added to run queue.\n");
         thread = thread_create(&func2, "[thread B]", NULL);
         if (!thread) {
                 kprintf("failed to create thread\n");
@@ -632,10 +633,9 @@ static void test_threads()
         }
         kprintf("Thread B created.\n");
 
-        if (scheduler_enqueue(thread)) {
-                kprintf("failed to add thread to run queue\n");
-		bug();
-        }
+	tq_insert_head(thread, &q);
+
+        scheduler_enqueue(&q);
         kprintf("Thread B added to run queue.\n");
 #endif /* OPT_TEST_THREADS */
 }
@@ -739,11 +739,14 @@ static void test_serial()
 {
 #ifdef OPT_TEST_SERIAL
 	struct thread *thread;
-	
+	struct thread_queue q;
+
 	thread = thread_create(&do_test_serial, "[serial]");
 	if (!thread)
 		bug();
-	if (scheduler_enqueue(thread)) {
+
+	tq_insert_head(thread, &q);
+	if (!scheduler_enqueue(&q)) {
 		bug();
 	}
 #endif
@@ -754,6 +757,7 @@ static void test_pckbd()
 {
 #ifdef OPT_TEST_PCKBD
 	struct thread *thread;
+	struct thread_queue q;
 
         thread = thread_create(&kbd_reader, "[keyboard]");
         if (!thread) {
@@ -762,7 +766,9 @@ static void test_pckbd()
         }
         kprintf("Thread keyboard created.\n");
 
-        if (scheduler_enqueue(thread)) {
+	tq_insert_head(thread, &q);
+
+        if (!scheduler_enqueue(&q)) {
                 kprintf("failed to add thread to run queue\n");
 		bug();
         }
