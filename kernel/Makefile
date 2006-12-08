@@ -3,6 +3,7 @@ SOURCES := \
 	textio.c \
 	thread.c \
 	fork.c \
+	thread_queue.c \
 	scheduler.c \
 	sched0.c \
 	timecore.c \

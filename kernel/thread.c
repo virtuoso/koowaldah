@@ -1,8 +1,10 @@
+
 /*
  * kernel/thread.c
  *
  * Copyright (C) 2006 Alexander Shishkin
- * 
+ * Copyright (C) 2006 Alexey Zaytsev
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -39,6 +41,7 @@
 #include <thread.h>
 #include <bug.h>
 #include <klist0.h>
+#include <spinlock.h>
 #include <scheduler.h>
 #include <lib.h>
 #include <page_alloc.h>
@@ -71,7 +74,8 @@ struct thread *thread_create(thread_t func, char *name, void *data)
 {
 	void *page;
 	struct thread *thread;
-	
+	u32 flags;
+
 	/* allocate stack space */
 	page = get_pages(/*THREAD_STACK_LIMIT/PAGE_SIZE*/0, 0);
 	if (!page) {
@@ -96,7 +100,6 @@ struct thread *thread_create(thread_t func, char *name, void *data)
 	memory_copy(thread->name, name, THREAD_NAME_LEN);
 	KLIST0_INIT(&thread->kthreads);
 	KLIST0_INIT(&thread->krunq);
-	klist0_append(&thread->kthreads, &thread_list);
 	thread->ns = &root_ns;
 	thread->last_fd = 0;
 	KLIST0_INIT(&thread->files);
@@ -104,7 +107,11 @@ struct thread *thread_create(thread_t func, char *name, void *data)
 	/* use root memory mapping */
 	thread->map = &root_map;
 
-	/*kprintf("created thread, stack_base = %x, esp = %x, pid = %d\n", 
+	thread->krunq_head = NULL;
+	spin_lock_irqsave(&thread_list.lock, flags);
+	klist0_append(&thread->kthreads, &thread_list.threads);
+	spin_unlock_irqrestore(&thread_list.lock, flags);
+	/*kprintf("created thread, stack_base = %x, esp = %x, pid = %d\n",
 			(u32) (tctx(thread).stack_base),
 			(u32) (tctx(thread).esp), thread->pid);*/
 
