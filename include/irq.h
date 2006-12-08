@@ -35,6 +35,7 @@
 #define __INTERRUPTS_H__
 
 #include <arch/asm.h>
+#include <arch/irq.h>
 
 int register_irq_handler(u32 number, void (*handler)());
 void unregister_irq_handler(u32 number);
