@@ -67,8 +67,8 @@ void kqueue_init(void);
 /* this is also needed only once */
 void run_tests(void);
 
-extern void mach_start();
-extern void mach_running();
+void mach_start();
+void mach_running();
 
 void __init kern_start()
 {
@@ -90,13 +90,12 @@ void __init kern_start()
 
 	sched0_load();
 	scheduler_init();
-	
 	main_thread = thread_create(&kernel_main_thread, "GOD", NULL);
 	if (!main_thread) {
 		kprintf("Failed to create main kernel thread\n");
 		bug();
 	}
-	thread_switch_to(main_thread);	
+	thread_switch_to(main_thread);
 
 	bug();
 }
@@ -108,9 +107,7 @@ void __noprof call_late_init()
 {
 	initfn *fn;
 
-	if (&late_init_start == &late_init_end)
-		return;
-
+	kprintf("Late init.\n");
 	for (fn = &late_init_start; fn < &late_init_end; fn++)
 		if ((*fn)() != 0)
 			kprintf("Late-init function %x failed\n", *fn);
@@ -133,6 +130,7 @@ static void __attribute__((noreturn)) init_thread(void *data)
 static void load_init()
 {
 	struct thread *thread;
+	struct thread_queue tmp_q;
 	char *dst = (char *)USERMEM_VIRT;
 	struct direntry *dent;
 	struct inode *inode;
@@ -156,29 +154,27 @@ static void load_init()
 	memory_copy(dst, page_to_addr(inode->i_map.i_pages[1]), PAGE_SIZE);
 	switch_map(thread->map, &root_map);
 
-        if (scheduler_enqueue(thread)) {
-                kprintf("failed to add thread to run queue\n");
-		bug();
-        }
+	tq_init(&tmp_q);
+	tq_insert_head(thread, &tmp_q);
 
+        bug_on(scheduler_enqueue(&tmp_q));
 }
 
 void __noprof kernel_main_thread(void *data)
 {
-	struct thread *thread = CURRENT();
-	
-        if (scheduler_enqueue_nolock(thread)) {
-                kprintf("Failed to add main kernel thread to run queue\n");
-		bug();
-        }
+	struct thread *me = CURRENT();
+	struct thread_queue tmp_q;
+
+	tq_init(&tmp_q);
+	tq_insert_head(me, &tmp_q);
+
+	bug_on(!scheduler_enqueue(&tmp_q));
 
 	mach_running();
 
 	kprintf("Initializing vfs core... ");
 	fs_init();
 	kprintf("Done.\n");
-
-	scheduler_start();
 
 	call_late_init();
 
@@ -187,6 +183,8 @@ void __noprof kernel_main_thread(void *data)
 	load_init();
 
 	for (;;)
-		__asm__ __volatile__("sti; hlt");
+		scheduler_yield();
+
+	bug();
 }
 
