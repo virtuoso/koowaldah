@@ -72,7 +72,7 @@ u32 __attribute__((regparm(0))) sys_call_gate(u32 eax, u32 ebx, u32 ecx, u32 edx
 
 		default:
 			kprintf("syscall %d not implemented\n", eax);
-			arch_display_thread();
+			display_thread();
 			return -ENOSYS;
 	}
 	return -ENOSYS;
