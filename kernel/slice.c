@@ -200,7 +200,7 @@ void slice_pool_recycle(struct slice_pool *pool)
 
 }
 
-char * slice_alloc(struct slice_pool *pool)
+void *slice_alloc(struct slice_pool *pool)
 {
 	/* XXX Locking! */
 
