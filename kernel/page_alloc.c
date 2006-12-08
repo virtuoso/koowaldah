@@ -183,13 +183,15 @@ struct page * __alloc_pages(u32 flags, struct mem_zone * zone, u32 order)
 {
 	int i = order;
 	struct page * pile;
-	
+
 	do { /* Find an non-empty level with sufficiently big piles in it. */
-		if (i >= MAX_ORDER)
+		if (i >= MAX_ORDER) {
+			kprintf("Page allocation of order %d failed!\n", order);
 			return NULL;
+		}
 	} while (klist0_empty(&zone->alloc_levels[i++]));
 	i = i - 1;
-	
+
 	pile = klist0_entry(zone->alloc_levels[i].next, struct page, list); 
 
 	klist0_unlink(zone->alloc_levels[i].next);
