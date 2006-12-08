@@ -157,7 +157,7 @@ static void load_init()
 	tq_init(&tmp_q);
 	tq_insert_head(thread, &tmp_q);
 
-        bug_on(scheduler_enqueue(&tmp_q));
+        bug_on(!scheduler_enqueue(&tmp_q));
 }
 
 void __noprof kernel_main_thread(void *data)
