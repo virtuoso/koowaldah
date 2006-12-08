@@ -39,6 +39,7 @@
 #include <scheduler.h>
 #include <arch/asm.h>
 #include <device.h>
+#include <spinlock.h>
 #include "table.h"
 
 #define KEYBOARD_IRQ 1
@@ -51,9 +52,11 @@
 static u8  key_buf[KEYBOARD_BUFSIZE];
 static u32 read_idx, write_idx, users;
 
+
 /* let's assume that kbd can be opened by no more than 1 thread,
  * so no waitqueue here */
-static struct thread *sleeper = NULL;
+struct thread_queue tq;
+
 
 static void pckbd_intr(u32 number)
 {
@@ -68,36 +71,27 @@ static void pckbd_intr(u32 number)
 		write_idx = 0;
 
 	/* buffer full */
-	if (write_idx+1 == read_idx)
-		return;
+	if (write_idx+1 != read_idx)
+		key_buf[write_idx++] = scancode;
 
-	if (sleeper) {
-		scheduler_enqueue(sleeper);
-		sleeper->state = THREAD_RUNNABLE;
-		sleeper = NULL;
-	}
-	key_buf[write_idx++] = scancode;
+	scheduler_enqueue(&tq);
 }
 
 u16 pckbd_read()
 {
 	/* trylock would be nice here */
-	disable_interrupts();
+//	local_irq_save();
 
 	if (read_idx == write_idx) {
-		struct thread *thread = CURRENT();
-	
-		thread->state = 0;
-		scheduler_dequeue(thread);
-		sleeper = thread;
-		enable_interrupts();
+		scheduler_dequeue(&tq);
 		scheduler_yield();
+		return 0;
 	}
 
 	if (read_idx == KEYBOARD_BUFSIZE)
 		read_idx = 0;
 
-	enable_interrupts();
+//	local_irq_restore();
 
 	return pckbd_sctrans[key_buf[read_idx++]];
 }
@@ -108,9 +102,11 @@ int pckbd_open()
 		return -EBUSY;
 
 	users++;
-	sleeper = NULL;
+
 	read_idx = 0;
 	write_idx = 0;
+
+	tq_init(&tq);
 	return 0;
 }
 
@@ -119,6 +115,9 @@ int pckbd_close()
 	if (!users)
 		return -EINVAL;
 	users--;
+
+	/* There should be no threads waiting. */
+	bug_on(scheduler_enqueue(&tq));
 	return 0;
 }
 
@@ -160,7 +159,6 @@ static struct device pckbd_dev = {
 int __init pckbd_load()
 {
 	kprintf("pckbd_load()\n");
-	sleeper = NULL;
 	users = read_idx = write_idx = 0; /* although, that's .bss, isn it? */
 	register_device(&pckbd_dev);
 	return register_irq_handler(KEYBOARD_IRQ, pckbd_intr);
