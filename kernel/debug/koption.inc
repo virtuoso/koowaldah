@@ -1,4 +1,4 @@
-KOPTIONS_START(DEBUG, "Kernel debugging options", 2)
+KOPTIONS_START(DEBUG, "Kernel debugging options", 3)
 KOPTION(
 	"INSTRUMENT_PROFILER",
 	"Simple static instrumentation profiler",
@@ -16,6 +16,13 @@ KOPTION(
 	"value hardly ever makes sence",
 	KOPT_INT,
 	2048
+),
+KOPTION(
+	"DEBUG_SPINLOCKS",
+	"Check spin locks and associated counters",
+	"",
+	KOPT_BOOL,
+	'Y'
 ),
 KOPTIONS_END
 
