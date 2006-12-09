@@ -116,7 +116,7 @@ int tsleep(u32 delay)
 			goto out;
 		}
 		if (delay == interval->ticks_left) {
-			scheduler_dequeue(&new_interval->wake_list);
+			scheduler_dequeue(&interval->wake_list);
 			goto out;
 		}
 
