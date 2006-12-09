@@ -100,7 +100,7 @@ void thread_switch_context(struct thread *from, struct thread *to)
 
 	esp_from = &tctx(from).esp;
 	esp_to = &tctx(to).esp;
-	root_tss.esp0 = tctx(to).esp;
+	root_tss.esp0 = tctx(to).stack_base;
 
 	if (from->map != to->map)
 		switch_map(from->map, to->map);
@@ -131,6 +131,7 @@ u32 prepare_deffered_context_switch(u32 curr_esp)
 		switch_map(from->map, to->map);
 
 	tctx(from).esp = curr_esp;
+	root_tss.esp0 = tctx(to).stack_base;
 
 	return tctx(to).esp;
 }
