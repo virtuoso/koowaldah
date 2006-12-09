@@ -182,8 +182,10 @@ void __noprof kernel_main_thread(void *data)
 
 	load_init();
 
-	for (;;)
+	for (;;) {
 		scheduler_yield();
+		__asm__ __volatile__("hlt");
+	}
 
 	bug();
 }
