@@ -63,8 +63,8 @@ void dump_thread(struct thread *thread)
 		"\tstate: %s\n"
 		"\tneighbours: %x, %x\n",
 		thread, thread->name, thread->pid,
-		tctx(thread).esp,
-		tctx(thread).stack_base,
+		thread->context.esp,
+		thread->context.stack_base,
 		(thread->state & THREAD_RUNNABLE ? "runnable" : "waiting"),
 		thread->kthreads.prev, thread->kthreads.next
 	);
@@ -88,9 +88,6 @@ struct thread *thread_create(thread_t func, char *name, void *data)
 	thread->state = THREAD_NEW;
 	/*kprintf("page=%x, thread=%x\n", page, thread);*/
 
-	/* stack pointers */
-	tctx(thread).stack_base = (u32 *)thread - 1;
-	tctx(thread).esp = (u32)tctx(thread).stack_base;
 	thread_init_stack(thread, func, data);
 
 	thread->pid = get_free_pid();
@@ -112,8 +109,8 @@ struct thread *thread_create(thread_t func, char *name, void *data)
 	klist0_append(&thread->kthreads, &thread_list.threads);
 	spin_unlock_irqrestore(&thread_list.lock, flags);
 	/*kprintf("created thread, stack_base = %x, esp = %x, pid = %d\n",
-			(u32) (tctx(thread).stack_base),
-			(u32) (tctx(thread).esp), thread->pid);*/
+			thread->context.stack_base),
+			thread->context.esp, thread->pid);*/
 
 	return thread;
 }
