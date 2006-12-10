@@ -63,11 +63,8 @@ struct thread {
 	u64 					last_tick;
 	prio_t					prio;
 
-	/* architecture-dependent thread info. Really a union here? */
-	union {
-		struct x86_thread_context	x86;
-		/* whatever else thread_context */
-	} ctx;
+	/* architecture-dependent thread info. */
+	struct thread_context			context;
 
 	/* memory mapping */
 	struct mapping				*map;

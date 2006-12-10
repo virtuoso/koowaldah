@@ -58,7 +58,11 @@ void display_thread()
 
 void thread_init_stack(struct thread *t, thread_t func, void *data)
 {
-	u32 *stack = (u32 *)(tctx(t).esp);
+	u32 *stack = (u32 *) t - 1;
+	/* stack pointers */
+	t->context.stack_base = (u32) stack;
+	t->context.esp = (u32) stack;
+
 	int i;
 	/* See arch/i386/asm/context_switch.S */
 	*stack-- = (u32)data;
@@ -69,7 +73,7 @@ void thread_init_stack(struct thread *t, thread_t func, void *data)
 	for (i = 0; i < 8; i++)
 		*--stack = 0;
 
-	tctx(t).esp = (u32) stack;
+	t->context.esp = (u32) stack;
 	t->state &= ~THREAD_NEW;
 }
 
@@ -84,9 +88,10 @@ void thread_switch_context(struct thread *from, struct thread *to)
 	kprintf("Switching context\n");
 
 	kprintf("from: stack_base = %x, esp = %x, pid = %d\n",
-			(u32) tctx(from).stack_base, tctx(from).esp, from->pid);
+			from->context.stack_base,
+			from.context->esp, from->pid);
 	kprintf("to: stack_base = %x, esp = %x, pid = %d\n",
-			(u32) tctx(to).stack_base, tctx(to).esp, to->pid);
+			to.context->stack_base, to->context.esp, to->pid);
 
 	__asm__ __volatile__("mov %%esp, %0" : "=m"(esp));
 
@@ -98,9 +103,9 @@ void thread_switch_context(struct thread *from, struct thread *to)
 	kprintf("esp[3] = 0x%x\n", *((u32 *) esp + 3));
 #endif
 
-	esp_from = &tctx(from).esp;
-	esp_to = &tctx(to).esp;
-	root_tss.esp0 = tctx(to).stack_base;
+	esp_from = &from->context.esp;
+	esp_to = &to->context.esp;
+	root_tss.esp0 = to->context.stack_base;
 
 	if (from->map != to->map)
 		switch_map(from->map, to->map);
@@ -117,9 +122,11 @@ u32 prepare_deffered_context_switch(u32 curr_esp)
 	kprintf("Deffered context switch\n");
 
 	kprintf("from: stack_base = %x, esp = %x, pid = %d\n",
-			(u32) tctx(from).stack_base, tctx(from).esp, from->pid);
+			from->context.stack_base,
+			from->context.esp, from->pid);
 	kprintf("to: stack_base = %x, esp = %x, pid = %d\n",
-			(u32) tctx(to).stack_base, tctx(to).esp, to->pid);
+			to->context.stack_base, to->context.esp,
+			to->pid);
 
 	kprintf("esp[0] = 0x%x\n", *((u32 *) curr_esp));
 	kprintf("esp[1] = 0x%x\n", *((u32 *) curr_esp + 1));
@@ -130,10 +137,10 @@ u32 prepare_deffered_context_switch(u32 curr_esp)
 	if (from->map != to->map)
 		switch_map(from->map, to->map);
 
-	tctx(from).esp = curr_esp;
-	root_tss.esp0 = tctx(to).stack_base;
+	from->context.esp = curr_esp;
+	root_tss.esp0 = to->context.stack_base;
 
-	return tctx(to).esp;
+	return to->context.esp;
 }
 
 void thread_switch_to(struct thread *thread)
@@ -144,6 +151,6 @@ void thread_switch_to(struct thread *thread)
 	kprintf("esp[2] = 0x%x\n", *((u32 *)tctx(thread).esp + 2));
 	kprintf("esp[3] = 0x%x\n", *((u32 *)tctx(thread).esp + 3));
 */
-	do_thread_switch_to((u32 *)tctx(thread).esp);
+	do_thread_switch_to((u32 *)thread->context.esp);
 }
 
