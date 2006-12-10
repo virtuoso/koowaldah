@@ -31,41 +31,53 @@
  */
 
 #include <syscalls.h>
+#include <string.h>
+#include <stdio.h>
 
 /*
  * The init program.
  */
 
-char buf[16];
+#define WELCOME "Init process starting"
+char buf[48];
 void _start()
 {
 	int fd, l;
 	unsigned short c;
+	int pid;
 
-	for (l = 0; l < 16; l++) buf[l] = '\0';
-	sys_debug("Init process starting!");
+	snprintf(buf, strlen(WELCOME), WELCOME);
+	sys_debug(buf);
+	memset(buf, 0, 48);
 	fd = sys_open("/init", 0);
 	if (fd < 0)
 		sys_debug("can't open /init");
-	l = sys_read(fd, buf, 12);
+	else {
+		l = sys_read(fd, buf, 12);
+		sys_debug(buf);
+		sys_close(fd);
+	}
+
+	l = sys_fork();
+	if (l == 0)
+		snprintf(buf, 7, "child!");
+	else
+		snprintf(buf, 32, "parent! child pid=%d", l);
 	sys_debug(buf);
-	sys_close(fd);
 
 	l = sys_fork();
 	if (l == 0)
-		sys_debug("CHILD");
+		snprintf(buf, 7, "child!");
 	else
-		sys_debug("PARENT!");
+		snprintf(buf, 32, "parent! child pid=%d", l);
+	sys_debug(buf);
 
-	l = sys_fork();
-	if (l == 0)
-		sys_debug("CHILD[2]");
-	else
-		sys_debug("PARENT[2]!");
+	pid = sys_getpid();
+	snprintf(buf, 16, "waking up [pid=%d]", pid);
 
 	for (;;) {
-		sys_debug("waking up");
-		sys_tsleep(1000);
+		sys_debug(buf);
+		sys_tsleep(250*pid);
 		/*sys_yield();*/
 	}
 }
