@@ -80,3 +80,8 @@ int sys_yield()
 	return sys_call(SYS_yield, 0, 0, 0);
 }
 
+int sys_getpid()
+{
+	return sys_call(SYS_getpid, 0, 0, 0);
+}
+
