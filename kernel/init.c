@@ -135,7 +135,7 @@ static void load_init()
 	struct direntry *dent;
 	struct inode *inode;
 
-        thread = thread_create_user(&init_thread, "init", NULL, 1, 1);
+        thread = thread_create_user(&init_thread, "init", NULL, 2, 1);
         if (!thread) {
                 kprintf("failed to create thread\n");
 		bug();
@@ -152,6 +152,7 @@ static void load_init()
 	/* "load" init process where it belongs */
 	switch_map(&root_map, thread->map);
 	memory_copy(dst, page_to_addr(inode->i_map.i_pages[1]), PAGE_SIZE);
+	memory_copy(dst + PAGE_SIZE, page_to_addr(inode->i_map.i_pages[2]), PAGE_SIZE);
 	switch_map(thread->map, &root_map);
 
 	tq_init(&tmp_q);
