@@ -38,7 +38,7 @@
  * Various string-formatting functions
  */
 
-static char *digits="0123456789ABCDEF";
+static char digits[] = "0123456789ABCDEF";
 
 size_t memory_set(void *s, char c, size_t n)
 {
