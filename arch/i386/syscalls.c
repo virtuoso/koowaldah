@@ -70,6 +70,9 @@ u32 __attribute__((regparm(0))) sys_call_gate(u32 eax, u32 ebx, u32 ecx, u32 edx
 			scheduler_yield();
 			return 0;
 
+		case 8:
+			return CURRENT()->pid;
+
 		default:
 			kprintf("syscall %d not implemented\n", eax);
 			display_thread();
