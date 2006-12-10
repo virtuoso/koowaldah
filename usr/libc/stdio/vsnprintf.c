@@ -115,7 +115,7 @@ static size_t sprint_int_unsigned(char *buf, unsigned long i, char base)
 
 int vsnprintf(char *buf, size_t size, const char *format, va_list args)
 {
-	int flen = kstrlen((char *)format) + 1;
+	int flen = strlen((char *)format) + 1;
 	char *cur = (char *)format;
 	char *old = (char *)format;
 	char *pos = buf;
@@ -127,7 +127,7 @@ int vsnprintf(char *buf, size_t size, const char *format, va_list args)
 
 	/* parse <format> */
 	do {
-		cur = kstrchr(cur, '%');
+		cur = strchr(cur, '%');
 		if (NULL != cur)
 			pos += memory_copy(pos, old, cur - old);
 
@@ -165,7 +165,7 @@ int vsnprintf(char *buf, size_t size, const char *format, va_list args)
 
 			case 's':
 				a_s = va_arg(args, char *);
-				pos += memory_copy(pos, a_s, kstrlen(a_s));
+				pos += memory_copy(pos, a_s, strlen(a_s));
 				break;
 
 			default:
