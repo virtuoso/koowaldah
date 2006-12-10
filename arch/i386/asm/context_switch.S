@@ -101,7 +101,7 @@ start_user:
 	movl $(USER_DATA)+3, %eax
 	pushl %eax
 
-	movl $0x40001ffb, %eax
+	movl $0x40002ffb, %eax
 	pushl %eax
 
 	movl $(USER_CODE)+3, %eax
