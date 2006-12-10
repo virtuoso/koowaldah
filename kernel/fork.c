@@ -44,12 +44,12 @@ extern struct tss_segment root_tss;
 
 static void __attribute__((noreturn)) forker(void *data)
 {
-	u32 *p = (u32 *)data;
+	u32 *p = (u32)CURRENT() & NOPAGE_MASK;
 
 	/* disregard everything on the current stack
 	 * as start_user() never returns */
 	root_tss.esp0 = (u32)CURRENT() - 4;
-	start_user_forked(p[1], 0x40001ffb, p[0], 0);
+	start_user_forked(p[0], 0x40002ffb, p[1], 0);
 	bug();
 }
 
@@ -59,15 +59,21 @@ pid_t fork()
 	struct thread *me = CURRENT();
 	struct thread_queue tmp_q;
 	u32 virt = USERMEM_VIRT, phys, i;
-	u32 *p = __builtin_frame_address(1);
+	u32 *p = (u32 *)me - 6;
+	u32 *d;
 
 	thread = thread_create_user(&forker, me->name, (void *)p[0],
 			me->map->m_cp, me->map->m_dp);
 	if (!thread)
 		return -ENOMEM;
 
+	/* put parent's return ip and stack to the bottom of child's stack */
+	d = (u32)thread & NOPAGE_MASK;
+	d[0] = p[0];
+	d[1] = p[3];
+
 	/* XXX: copy process' pages */
-	for (i = 0; i < 2; i++) {
+	for (i = 0; i < me->map->m_cp + me->map->m_dp; i++) {
 		switch_map(me->map, thread->map);
 		phys = __virt2physpg(virt);
 		switch_map(thread->map, me->map);
