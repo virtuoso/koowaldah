@@ -3,7 +3,9 @@ CFLAGS := -ffreestanding -nostdinc -nostdlib -Iinclude
 OBJS := \
 	string/strlen.o \
 	string/strcmp.o \
+	string/strchr.o \
 	string/memccpy.o \
+	string/memset.o \
 	string/strcoll.o \
 	string/strcspn.o \
 	string/strmode.o \
