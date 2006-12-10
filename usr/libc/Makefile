@@ -1,4 +1,4 @@
-CFLAGS := -ffreestanding -nostdinc -nostdlib -Iinclude
+CFLAGS := -g -ffreestanding -nostdinc -nostdlib -Iinclude
 
 OBJS := \
 	string/strlen.o \
@@ -20,7 +20,6 @@ OBJS := \
 	stdio/vsnprintf.o \
 	sys/i386/syscall.S.o \
 	sys/i386/syscall.o
-#	string/_strerror_r.o string/_strlcat.o string/_strlcpy.o string/memccpy.o string/strcoll.o string/strcspn.o string/strncat.o string/strspn.o string/strxfrm.o
 
 %.S.o:
 	$(AS) -o $@ $(subst .o,,$@)
