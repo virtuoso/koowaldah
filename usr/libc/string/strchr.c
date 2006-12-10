@@ -36,12 +36,12 @@
 
 char *strchr(const char *str, int c)
 {
-	char *p = str;
+	const char *p = str;
 
 	while ('\0' != *p && c != *p) p++;
 	if ('\0' == *p) return NULL;
 
-	return p;
+	return (char *)p;
 }
 
 
