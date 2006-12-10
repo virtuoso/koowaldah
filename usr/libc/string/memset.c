@@ -34,12 +34,13 @@
 #include <assert.h>
 #include <string.h>
 
-size_t memory_set(void *s, char c, size_t n)
+void *memset(void *s, int c, size_t n)
 {
-        
         size_t t = n;
+
         while (t-- > 0)
                 ((char *)s)[t] = (char)c;
-        return n;
+
+        return s;
 }
 
