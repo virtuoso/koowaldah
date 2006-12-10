@@ -10,9 +10,9 @@ ARCH = i386
 #### CONFIGURATION SECTION END ####
 
 ASM ?= gcc
-ASM_FLAGS += -Wall -ffreestanding -g
+ASM_FLAGS += -Wall -ffreestanding -nostdinc -nostdlib -g
 CC ?= gcc
-CC_FLAGS += -Wall -ffreestanding -g -std=gnu89
+CC_FLAGS += -Wall -ffreestanding -nostdinc -nostdlib -g -std=gnu89
 CC_FLAGS_KERN := $(CC_FLAGS)
 LD ?= ld
 OBJCOPY ?= objcopy
