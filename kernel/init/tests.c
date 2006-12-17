@@ -740,6 +740,8 @@ static void test_serial()
 	struct thread *thread;
 	struct thread_queue q;
 
+	tq_init(&q);
+
 	thread = thread_create(&do_test_serial, "[serial]", NULL);
 	if (!thread)
 		bug();
@@ -757,6 +759,8 @@ static void test_pckbd()
 #ifdef OPT_TEST_PCKBD
 	struct thread *thread;
 	struct thread_queue q;
+
+	tq_init(&q);
 
         thread = thread_create(&kbd_reader, "[keyboard]", NULL);
         if (!thread) {
