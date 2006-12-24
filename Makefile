@@ -4,7 +4,15 @@ include tools/main.mk
 
 #### CONFIGURATION SECTION START ####
 
-ARCH = i386
+ifeq ($(MK_CPU_ARCH_I386),Y)
+ARCH := i386
+endif
+ifeq ($(MK_CPU_ARCH_POWERPC),Y)
+ARCH := powerpc
+endif
+ifeq ($(MK_CPU_ARCH_ARM),Y)
+ARCH := arm
+endif
 
 
 #### CONFIGURATION SECTION END ####
@@ -37,6 +45,7 @@ include/koptions.h: konfig/konfigure
 konfig/konfigure: konfig/konfigure.c
 	$(CC) -Wall -Ikonfig -I. -o konfig/konfigure.o -c konfig/konfigure.c
 	$(CC) -Wall -Ikonfig -I. -o konfig/kout.o -c konfig/kout.c
+	$(CC) -Wall -Ikonfig -I. -o konfig/ktree.o -c konfig/ktree.c
 	$(CC) -Wall -Ikonfig -I. -o konfig/kuser.o -c konfig/kuser.c
 	$(CC) -o $@ konfig/*.o
 
