@@ -13,7 +13,7 @@
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in the
  *    documentation and/or other materials provided with the distribution.
- * 3. Neither the name of the Koowaldah developers nor the names of theyr 
+ * 3. Neither the name of the Koowaldah developers nor the names of their 
  *    contributors may be used to endorse or promote products derived from
  *    this software without specific prior written permission.
  *
@@ -35,9 +35,10 @@
 #include <koowaldah.h>
 #include <mm_zone.h>
 
-extern void arch_init_boot_zone(struct mem_zone * zone);
+extern void arch_init_boot_zone(struct mem_zone *zone, struct mem_zone *user);
 	
 struct mem_zone boot_zone;
+struct mem_zone user_zone;
 
 struct mem_info memory_info;
 
@@ -45,10 +46,12 @@ void init_mem_info ()
 {
 	KLIST0_INIT(&memory_info.zone_list);
 	KLIST0_INIT(&boot_zone.list);
+	KLIST0_INIT(&user_zone.list);
 
-	arch_init_boot_zone(&boot_zone);
+	arch_init_boot_zone(&boot_zone, &user_zone);
 
 	klist0_append(&boot_zone.list, &memory_info.zone_list);
+	klist0_append(&user_zone.list, &memory_info.zone_list);
 }
 
 

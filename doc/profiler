@@ -1,0 +1,33 @@
+Koowaldah profiler aka koowald-o-meter, take 1
+----------------------------------------------
+
+By profiling here I mean logging function calls with respect to a certain
+timer. This is implemented using gcc's instrument functions method.
+
+First off, you'll have to define a set of so-called profiler triggers. A
+trigger is needed to tell the profiler that it should start or stop logging
+at a certain point. Once the execution reaches the function referenced in
+a trigger (or leaves this function, in case of 'on exit trigger'), profiler
+starts (or stops, in case of 'stop trigger') logging events. IOW, you can
+start and stop logging upon entry or exit to/from functions of your choice.
+
+To turn on this feature, change the value of OPT_INSTRUMENT_PROFILER to Y.
+After this, you'll have to create a file called triggers.c in kernel/debug
+directory in order for compilation to succeed. There is no default triggers.c
+under version control, this is done intentionally, so that you know what you're
+doing beforehand.
+
+triggers.c is merely a list of profiling triggers and should look like this:
+---cut---
+#include <profiler.h>
+
+extern void open();
+struct prof_trigger profiler_triggers[] = {
+	{ open, PROF_START, PROF_ENTRY },
+	{ open, PROF_STOP | PROF_DUMP, PROF_EXIT }
+};
+int NUM_TRIGGERS = 2;
+---cut---
+
+I do hope it's self-explanatory.
+Good Night!

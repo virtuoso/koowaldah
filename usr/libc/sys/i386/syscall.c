@@ -12,7 +12,7 @@
  * 2. Redistributions in binary form must reproduce the above copyright
  * notice, this list of conditions and the following disclaimer in the
  * documentation and/or other materials provided with the distribution.
- * 3. Neither the name of the Koowaldah developers nor the names of theyr
+ * 3. Neither the name of the Koowaldah developers nor the names of their
  * contributors may be used to endorse or promote products derived from
  * this software without specific prior written permission.
  *
@@ -68,5 +68,20 @@ int sys_write(int fd, char *buf, unsigned int len)
 int sys_tsleep(unsigned int t)
 {
 	return sys_call(SYS_tsleep, t, 0, 0);
+}
+
+int sys_fork()
+{
+	return sys_call(SYS_fork, 0, 0, 0);
+}
+
+int sys_yield()
+{
+	return sys_call(SYS_yield, 0, 0, 0);
+}
+
+int sys_getpid()
+{
+	return sys_call(SYS_getpid, 0, 0, 0);
 }
 

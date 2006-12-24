@@ -13,7 +13,7 @@
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in the
  *    documentation and/or other materials provided with the distribution.
- * 3. Neither the name of the Koowaldah developers nor the names of theyr 
+ * 3. Neither the name of the Koowaldah developers nor the names of their 
  *    contributors may be used to endorse or promote products derived from
  *    this software without specific prior written permission.
  *
@@ -52,7 +52,7 @@ void slice_pool_info(struct slice_pool *);
 struct slice_pool *slice_pool_create(u32 flags, int obj_size);
 void slice_pool_shrink(struct slice_pool *pool);
 void slice_pool_recycle(struct slice_pool *pool);
-char *slice_alloc(struct slice_pool *pool);
+void *slice_alloc(struct slice_pool *pool);
 void slice_free(void *slice, struct slice_pool *pool);
 
 #endif /* __SLICE_H__ */

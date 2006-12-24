@@ -13,7 +13,7 @@
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in the
  *    documentation and/or other materials provided with the distribution.
- * 3. Neither the name of the Koowaldah developers nor the names of theyr 
+ * 3. Neither the name of the Koowaldah developers nor the names of their 
  *    contributors may be used to endorse or promote products derived from
  *    this software without specific prior written permission.
  *
@@ -34,33 +34,37 @@
 #ifndef __THREAD_H__
 #define __THREAD_H__
 #include <arch/thread.h>
+#include <spinlock.h>
 #include <klist0.h>
 #include <namespace.h>
 
 #define THREAD_NAME_LEN 32
 #define MAX_THREADS 128
 
-/* thread state flags */
+/* Thread state flags. What are they for? */
 #define THREAD_RUNNABLE (0x1) /* can be selected for execution */
 #define THREAD_NEW      (0x2) /* being created */
 #define THREAD_ILL      (0x4) /* screwed up */
 #define THREAD_WAIT     (0x8) /* sleeping on condition */
 
 typedef unsigned short prio_t;
+typedef void (*thread_t)(void *);
+
+struct thread_queue {
+	spinlock_t lock;
+	struct klist0_node threads;
+};
 
 struct thread {
-	/* scheduler data */
 	struct klist0_node			kthreads;
+	struct thread_queue			*krunq_head;
 	struct klist0_node			krunq;
 	u32					quantum;
 	u64 					last_tick;
 	prio_t					prio;
 
-	/* architecture-dependent thread info */
-	union {
-		struct x86_thread_context	x86;
-		/* whatever else thread_context */
-	} ctx;
+	/* architecture-dependent thread info. */
+	struct thread_context			context;
 
 	/* memory mapping */
 	struct mapping				*map;
@@ -75,12 +79,103 @@ struct thread {
 	int					last_fd;
 };
 
+static inline void tq_init(struct thread_queue *q)
+{
+	KLIST0_INIT(&q->threads);
+	spinlock_init(&q->lock);
+}
+
+static inline int tq_is_empty(struct thread_queue *q)
+{
+	bug_on(!q);
+	return klist0_empty(&q->threads);
+}
+
+/*
+ * Put a thread into a thread queue'a head.
+ */
+static inline void __tq_insert_head(struct thread *t, struct thread_queue *q)
+{
+	bug_on(!klist0_empty(&t->krunq));
+	bug_on(!spin_trylock(&q->lock));
+
+	klist0_append(&t->krunq, &q->threads);
+	t->krunq_head = q;
+}
+
+/*
+ * Put a thread into a thread queue's tail.
+ */
+static inline void __tq_insert_tail(struct thread *t, struct thread_queue *q)
+{
+	bug_on(!klist0_empty(&t->krunq));
+	bug_on(!spin_trylock(&q->lock));
+
+	klist0_prepend(&t->krunq, &q->threads);
+	t->krunq_head = q;
+}
+
+/*
+ * Remove a thread from it's queue.
+ */
+static inline void __tq_remove_thread(struct thread *t)
+{
+	bug_on(!t->krunq_head);
+	bug_on(klist0_empty(&t->krunq));
+
+	klist0_unlink(&t->krunq);
+	t->krunq_head = NULL;
+}
+
+/*
+ * Dequeue a thread from the queue's head.
+ */
+static inline struct thread * __tq_remove_head(struct thread_queue *q)
+{
+	struct thread *t = NULL;
+
+	if (!klist0_empty(&q->threads)) {
+		t = klist0_entry(q->threads.next, struct thread, krunq);
+		__tq_remove_thread(t);
+	}
+
+	return t;
+}
+
+/*
+ * Dequeue a thread from the queue's tail.
+ */
+static inline struct thread * __tq_remove_tail(struct thread_queue *q)
+{
+	struct thread *t = NULL;
+
+	if (!klist0_empty(&q->threads)) {
+		t = klist0_entry(q->threads.prev, struct thread, krunq);
+		__tq_remove_thread(t);
+	}
+
+	return t;
+}
+
+void tq_insert_head(struct thread *t, struct thread_queue *q);
+void tq_insert_tail(struct thread *t, struct thread_queue *q);
+struct thread *tq_remove_head(struct thread_queue *q);
+struct thread *tq_remove_tail(struct thread_queue *q);
+int tq_transfer_head_to_head(struct thread_queue *from_q, struct thread_queue *to_q);
+int tq_transfer_head_to_tail(struct thread_queue *from_q, struct thread_queue *to_q);
+int tq_transfer_tail_to_head(struct thread_queue *from_q, struct thread_queue *to_q);
+int tq_transfer_tail_to_tail(struct thread_queue *from_q, struct thread_queue *to_q);
+
 void dump_thread(struct thread *thread);
-struct thread *thread_create(void (*func)(), char *name);
-struct thread *thread_create_user(void (*func)(), char *name);
+struct thread *thread_create(thread_t func, char *name, void *data);
+struct thread *thread_create_user(thread_t func, char *name, void *data,
+		u32 cp, u32 dp);
+pid_t fork();
 
 /* arch */
 void thread_switch_to(struct thread *thread);
-void thread_switch_context(struct thread * from, struct thread * to);
+void thread_switch_context(struct thread *from, struct thread *to);
+void start_user(void);
+void start_user_forked(u32 eip, u32 ebp, u32 esp, u32 val);
 
 #endif /* __THREAD_H__ */

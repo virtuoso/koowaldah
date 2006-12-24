@@ -13,7 +13,7 @@
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in the
  *    documentation and/or other materials provided with the distribution.
- * 3. Neither the name of the Koowaldah developers nor the names of theyr 
+ * 3. Neither the name of the Koowaldah developers nor the names of their 
  *    contributors may be used to endorse or promote products derived from
  *    this software without specific prior written permission.
  *
@@ -42,23 +42,23 @@
 #include <textio.h>
 #include <i386/segments.h>
 
-extern void irq_pre_handler0();
-extern void irq_pre_handler1();
-extern void irq_pre_handler2();
-extern void irq_pre_handler3();
-extern void irq_pre_handler4();
-extern void irq_pre_handler5();
-extern void irq_pre_handler6();
-extern void irq_pre_handler7();
-extern void irq_pre_handler8();
-extern void irq_pre_handler9();
-extern void irq_pre_handler10();
-extern void irq_pre_handler11();
-extern void irq_pre_handler12();
-extern void irq_pre_handler13();
-extern void irq_pre_handler14();
-extern void irq_pre_handler15();
-extern void irq_pre_handler16();
+void irq_pre_handler0();
+void irq_pre_handler1();
+void irq_pre_handler2();
+void irq_pre_handler3();
+void irq_pre_handler4();
+void irq_pre_handler5();
+void irq_pre_handler6();
+void irq_pre_handler7();
+void irq_pre_handler8();
+void irq_pre_handler9();
+void irq_pre_handler10();
+void irq_pre_handler11();
+void irq_pre_handler12();
+void irq_pre_handler13();
+void irq_pre_handler14();
+void irq_pre_handler15();
+void irq_pre_handler16();
 
 static void (*irq_handler_table[16])(unsigned int number);
 
@@ -89,17 +89,17 @@ void main_irq_handler(u32 number)
 	if(irq_handler_table[number])
 		irq_handler_table[number](number);
 
+	pic_do_eoi(number);
 	if (mach_state == MACH_RUNNING)
 		scheduler_tick();
-
-	pic_do_eoi(number);
 }
 
 int register_irq_handler(u32 number, void (*handler)(u32 number))
 {
-	if(irq_handler_table[number])
+
+	if (irq_handler_table[number])
 		return 1;		/* first unregister previous handler */
-	
+
 	irq_handler_table[number] = handler;
 	pic_unmask_interrupt(number);
 	return 0;

@@ -1,4 +1,4 @@
-CFLAGS := -nostdlib -ffreestanding -I../libc/include
+CFLAGS := -nostdlib -ffreestanding -I../libc/include -g
 
 all: init
 

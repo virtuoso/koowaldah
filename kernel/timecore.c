@@ -1,8 +1,8 @@
 /*
  * kernel/timecore.c
  *
- * Copyright (C) 2006 Alexander Shishkin
- * 
+ * Copyright (C) 2006 Alexey Zaytsev
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -12,7 +12,7 @@
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in the
  *    documentation and/or other materials provided with the distribution.
- * 3. Neither the name of the Koowaldah developers nor the names of theyr 
+ * 3. Neither the name of the Koowaldah developers nor the names of their 
  *    contributors may be used to endorse or promote products derived from
  *    this software without specific prior written permission.
  *
@@ -27,118 +27,115 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
- * 
- * Basic kernel timer implementation
- * (at least I can sleep after this)
  *
  */
 
 #include <koowaldah.h>
-#include <klist0.h>
-#include <textio.h>
 #include <irq.h>
-#include <error.h>
-#include <mm.h>
-#include <page_alloc.h>
 #include <thread.h>
+#include <spinlock.h>
 #include <scheduler.h>
+#include <slice.h>
+#include <klist0.h>
+#include <error.h>
+#include <timers.h>
 
-static struct klist0_node timers;
-
-typedef void (*timer_fn)(void *data);
-
-struct timer {
-	struct klist0_node t_list;
-	timer_fn	func;
-	u32		counter;
-	void		*data;
+struct time_interval {
+	struct klist0_node interval_list;
+	struct thread_queue wake_list;
+	u32 ticks_left;
 };
 
-#define _TIMER(p) ((struct timer *)p)
+static struct klist0_node future;
+static SPINLOCK(future_lock);
+
+struct slice_pool *interval_pool;
+struct slice_pool *tq_pool;
 
 void __init timers_init()
 {
-	KLIST0_INIT(&timers);
-}
-
-int register_timer(timer_fn func, u32 delay, void *data)
-{
-	struct timer *timer;
-
-	/* lock here, shall we? */
-	disable_interrupts();
-
-	timer = memory_alloc(sizeof(struct timer));
-	if (!timer) {
-		enable_interrupts();
-		return ERR_NOMEMORY;
-	}
-
-	timer->func = func;
-	timer->counter = delay;
-	timer->data = data;
-
-        klist0_append(&timer->t_list, &timers);
-
-	enable_interrupts();
-
-        return 0;
+	KLIST0_INIT(&future);
+	spinlock_init(&future_lock);
+	interval_pool = slice_pool_create(0, sizeof(struct time_interval));
+	bug_on(!interval_pool);
 }
 
 void __noprof update_timers()
 {
-        struct klist0_node *t, *d;
-	struct timer *timer;
+	struct time_interval *interval = NULL;
 
-        if (!klist0_empty(&timers)) {
-		disable_interrupts();
+	spin_lock(&future_lock);
 
-		t = timers.next;
-		do {
-			timer = klist0_entry(t, struct timer, t_list);
-			if (!--timer->counter) {
-				d = t; t = t->next;
-				klist0_unlink(d);
-				timer->func(timer->data);
-				memory_release(timer);
-			} else
-				t = t->next;
-                } while (t != &timers);
+	if (!klist0_empty(&future)) {
+		interval = klist0_entry(future.next, struct time_interval,
+			interval_list);
 
-		enable_interrupts();
-        }
+		if (!interval->ticks_left--) {
+			klist0_unlink(&interval->interval_list);
+		} else
+			interval = NULL;
+	}
+	spin_unlock(&future_lock);
+
+	/* Maybe we want some bottom halve mechanism? */
+	if (interval) {
+		while(scheduler_enqueue(&interval->wake_list));
+		slice_free(interval, interval_pool);
+	}
+
+
 }
 
-static void tsleep_alarm(void *data)
-{
-	struct thread *thread = (struct thread *)data;
-
-	scheduler_enqueue(thread);
-	thread->state = THREAD_RUNNABLE;
-}
-
-/* sleep on timer ticks */
 int tsleep(u32 delay)
 {
-	struct thread *thread = CURRENT();
-	int ret;
+	struct time_interval *interval, *new_interval;
+	struct klist0_node *tmp;
 
-	disable_interrupts();
+	u32 flags;
 
-	/* remove the thread from scheduler's candidates */
-	thread->state = 0;
-	scheduler_dequeue(thread);
-	//thread->state &= ~THREAD_RUNNABLE;
-	//thread->state = THREAD_WAIT;
+	spin_lock_irqsave(&future_lock, flags);
 
-	/* this will wake us up after /at least/ delay ticks */
-	ret = register_timer(tsleep_alarm, delay, (void *)thread);
+	klist0_for_each(tmp, &future) {
+		interval = klist0_entry(tmp, struct time_interval,
+			interval_list);
+		if (delay < interval->ticks_left) {
+			interval->ticks_left -= delay;
 
-	/* quit running immediately */
-	if (!ret)
-		scheduler_yield();
-	enable_interrupts();
+			new_interval = slice_alloc(interval_pool);
+			if (!new_interval)
+				return -ENOMEM;
 
-	return ret;
+			KLIST0_INIT(&new_interval->interval_list);
+			tq_init(&new_interval->wake_list);
+			new_interval->ticks_left = delay;
+
+			klist0_prepend(&new_interval->interval_list,
+				&interval->interval_list);
+
+			scheduler_dequeue(&new_interval->wake_list);
+			goto out;
+		}
+		if (delay == interval->ticks_left) {
+			scheduler_dequeue(&interval->wake_list);
+			goto out;
+		}
+
+		delay -= interval->ticks_left;
+	}
+	new_interval = slice_alloc(interval_pool);
+	if (!new_interval)
+		return -ENOMEM;
+
+	KLIST0_INIT(&new_interval->interval_list);
+	tq_init(&new_interval->wake_list);
+	new_interval->ticks_left = delay;
+
+	klist0_prepend(&new_interval->interval_list, &future);
+	scheduler_dequeue(&new_interval->wake_list);
+out:
+	spin_unlock_irqrestore(&future_lock, flags);
+	scheduler_yield();
+
+	return 0;
 }
 

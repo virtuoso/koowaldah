@@ -13,7 +13,7 @@
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in the
  *    documentation and/or other materials provided with the distribution.
- * 3. Neither the name of the Koowaldah developers nor the names of theyr 
+ * 3. Neither the name of the Koowaldah developers nor the names of their 
  *    contributors may be used to endorse or promote products derived from
  *    this software without specific prior written permission.
  *
@@ -75,7 +75,7 @@ unsigned short vga_get_cursor()
         return cursor;
 }
 
-void early_vga_init()
+void __init early_vga_init()
 {
 	/* bogus man! */
 	vga_color = 0x0f;
