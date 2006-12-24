@@ -13,7 +13,7 @@
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in the
  *    documentation and/or other materials provided with the distribution.
- * 3. Neither the name of the Koowaldah developers nor the names of theyr 
+ * 3. Neither the name of the Koowaldah developers nor the names of their 
  *    contributors may be used to endorse or promote products derived from
  *    this software without specific prior written permission.
  *
@@ -36,9 +36,11 @@
 
 
 #include <textio.h>
-#include <irq.h>
 #include <arch/bug.h>
+#include <arch/asm.h>
 
+
+void display_thread();
 
 /*
  * First of all, we dump all the registers on the stack. Now we can mess with them calling
@@ -48,7 +50,7 @@
 #define info(fmt, args ...) do {		\
 	arch_dump_registers();			\
 	kprintf("\nDebug info: " fmt "\b", ## args);	\
-	arch_display_thread();			\
+	display_thread();			\
 	kprintf("Registers:\n");		\
 	arch_display_registers();		\
 	kprintf("Stack:\n");			\
@@ -56,9 +58,10 @@
 }while (0)
 
 #define panic(fmt, args ... ) do {		\
+	local_irq_disable();			\
 	arch_dump_registers();			\
 	kprintf("\nPanic: " fmt "\n", ## args);	\
-	arch_display_thread();			\
+	display_thread();			\
 	kprintf("Registers:\n");		\
 	arch_display_registers();		\
 	kprintf("Stack:\n");			\

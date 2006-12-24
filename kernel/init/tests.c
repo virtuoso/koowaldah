@@ -13,7 +13,7 @@
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in the
  *    documentation and/or other materials provided with the distribution.
- * 3. Neither the name of the Koowaldah developers nor the names of theyr 
+ * 3. Neither the name of the Koowaldah developers nor the names of their 
  *    contributors may be used to endorse or promote products derived from
  *    this software without specific prior written permission.
  *
@@ -40,7 +40,7 @@
 #include <arch/asm.h>
 #include <arch/isr.h>
 #include <irq.h>
-#include <timer.h>
+#include <timers.h>
 #include <textio.h>
 #include <klist.h>
 #include <thread.h>
@@ -49,6 +49,7 @@
 #include <lib.h>
 #include <bug.h>
 #include <kqueue.h>
+#include <spinlock.h>
 
 struct page *pages[2048];
 
@@ -587,55 +588,53 @@ static void test_kqueue()
 #endif /* OPT_TEST_KQUEUE */
 }
 
-#ifdef OPT_TEST_THREADS
-extern int tsleep(u32 delay);
-
-static void func1()
+static void __future func1(void *data)
 {
 	for (;;) {
 		kprintf("A");
 		tsleep(50);
 	}
+
 }
 
-static void func2()
+static void __future func2(void *data)
 {
 	for (;;) {
 		kprintf("B");
 		tsleep(70);
 	}
 }
-#endif /* OPT_TEST_THREADS */
 
 static void test_threads()
 {
 #ifdef OPT_TEST_THREADS
 	struct thread *thread;
+	struct thread_queue q;
 
-        thread = thread_create(&func1, "[thread A]");
+	tq_init(&q);
+
+        thread = thread_create(&func1, "[thread A]", NULL);
         if (!thread) {
                 kprintf("failed to create thread\n");
 		bug();
         }
         kprintf("Thread A created.\n");
 
-        if (scheduler_enqueue(thread)) {
-                kprintf("failed to add thread to run queue\n");
-		bug();
-        }
+	tq_insert_head(thread, &q);
+        scheduler_enqueue(&q);
+
         kprintf("Thread A added to run queue.\n");
 
-        thread = thread_create(&func2, "[thread B]");
+        thread = thread_create(&func2, "[thread B]", NULL);
         if (!thread) {
                 kprintf("failed to create thread\n");
 		bug();
         }
         kprintf("Thread B created.\n");
 
-        if (scheduler_enqueue(thread)) {
-                kprintf("failed to add thread to run queue\n");
-		bug();
-        }
+	tq_insert_head(thread, &q);
+
+        scheduler_enqueue(&q);
         kprintf("Thread B added to run queue.\n");
 #endif /* OPT_TEST_THREADS */
 }
@@ -739,11 +738,16 @@ static void test_serial()
 {
 #ifdef OPT_TEST_SERIAL
 	struct thread *thread;
-	
-	thread = thread_create(&do_test_serial, "[serial]");
+	struct thread_queue q;
+
+	tq_init(&q);
+
+	thread = thread_create(&do_test_serial, "[serial]", NULL);
 	if (!thread)
 		bug();
-	if (scheduler_enqueue(thread)) {
+
+	tq_insert_head(thread, &q);
+	if (!scheduler_enqueue(&q)) {
 		bug();
 	}
 #endif
@@ -754,15 +758,20 @@ static void test_pckbd()
 {
 #ifdef OPT_TEST_PCKBD
 	struct thread *thread;
+	struct thread_queue q;
 
-        thread = thread_create(&kbd_reader, "[keyboard]");
+	tq_init(&q);
+
+        thread = thread_create(&kbd_reader, "[keyboard]", NULL);
         if (!thread) {
                 kprintf("failed to create thread\n");
 		bug();
         }
         kprintf("Thread keyboard created.\n");
 
-        if (scheduler_enqueue(thread)) {
+	tq_insert_head(thread, &q);
+
+        if (!scheduler_enqueue(&q)) {
                 kprintf("failed to add thread to run queue\n");
 		bug();
         }
@@ -803,55 +812,14 @@ static void test_fslookup()
 }
 
 
-#ifdef OPT_TEST_ROOTFS
-extern void start_user(void);
-
-/* big fat XXX */
-#include <i386/segments.h>
-extern struct tss_segment root_tss;
-
-static void init_thread()
-{
-	/* it is ABSOLUTELY obligatory to fill esp0 before switching */
-	__asm__ __volatile__("mov %%esp, %%eax\nmov %%eax, %0" :
-			"=r"(root_tss.esp0));
-	start_user();
-	bug();
-}
-#endif
-
 static void test_rootfs()
 {
 #ifdef OPT_TEST_ROOTFS
-	struct thread *thread;
 	struct direntry *dent;
-	struct inode *inode;
-	char *dst = (char *)0x40000000; /* _start() load address */
-	int i;
 
-	dent = lookup_path("/sbin/init");
-	if (!dent) {
-		kprintf("Init not found.\n");
-		panic();
-	}
-
-	inode = dent->d_inode;
-
-        thread = thread_create_user(&init_thread, "init");
-        if (!thread) {
-                kprintf("failed to create thread\n");
-		bug();
-        }
-
-	/* "load" init process where it belongs */
-	switch_map(&root_map, thread->map);
-	i = memory_copy(dst, page_to_addr(inode->i_map.i_pages[1]), 4096);
-	switch_map(thread->map, &root_map);
-
-        if (scheduler_enqueue(thread)) {
-                kprintf("failed to add thread to run queue\n");
-		bug();
-        }
+	dent = lookup_path("/dev/console");
+	if (!dent)
+		kprintf("/dev/console not found.\n");
 #endif
 }
 

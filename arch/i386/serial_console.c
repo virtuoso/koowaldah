@@ -13,7 +13,7 @@
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in the
  *    documentation and/or other materials provided with the distribution.
- * 3. Neither the name of the Koowaldah developers nor the names of theyr 
+ * 3. Neither the name of the Koowaldah developers nor the names of their 
  *    contributors may be used to endorse or promote products derived from
  *    this software without specific prior written permission.
  *
@@ -38,7 +38,6 @@
 
 void __init early_serial_init()
 {
-
 	outb(SERIO_1_BASE + 3, 0x80); /* DLAB = 1 */
 
 	outb(SERIO_1_BASE + 0, 12);
@@ -51,7 +50,6 @@ void __init early_serial_init()
 					 */
 	outb(SERIO_1_BASE + 1, 0x00); /* Disable serial interrupts */
 	outb(SERIO_1_BASE + 4, 0x00); /* No modem control */
-
 } 
 
 void early_serial_put_char(char c)

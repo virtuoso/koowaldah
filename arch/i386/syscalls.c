@@ -12,7 +12,7 @@
  * 2. Redistributions in binary form must reproduce the above copyright
  * notice, this list of conditions and the following disclaimer in the
  * documentation and/or other materials provided with the distribution.
- * 3. Neither the name of the Koowaldah developers nor the names of theyr
+ * 3. Neither the name of the Koowaldah developers nor the names of their
  * contributors may be used to endorse or promote products derived from
  * this software without specific prior written permission.
  *
@@ -39,6 +39,7 @@
 #include <sys/errno.h>
 #include <file.h>
 #include <timers.h>
+#include <scheduler.h>
 
 u32 __attribute__((regparm(0))) sys_call_gate(u32 eax, u32 ebx, u32 ecx, u32 edx)
 {
@@ -62,9 +63,19 @@ u32 __attribute__((regparm(0))) sys_call_gate(u32 eax, u32 ebx, u32 ecx, u32 edx
 		case 5:
 			return tsleep(ebx);
 
+		case 6:
+			return fork();
+
+		case 7:
+			scheduler_yield();
+			return 0;
+
+		case 8:
+			return CURRENT()->pid;
+
 		default:
 			kprintf("syscall %d not implemented\n", eax);
-			arch_display_thread();
+			display_thread();
 			return -ENOSYS;
 	}
 	return -ENOSYS;

@@ -13,7 +13,7 @@
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in the
  *    documentation and/or other materials provided with the distribution.
- * 3. Neither the name of the Koowaldah developers nor the names of theyr 
+ * 3. Neither the name of the Koowaldah developers nor the names of their 
  *    contributors may be used to endorse or promote products derived from
  *    this software without specific prior written permission.
  *
@@ -37,6 +37,8 @@
 /* allow kernel to consume 1/KERN_ALLOWANCE of available physical memory */
 #define KERN_ALLOWANCE 8
 
+#define USERMEM_VIRT 0x40000000
+
 /* page size, bits, mask, unmask */
 #define PAGE_SHIFT 12
 #define PAGE_SIZE (1UL << PAGE_SHIFT)
@@ -53,6 +55,9 @@
 #define PGD_MASK 0xffc00000
 #define PGT_MASK 0x003ff000
 
+#define PGDIDX(addr) ((addr) >> PGD_SHIFT)
+#define PGTIDX(addr) (((addr) & PGT_MASK) >> PGT_SHIFT)
+
 /* page table flags */
 #define PTF_PRESENT  (1 << 0)
 #define PTF_RW       (1 << 1)
@@ -63,11 +68,20 @@
 #define PTF_DIRTY    (1 << 6)
 /* more to come as needed */
 
+#define PTE_DESC(addr, attrs)      \
+	(                          \
+	 ((addr) << PAGE_SHIFT)  | \
+	 (attrs)                   \
+	)
+
 #ifndef __ASSEMBLY__
+
 /* memory mapping/page directory */
 struct mapping {
 	u32 *m_pgdir;
 	u32 *m_pgtable;
+	u32 m_cp;       /* code pages */
+	u32 m_dp;       /* data pages */
 };
 
 extern struct mapping root_map;
@@ -187,7 +201,7 @@ static inline u32 __virt2phys(u32 addr)
 }
 
 void copy_map(struct mapping *dst, struct mapping *map);
-void init_user_map(struct mapping *map);
+int init_user_map(struct mapping *map, u32 cp, u32 dp);
 void switch_map(struct mapping *from, struct mapping *to);
 
 static inline u8 inb(u16 port)
@@ -222,22 +236,22 @@ static inline u32 read_eflags()
 	return f;
 }
 
-static inline u32 write_eflags()
+static inline void write_eflags(u32 f)
 {
-	u32 f;
 	__asm__ __volatile__("pushl %0; popfl" : : "r"(f));
-	return f;
+}
+#define EFLAGS_IF	0x0200
+
+static inline void local_irq_disable()
+{
+        __asm__ __volatile__ ("cli");
 }
 
-static inline void disable_interrupts()
+static inline void local_irq_enable()
 {
-        asm volatile ("cli");
+        __asm__ __volatile__ ("sti");
 }
 
-static inline void enable_interrupts()
-{
-        asm volatile ("sti");
-}
 #endif /* __ASSEMBLY__ */
 
 #endif /* __ARCH_ASM_H__ */

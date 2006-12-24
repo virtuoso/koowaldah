@@ -13,7 +13,7 @@
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in the
  *    documentation and/or other materials provided with the distribution.
- * 3. Neither the name of the Koowaldah developers nor the names of theyr 
+ * 3. Neither the name of the Koowaldah developers nor the names of their 
  *    contributors may be used to endorse or promote products derived from
  *    this software without specific prior written permission.
  *
@@ -37,7 +37,7 @@
 #include <types.h>
 #include <config.h>
 
-extern u64 jiffies;
+extern u64 __volatile__ jiffies;
 extern u8 kernel_started;
 
 /* kernel component name length */
@@ -65,6 +65,7 @@ extern u8 kernel_started;
 #define __future __attribute__((unused))
 #define __inline __attribute__((always_inline)) inline
 #define __noprof __attribute__((no_instrument_function))
+#define __regparm(n) __attribute__((regparm(n)))
 
 typedef int (*initfn)(void);
 

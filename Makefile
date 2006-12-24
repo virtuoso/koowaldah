@@ -18,15 +18,15 @@ endif
 #### CONFIGURATION SECTION END ####
 
 ASM ?= gcc
-ASM_FLAGS += -g -ffreestanding
+ASM_FLAGS += -Wall -ffreestanding -nostdinc -nostdlib -g
 CC ?= gcc
-CC_FLAGS += -Wall -g -ffreestanding
+CC_FLAGS += -Wall -ffreestanding -nostdinc -nostdlib -g -std=gnu89
 CC_FLAGS_KERN := $(CC_FLAGS)
 LD ?= ld
 OBJCOPY ?= objcopy
 
 ifeq ($(MK_INSTRUMENT_PROFILER),Y)
-  CC_FLAGS_KERN += -finstrument-functions
+  CC_FLAGS += -finstrument-functions
 endif
 
 OBJDIR := $(PRJROOT)/solver

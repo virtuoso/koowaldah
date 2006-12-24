@@ -13,7 +13,7 @@
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in the
  *    documentation and/or other materials provided with the distribution.
- * 3. Neither the name of the Koowaldah developers nor the names of theyr 
+ * 3. Neither the name of the Koowaldah developers nor the names of their 
  *    contributors may be used to endorse or promote products derived from
  *    this software without specific prior written permission.
  *
@@ -193,7 +193,6 @@ void fake_getpage_init()
                 if(!tmp)
                         bug();
                 *tmp->data = (u32) page_array + (0x1000 * i);
-		kprintf("[%x]", *(u32*)tmp->data);
 
                 klist_add(tmp, &page_list);
 //              kprintf("added entry, tmp->data = %x\n", (u32) tmp->data);

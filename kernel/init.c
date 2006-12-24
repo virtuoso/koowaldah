@@ -13,7 +13,7 @@
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in the
  *    documentation and/or other materials provided with the distribution.
- * 3. Neither the name of the Koowaldah developers nor the names of theyr 
+ * 3. Neither the name of the Koowaldah developers nor the names of their 
  *    contributors may be used to endorse or promote products derived from
  *    this software without specific prior written permission.
  *
@@ -40,6 +40,7 @@
 #include <timer.h>
 #include <textio.h>
 #include <klist.h>
+#include <lib.h>
 #include <kqueue.h>
 #include <thread.h>
 #include <scheduler.h>
@@ -66,8 +67,8 @@ void kqueue_init(void);
 /* this is also needed only once */
 void run_tests(void);
 
-extern void mach_start();
-extern void mach_running();
+void mach_start();
+void mach_running();
 
 void __init kern_start()
 {
@@ -89,13 +90,12 @@ void __init kern_start()
 
 	sched0_load();
 	scheduler_init();
-	
-	main_thread = thread_create(&kernel_main_thread, "GOD");
-	if(!main_thread){
+	main_thread = thread_create(&kernel_main_thread, "GOD", NULL);
+	if (!main_thread) {
 		kprintf("Failed to create main kernel thread\n");
 		bug();
 	}
-	thread_switch_to(main_thread);	
+	thread_switch_to(main_thread);
 
 	bug();
 }
@@ -107,22 +107,69 @@ void __noprof call_late_init()
 {
 	initfn *fn;
 
-	if (&late_init_start == &late_init_end)
-		return;
-
+	kprintf("Late init.\n");
 	for (fn = &late_init_start; fn < &late_init_end; fn++)
 		if ((*fn)() != 0)
 			kprintf("Late-init function %x failed\n", *fn);
 }
 
-void __noprof kernel_main_thread()
+/* vvv big fat XXX */
+#include <i386/segments.h>
+extern struct tss_segment root_tss;
+/* ^^^ big fat XXX */
+
+static void __attribute__((noreturn)) init_thread(void *data)
 {
-	struct thread *me = CURRENT();
-	
-        if (scheduler_enqueue_nolock(me)) {
-                kprintf("Failed to add main kernel thread to run queue\n");
+	/* disregard everything on the current stack
+	 * as start_user() never returns */
+	root_tss.esp0 = (u32)CURRENT() - 4;
+	start_user();
+	bug();
+}
+
+static void load_init()
+{
+	struct thread *thread;
+	struct thread_queue tmp_q;
+	char *dst = (char *)USERMEM_VIRT;
+	struct direntry *dent;
+	struct inode *inode;
+
+        thread = thread_create_user(&init_thread, "init", NULL, 2, 1);
+        if (!thread) {
+                kprintf("failed to create thread\n");
 		bug();
         }
+
+	dent = lookup_path("/sbin/init");
+	if (!dent) {
+		kprintf("Init not found.\n");
+		panic();
+	}
+
+	inode = dent->d_inode;
+
+	/* "load" init process where it belongs */
+	switch_map(&root_map, thread->map);
+	memory_copy(dst, page_to_addr(inode->i_map.i_pages[1]), PAGE_SIZE);
+	memory_copy(dst + PAGE_SIZE, page_to_addr(inode->i_map.i_pages[2]), PAGE_SIZE);
+	switch_map(thread->map, &root_map);
+
+	tq_init(&tmp_q);
+	tq_insert_head(thread, &tmp_q);
+
+        bug_on(!scheduler_enqueue(&tmp_q));
+}
+
+void __noprof kernel_main_thread(void *data)
+{
+	struct thread *me = CURRENT();
+	struct thread_queue tmp_q;
+
+	tq_init(&tmp_q);
+	tq_insert_head(me, &tmp_q);
+
+	bug_on(!scheduler_enqueue(&tmp_q));
 
 	mach_running();
 
@@ -130,13 +177,17 @@ void __noprof kernel_main_thread()
 	fs_init();
 	kprintf("Done.\n");
 
-	scheduler_start();
-
 	call_late_init();
 
 	run_tests();
 
-	for (;;)
-		__asm__ __volatile__("sti; hlt");
+	load_init();
+
+	for (;;) {
+		scheduler_yield();
+		__asm__ __volatile__("hlt");
+	}
+
+	bug();
 }
 

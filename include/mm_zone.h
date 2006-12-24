@@ -13,7 +13,7 @@
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in the
  *    documentation and/or other materials provided with the distribution.
- * 3. Neither the name of the Koowaldah developers nor the names of theyr 
+ * 3. Neither the name of the Koowaldah developers nor the names of their 
  *    contributors may be used to endorse or promote products derived from
  *    this software without specific prior written permission.
  *
@@ -31,13 +31,16 @@
  * 
  */
 #ifndef __MM_ZONE_H__
-#define __MM_ZOME_H__
+#define __MM_ZONE_H__
 
 #include <page_alloc.h>
 #include <klist0.h>
 
+#define ZONE_BOOT 0x0
+#define ZONE_USER 0x1
+
 struct mem_zone {
-	u32 * base;
+	u32 *base;
 	u32 total_pages;
 	u32 free_pages;
 	struct klist0_node alloc_levels[MAX_ORDER];

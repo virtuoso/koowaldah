@@ -13,7 +13,7 @@
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in the
  *    documentation and/or other materials provided with the distribution.
- * 3. Neither the name of the Koowaldah developers nor the names of theyr 
+ * 3. Neither the name of the Koowaldah developers nor the names of their 
  *    contributors may be used to endorse or promote products derived from
  *    this software without specific prior written permission.
  *
@@ -35,16 +35,17 @@
 #define __ARCH_BUG_H__
 
 #include <koowaldah.h>
-#include <thread.h>
+//#include <thread.h>
 #include <arch/asm.h>
 
 void i386_display_regs(u32 *regs_dump);
 void i386_dump_stack(u32 * stack);
+void local_irq_disable();
 
 #define arch_halt() \
 	do { 					\
 		for (;;) { 			\
-			disable_interrupts(); 	\
+			local_irq_disable(); 	\
 			asm volatile ("hlt"); 	\
 		} 				\
 	} while (0)
@@ -98,15 +99,6 @@ void i386_dump_stack(u32 * stack);
 			"addl $4, %esp"		\
 		);				\
 	} while (0)
-
-#define arch_display_thread() do { 		\
-	struct thread *thread;		\
-	thread = CURRENT();			\
-	kprintf("Task: %s, pid: %d\n",		\
-			thread->name,		\
-			thread->pid		\
-		);				\
-} while (0)
 
 #endif /* __ARCH_BUG_H__ */
 

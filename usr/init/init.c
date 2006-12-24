@@ -12,7 +12,7 @@
  * 2. Redistributions in binary form must reproduce the above copyright
  * notice, this list of conditions and the following disclaimer in the
  * documentation and/or other materials provided with the distribution.
- * 3. Neither the name of the Koowaldah developers nor the names of theyr
+ * 3. Neither the name of the Koowaldah developers nor the names of their
  * contributors may be used to endorse or promote products derived from
  * this software without specific prior written permission.
  *
@@ -31,29 +31,54 @@
  */
 
 #include <syscalls.h>
+#include <string.h>
+#include <stdio.h>
 
 /*
  * The init program.
  */
 
-char buf[16];
+#define WELCOME "Init process starting"
+char buf[48];
 void _start()
 {
 	int fd, l;
 	unsigned short c;
-	char *p = (char *)0x40000000; /* 1GB virtual */
+	int pid;
 
-	for (l = 0; l < 16; l++) buf[l] = '\0';
-	sys_debug("Init process starting!");
-	*p = 'z'; /* we shouldn't pagefault here */
-	fd = sys_open("/init", 0);
-	l = sys_read(fd, buf, 12);
+	snprintf(buf, strlen(WELCOME), WELCOME);
 	sys_debug(buf);
-	sys_close(fd);
+	memset(buf, 0, 48);
+	fd = sys_open("/init", 0);
+	if (fd < 0)
+		sys_debug("can't open /init");
+	else {
+		l = sys_read(fd, buf, 12);
+		sys_debug(buf);
+		sys_close(fd);
+	}
+
+	l = sys_fork();
+	if (l == 0)
+		snprintf(buf, 7, "child!");
+	else
+		snprintf(buf, 32, "parent! child pid=%d", l);
+	sys_debug(buf);
+
+	l = sys_fork();
+	if (l == 0)
+		snprintf(buf, 7, "child!");
+	else
+		snprintf(buf, 32, "parent! child pid=%d", l);
+	sys_debug(buf);
+
+	pid = sys_getpid();
+	snprintf(buf, 16, "waking up [pid=%d]", pid);
 
 	for (;;) {
-		sys_debug("waking up");
-		sys_tsleep(1000);
+		sys_debug(buf);
+		sys_tsleep(250*pid);
+		/*sys_yield();*/
 	}
 }
 
