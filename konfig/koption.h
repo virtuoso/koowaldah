@@ -35,6 +35,8 @@
  */
 #define OPTNAME_MAX 32
 
+#define CONFLICT_MAX 32
+
 /*
  * Available option types
  */
@@ -72,6 +74,7 @@ typedef struct koption {
 	const char *desc;
 	const char *help;
 	const int type;
+	const char *conflicts[CONFLICT_MAX];
 	union {
 		kopt_bool_t     b;
 		kopt_int_t      i;
@@ -84,6 +87,12 @@ typedef struct koption {
 
 #define DEREF(x, type) ({ char **__p = (char **)(x); (type *)*__p; })
 
+#define ARRSIZE(a) ({ \
+		unsigned int __i = 0; \
+		for (__i = 0; a[__i]; __i++); \
+		__i; \
+	})
+
 #define __PTR __attribute__((section("KPTR")))
 #define KOPTIONS_START(__name, __desc, __number) \
 	const koption_t __name ## _options[__number]; \
@@ -95,20 +104,29 @@ typedef struct koption {
 	const void __PTR *__name ## _desc_ptr = &__name ## _section; \
 	const koption_t __name ## _options[__number] = {
 #define KOPTIONS_END };
-#define KOPTION(__name, __desc, __help, __type, __default) { \
+#define KOPTION_FULL(__name, __desc, __help, __type, __conflicts, __default) { \
 	.name = __name, \
 	.desc = __desc, \
 	.help = __help, \
 	.type = __type, \
+	.conflicts = __conflicts, \
 	.def = DEF_ ## __type(__default), \
 	.user_set = 0, \
 	.section = NULL \
 }
+#define KOPTION(__name, __desc, __help, __type, __default) \
+	KOPTION_FULL(__name, __desc, __help, __type, {NULL}, __default)
+
+#define CONFLICTS(args ...) { args, NULL }
 
 #define DEF_KOPT_BOOL(x) { .b = { .v = (x) } }
 #define DEF_KOPT_TRISTATE(x) { .t = { .v = (x) } }
 #define DEF_KOPT_INT(x) { .i = { .v = (x) } }
 #define DEF_KOPT_STRING(x) { .s = { .v = (x) } }
+
+/* konfigure.c, generic helpers */
+int kopt_isset(const char *name);
+int kopt_setval(const char *name, char *val);
 
 /* kout.c */
 void writeback(const char *konfig,
