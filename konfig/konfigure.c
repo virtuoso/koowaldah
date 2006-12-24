@@ -98,11 +98,14 @@ void init()
 	}
 }
 
-int kopt_setval(char *name, char *val)
+int kopt_setval(const char *name, char *val)
 {
 	int i;
 
-	name += 4; /* skip OPT_ */
+	/* if name starts with "OPT_", disregard it */
+	if (!strncmp("OPT_", name, 4))
+		name += 4;
+
 	for (i = 0; i < total_kopts; i++)
 		if (!strcmp(KOPT[i].name, name)) {
 			switch (KOPT[i].type) {
@@ -121,6 +124,44 @@ int kopt_setval(char *name, char *val)
 			}
 			KOPT[i].user_set++;
 			return 0;
+		}
+	return -1;
+}
+
+/*
+ * Check if a bool or tristate option has it's value set
+ * @name -- the option
+ * returns: 0 == not set ('N')
+ *          1 == set to 'Y'
+ *          2 == set to 'M' (for tristates)
+ *         -1 == no option with this name exists or nonbool type
+ */
+int kopt_isset(const char *name)
+{
+	int i;
+	char v;
+
+	/* if name starts with "OPT_", disregard it */
+	if (!strncmp("OPT_", name, 4))
+		name += 4;
+
+	for (i = 0; i < total_kopts; i++)
+		if (!strcmp(KOPT[i].name, name)) {
+			switch (KOPT[i].type) {
+				case KOPT_BOOL:
+					v = KOPT[i].def.b.v;
+					break;
+				case KOPT_TRISTATE:
+					v = KOPT[i].def.t.v;
+					break;
+				default:
+					return -1;
+			}
+
+			if (v == 'M')
+				return 2;
+
+			return v == 'Y' ? 1 : 0;
 		}
 	return -1;
 }
@@ -162,6 +203,7 @@ int main()
 	if (!nointr)
 		ask_user();
 
+	process_konfig();
 	writeback(KONFIG_PATH, HEADER_PATH, MAKE_PATH);
 	free(KOPT);
 
