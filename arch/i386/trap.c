@@ -34,7 +34,11 @@
 
 #include <koowaldah.h>
 #include <textio.h>
+#include <lib.h>
 #include <bug.h>
+#include <thread.h>
+#include <mem_area.h>
+#include <page_alloc.h>
 #include <i386/segments.h>
 
 void general_protection()
@@ -46,14 +50,47 @@ void general_protection()
 	panic("GENERAL PROTECTION FAULT");
 }
 
+static int dfault = 0;
+
+#define PFLT_ERRMAX 48
 void page_fault()
 {
 	u32 addr = read_cr2();
 	u32 *frame;
+	u32 err;
+	struct thread *me = CURRENT();
+	char errstr[PFLT_ERRMAX];
 
-	__asm__ __volatile__("mov %%esp, %%eax\nmov %%eax, %0" : "=m"(frame));
-	kprintf("### EIP=%x\n", frame[16]);
+	if (dfault)
+		panic("DOUBLE PAGE FAULT");
+
+	dfault++;
+	frame = (u32 *)me;
+	frame -= 7;
+	err = frame[0];
+	/* try and decipher error code */
+	snprintf(errstr, PFLT_ERRMAX, "%s%s%s%s",
+			(err & PFLT_RESB  ? "res. bit, "    : "--//--, "     ),
+			(err & PFLT_PROT  ? "protection, "  : "non-present, "),
+			(err & PFLT_WRITE ? "write, "       : "read, "       ),
+			(err & PFLT_USER  ? "user."         : "supervisor."  )
+		);
+	kprintf("### ERROR:   %x: %s\n", err, errstr);
+	kprintf("### IP:      %x\n", frame[1]);
+	kprintf("### ESP:     %x\n", frame[4]);
 	kprintf("### ADDRESS: %x\n", addr);
+	kprintf("### ESPPHYS: %x\n", __virt2physpg(frame[4]));
+
+	if (err & PFLT_USER) {
+		frame = (u32 *)frame[4];
+		while ((u32)frame < USERMEM_STACK+PAGE_SIZE) {
+			kprintf("%x:<%x> ", frame, *frame);
+			frame++;
+		}
+	} else
+		arch_display_stack();
+	
+	dfault--;
 	panic("PAGE_FAULT");
 }
 
