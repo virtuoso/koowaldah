@@ -34,15 +34,18 @@
 
 #include <koowaldah.h>
 #include <mm_zone.h>
+#include <mm.h>
+#include <bug.h>
 
 extern void arch_init_boot_zone(struct mem_zone *zone, struct mem_zone *user);
+void __init mma_init();
 	
 struct mem_zone boot_zone;
 struct mem_zone user_zone;
 
 struct mem_info memory_info;
 
-void init_mem_info ()
+void __init init_mem_info()
 {
 	KLIST0_INIT(&memory_info.zone_list);
 	KLIST0_INIT(&boot_zone.list);
@@ -52,6 +55,7 @@ void init_mem_info ()
 
 	klist0_append(&boot_zone.list, &memory_info.zone_list);
 	klist0_append(&user_zone.list, &memory_info.zone_list);
-}
 
+	mma_init();
+}
 
