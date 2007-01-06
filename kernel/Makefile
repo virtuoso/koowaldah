@@ -3,11 +3,13 @@ SOURCES := \
 	textio.c \
 	thread.c \
 	fork.c \
+	exec.c \
 	thread_queue.c \
 	scheduler.c \
 	sched0.c \
 	timecore.c \
 	mm_zone.c \
+	mem_area.c \
 	page_alloc.c \
 	slice.c \
 	galloc.c
