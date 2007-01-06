@@ -85,3 +85,8 @@ int sys_getpid()
 	return sys_call(SYS_getpid, 0, 0, 0);
 }
 
+int sys_exec(char *path)
+{
+	return sys_call(SYS_exec, (u32)path, 0, 0);
+}
+
