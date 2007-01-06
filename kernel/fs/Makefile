@@ -5,6 +5,7 @@ SOURCES := \
 	namespace.c \
 	fs.c \
 	device.c \
+	aout.c \
 	cpio.c
 
 include $(PRJROOT)/tools/main.mk
