@@ -137,6 +137,7 @@ int generic_read(struct file *file, char *buf, off_t len)
 				MIN((size_t)PAGE_SIZE, left));
 		left -= PAGE_SIZE;
 		to += PAGE_SIZE;
+		pgstart_off = 0;
 	} while (r < npages);
 
 	file->f_offset += len;
