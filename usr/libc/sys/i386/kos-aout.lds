@@ -28,6 +28,7 @@ SECTIONS
 		*(.debug_pubnames)
 		*(.debug_aranges)
 		*(.debug_str)
+		*(.debug_loc)
 		*(.debug_macinfo)
 	}
 
