@@ -39,12 +39,21 @@
  */
 
 #define WELCOME "Init process starting"
+#define WRONGPID "This init is not the first process, bye-bye."
+
 char buf[48];
 void _start()
 {
 	int fd, l;
 	unsigned short c;
-	int pid;
+	int pid = sys_getpid();
+
+	if (pid != 1) {
+		char *s = WRONGPID;
+		sys_debug(s);
+		for (;;)
+			sys_tsleep(1000);
+	}
 
 	snprintf(buf, strlen(WELCOME), WELCOME);
 	sys_debug(buf);
@@ -59,20 +68,13 @@ void _start()
 	}
 
 	l = sys_fork();
-	if (l == 0)
+	if (l == 0) {
 		snprintf(buf, 7, "child!");
-	else
+		sys_debug(buf);
+		sys_exec("/sbin/init");
+	} else
 		snprintf(buf, 32, "parent! child pid=%d", l);
-	sys_debug(buf);
 
-	l = sys_fork();
-	if (l == 0)
-		snprintf(buf, 7, "child!");
-	else
-		snprintf(buf, 32, "parent! child pid=%d", l);
-	sys_debug(buf);
-
-	pid = sys_getpid();
 	snprintf(buf, 16, "waking up [pid=%d]", pid);
 
 	for (;;) {
