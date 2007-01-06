@@ -37,13 +37,17 @@
 /* allow kernel to consume 1/KERN_ALLOWANCE of available physical memory */
 #define KERN_ALLOWANCE 8
 
-#define USERMEM_VIRT 0x40000000
+#define USERMEM_START 0x40000000
+#define USERMEM_STACK 0x7ffff000
+#define USERMEM_HEAP  0x80000000
+#define in_kernel(p) ((u32)p < USERMEM_START ? 1 : 0)
 
 /* page size, bits, mask, unmask */
 #define PAGE_SHIFT 12
 #define PAGE_SIZE (1UL << PAGE_SHIFT)
 #define PAGE_MASK (PAGE_SIZE - 1)
 #define NOPAGE_MASK ~(PAGE_MASK)
+#define NOPAGE_ADDR (~0UL)
 
 /* page translation constants */
 #define PTE_BITS  32
@@ -58,15 +62,16 @@
 #define PGDIDX(addr) ((addr) >> PGD_SHIFT)
 #define PGTIDX(addr) (((addr) & PGT_MASK) >> PGT_SHIFT)
 
-/* page table flags */
-#define PTF_PRESENT  (1 << 0)
-#define PTF_RW       (1 << 1)
-#define PTF_USER     (1 << 2)
-#define PTF_PWT      (1 << 3)
-#define PTF_PCD      (1 << 4)
-#define PTF_ACCESSED (1 << 5)
-#define PTF_DIRTY    (1 << 6)
-/* more to come as needed */
+/* page table flags                                      */
+#define PTF_PRESENT  (1 << 0)  /* page/pte is present    */
+#define PTF_RW       (1 << 1)  /* write access available */
+#define PTF_USER     (1 << 2)  /* accessible by user     */
+#define PTF_PWT      (1 << 3)  /* prevent write-through  */
+#define PTF_PCD      (1 << 4)  /* cache disable          */
+#define PTF_ACCESSED (1 << 5)  /* page has been accessed */
+#define PTF_DIRTY    (1 << 6)  /* page is dirty          */
+#define PTF_PGSIZE   (1 << 7)  /* page size = 4M         */
+#define PTF_GLOBAL   (1 << 8)  /* global (for TLB)       */
 
 #define PTE_DESC(addr, attrs)      \
 	(                          \
@@ -74,18 +79,23 @@
 	 (attrs)                   \
 	)
 
+/* page fault error code bits                                        */
+/*      name      bit         cause / otherwise                      */
+#define PFLT_PROT  (0x01)  /* protection violation, oth. non-present */
+#define PFLT_WRITE (0x02)  /* write operation, oth. read operation   */
+#define PFLT_USER  (0x04)  /* in user mode, oth. in supervisor mode  */
+#define PFLT_RESB  (0x08)  /* reserved bit violation                 */
+
 #ifndef __ASSEMBLY__
+#include <i386/segments.h>
+#define reset_stack() \
+	do { \
+		CURRENT()->context.esp = (u32)CURRENT() - 4; \
+		root_tss.esp0 = (u32)CURRENT() - 4; \
+	} while (0);
+#endif /* __ASSEMBLY__ */
 
-/* memory mapping/page directory */
-struct mapping {
-	u32 *m_pgdir;
-	u32 *m_pgtable;
-	u32 m_cp;       /* code pages */
-	u32 m_dp;       /* data pages */
-};
-
-extern struct mapping root_map;
-
+#ifndef __ASSEMBLY__
 /* read/write cpu control registers */
 #define READ_REG(reg, REG) \
 static inline unsigned long read_ ##reg() \
@@ -199,10 +209,6 @@ static inline u32 __virt2phys(u32 addr)
 		);
 	return ret;
 }
-
-void copy_map(struct mapping *dst, struct mapping *map);
-int init_user_map(struct mapping *map, u32 cp, u32 dp);
-void switch_map(struct mapping *from, struct mapping *to);
 
 static inline u8 inb(u16 port)
 {
