@@ -45,23 +45,25 @@ struct mem_zone;
 
 struct page {
 	u32 index;
+	unsigned long virt;
 	struct klist0_node list;
+	struct klist0_node area_list;
 	union {
 		u32 order;
 	} private;
-	struct mem_zone * zone;
+	struct mem_zone *zone;
 };
 
-struct page * alloc_pages(u32 flags, u32 order);
-u32 * get_pages(u32 flags, u32 order);
-u32 * page_to_addr(struct page * page);
-struct page * addr_to_page(u32 * page);
+struct page *alloc_pages(u32 flags, u32 order);
+u32 *get_pages(u32 flags, u32 order);
+void *page_to_addr(struct page *page);
+struct page *addr_to_page(u32 *page);
 
 #define alloc_page(flags) alloc_pages(flags, 0) 
 #define get_page(flags) get_pages(flags, 0)
 
-void free_pages(struct page * pg);
-void put_pages(void * addr);
+void free_pages(struct page *pg);
+void put_pages(void *addr);
 
 #define free_page(page) free_pages(page)
 #define put_page(addr) put_pages(addr)
