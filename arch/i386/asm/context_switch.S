@@ -92,37 +92,13 @@ do_thread_switch_to:
 	popa
 	iret
 
-/* XXX: stuff hardcoded until we have a proper elf parser */
-.globl start_user
-start_user:
-	pushl %ebp
-	movl %esp, %ebp
-
-	movl $(USER_DATA)+3, %eax
-	pushl %eax
-
-	movl $0x40002ffb, %eax
-	pushl %eax
-
-	movl $(USER_CODE)+3, %eax
-	pushl %eax
-
-	movl $0x40000000, %eax
-	pushl %eax
-
-	movl $(USER_DATA)+3, %ebx
-	mov %bx, %ds
-	mov %bx, %es
-
-	lret
-
 /*
- * start_user_forked(eip, ebp, esp, val)
+ * start_user(eip, ebp, esp, val)
  */
-.globl start_user_forked
-.type start_user_forked,%function
+.globl start_user
+.type start_user,%function
 .align 4
-start_user_forked:
+start_user:
 	pushl %ebp
 	movl %esp, %ebp
 
@@ -131,6 +107,7 @@ start_user_forked:
 
 	movl 16(%ebp), %eax /* stack ptr */
 	pushl %eax
+	pushfl
 
 	movl $(USER_CODE)+3, %eax
 	pushl %eax
@@ -147,5 +124,5 @@ start_user_forked:
 	mov %bx, %es
 	movl %ecx, %eax
 
-	lret
+	iret
 
