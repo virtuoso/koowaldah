@@ -168,14 +168,16 @@ int tq_transfer_tail_to_tail(struct thread_queue *from_q, struct thread_queue *t
 
 void dump_thread(struct thread *thread);
 struct thread *thread_create(thread_t func, char *name, void *data);
-struct thread *thread_create_user(thread_t func, char *name, void *data,
-		u32 cp, u32 dp);
+struct thread *thread_create_user(thread_t func, char *name, void *data);
 pid_t fork();
+int thread_exec(struct thread *thread, char *path);
+int thread_exec_new(struct thread *thread, struct inode *inode);
+int spawn(char *path);
 
 /* arch */
+void thread_init_stack(struct thread *t, thread_t func, void *data);
 void thread_switch_to(struct thread *thread);
 void thread_switch_context(struct thread *from, struct thread *to);
-void start_user(void);
-void start_user_forked(u32 eip, u32 ebp, u32 esp, u32 val);
+void start_user(u32 eip, u32 ebp, u32 esp, u32 val);
 
 #endif /* __THREAD_H__ */
