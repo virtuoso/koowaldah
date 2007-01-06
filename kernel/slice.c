@@ -84,7 +84,7 @@ static void slice_page_info(struct page *pg, int obj_size)
 void slice_pool_info(struct slice_pool *slice)
 {
 	struct klist0_node *tmp;
-	kprintf("Slab 0x%x (%d): \n", (u32) slice, (u32) slice);
+	kprintf("Slice 0x%x (%d): \n", (u32) slice, (u32) slice);
 
 	kprintf("Object size: 0x%x (%d)\n",
 		slice->obj_size, slice->obj_size);
