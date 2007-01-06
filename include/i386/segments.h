@@ -334,6 +334,10 @@ void gatedesc_init(u32 idx, u32 offset, u8 type, u8 priv);
 
 #define trapgate_init(num, handler) \
 	gatedesc_init(num << 3, (u32)handler, GT_TRAP, DPL_KERN);
+
+/* from arch/i386/segments.c */
+extern struct tss_segment root_tss;
+
 #endif
 
 #endif /* __I386_SEGMENTS_H__ */
