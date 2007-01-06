@@ -73,6 +73,9 @@ u32 __attribute__((regparm(0))) sys_call_gate(u32 eax, u32 ebx, u32 ecx, u32 edx
 		case 8:
 			return CURRENT()->pid;
 
+		case 9:
+			return thread_exec(CURRENT(), (char *)ebx);
+
 		default:
 			kprintf("syscall %d not implemented\n", eax);
 			display_thread();
