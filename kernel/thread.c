@@ -37,6 +37,7 @@
 
 #include <koowaldah.h>
 #include <mm.h>
+#include <mm_zone.h>
 #include <textio.h>
 #include <thread.h>
 #include <bug.h>
@@ -45,9 +46,6 @@
 #include <scheduler.h>
 #include <lib.h>
 #include <page_alloc.h>
-
-/* each architecture should define this */
-extern void thread_init_stack(struct thread *t, thread_t func, void *data);
 
 /* omgwtf */
 u32 get_free_pid()
@@ -115,19 +113,14 @@ struct thread *thread_create(thread_t func, char *name, void *data)
 	return thread;
 }
 
-struct thread *thread_create_user(thread_t func, char *name, void *data,
-		u32 cp, u32 dp)
+struct thread *thread_create_user(thread_t func, char *name, void *data)
 {
 	struct thread *thread;
 
 	thread = thread_create(func, name, data);
 	if (thread) {
 		thread->map = memory_alloc(sizeof(struct mapping));
-		if (init_user_map(thread->map, cp, dp)) {
-			memory_release(thread->map);
-			/*thread_destroy(thread)*/
-			return NULL;
-		}
+		clone_map(thread->map, &root_map);
 	}
 
 	return thread;
