@@ -113,52 +113,15 @@ void __noprof call_late_init()
 			kprintf("Late-init function %x failed\n", *fn);
 }
 
-/* vvv big fat XXX */
-#include <i386/segments.h>
-extern struct tss_segment root_tss;
-/* ^^^ big fat XXX */
-
-static void __attribute__((noreturn)) init_thread(void *data)
-{
-	/* disregard everything on the current stack
-	 * as start_user() never returns */
-	root_tss.esp0 = (u32)CURRENT() - 4;
-	start_user();
-	bug();
-}
-
 static void load_init()
 {
-	struct thread *thread;
-	struct thread_queue tmp_q;
-	char *dst = (char *)USERMEM_VIRT;
-	struct direntry *dent;
-	struct inode *inode;
-
-        thread = thread_create_user(&init_thread, "init", NULL, 2, 1);
-        if (!thread) {
-                kprintf("failed to create thread\n");
-		bug();
-        }
-
-	dent = lookup_path("/sbin/init");
-	if (!dent) {
-		kprintf("Init not found.\n");
+	int s = spawn("/sbin/init");
+	if (s)  spawn("/bin/init");
+	if (s)  spawn("/kosrc");
+	if (s) {
+		kprintf("Failed to execute init. Bye-bye!\n");
 		panic();
 	}
-
-	inode = dent->d_inode;
-
-	/* "load" init process where it belongs */
-	switch_map(&root_map, thread->map);
-	memory_copy(dst, page_to_addr(inode->i_map.i_pages[1]), PAGE_SIZE);
-	memory_copy(dst + PAGE_SIZE, page_to_addr(inode->i_map.i_pages[2]), PAGE_SIZE);
-	switch_map(thread->map, &root_map);
-
-	tq_init(&tmp_q);
-	tq_insert_head(thread, &tmp_q);
-
-        bug_on(!scheduler_enqueue(&tmp_q));
 }
 
 void __noprof kernel_main_thread(void *data)
