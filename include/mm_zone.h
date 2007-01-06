@@ -35,6 +35,7 @@
 
 #include <page_alloc.h>
 #include <klist0.h>
+#include <mem_area.h>
 
 #define ZONE_BOOT 0x0
 #define ZONE_USER 0x1
@@ -51,7 +52,7 @@ struct mem_info {
 	struct klist0_node zone_list;
 };
 
-void mem_zone_init(struct mem_zone * zone);
+void mem_zone_init(struct mem_zone *zone);
 
 
 #endif /* __MM_ZONE_H__ */
