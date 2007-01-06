@@ -41,6 +41,7 @@
 #include <klist.h>
 #include <error.h>
 #include <bug.h>
+#include <mm_zone.h>
 #include <mm.h>
 #include <timer.h>
 #include <i386/asm.h>
