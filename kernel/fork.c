@@ -30,26 +30,24 @@
  */
 
 #include <koowaldah.h>
+#include <mm_zone.h>
 #include <thread.h>
 #include <textio.h>
 #include <sys/errno.h>
 #include <bug.h>
 #include <scheduler.h>
 #include <lib.h>
-
-/* vvv big fat XXX */
-#include <i386/segments.h>
-extern struct tss_segment root_tss;
-/* ^^^ big fat XXX */
+#include <arch/asm.h>
+#include <arch/fork.h>
 
 static void __attribute__((noreturn)) forker(void *data)
 {
-	u32 *p = (u32)CURRENT() & NOPAGE_MASK;
+	u32 *p = (u32 *)((u32)CURRENT() & NOPAGE_MASK);
 
 	/* disregard everything on the current stack
 	 * as start_user() never returns */
-	root_tss.esp0 = (u32)CURRENT() - 4;
-	start_user_forked(p[0], 0x40002ffb, p[1], 0);
+	reset_stack();
+	start_user(p[0], USERMEM_STACK + PAGE_SIZE - 4, p[1], 0);
 	bug();
 }
 
@@ -58,28 +56,18 @@ pid_t fork()
 	struct thread *thread;
 	struct thread *me = CURRENT();
 	struct thread_queue tmp_q;
-	u32 virt = USERMEM_VIRT, phys, i;
-	u32 *p = (u32 *)me - 6;
-	u32 *d;
 
-	thread = thread_create_user(&forker, me->name, (void *)p[0],
-			me->map->m_cp, me->map->m_dp);
+	thread = thread_create_user(&forker, me->name, NULL);
 	if (!thread)
 		return -ENOMEM;
 
-	/* put parent's return ip and stack to the bottom of child's stack */
-	d = (u32)thread & NOPAGE_MASK;
-	d[0] = p[0];
-	d[1] = p[3];
+	mem_area_attach(thread->map, me->map->m_mma[0]);
+	thread->map->m_mma[1] = mem_area_clone(thread->map, me->map->m_mma[1]);
+	thread->map->m_mma[2] = mem_area_clone(thread->map, me->map->m_mma[2]);
+	thread->map->m_mma[3] = mem_area_clone(thread->map, me->map->m_mma[3]);
+	thread->map->m_nmma = 4;
 
-	/* XXX: copy process' pages */
-	for (i = 0; i < me->map->m_cp + me->map->m_dp; i++) {
-		switch_map(me->map, thread->map);
-		phys = __virt2physpg(virt);
-		switch_map(thread->map, me->map);
-		memory_copy((char *)phys, (char *)virt, PAGE_SIZE);
-		virt += PAGE_SIZE;
-	}
+	prepare_fork(thread);
 
 	tq_init(&tmp_q);
 	tq_insert_head(thread, &tmp_q);
