@@ -38,7 +38,7 @@
 #include <bug.h>
 
 
-#if 1
+#if 0
 #define DEBUG
 #endif
 
