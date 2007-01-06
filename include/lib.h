@@ -38,8 +38,15 @@
 #include <stdarg.h>
 
 size_t memory_set(void *s, char c, size_t n);
-size_t memory_copy( void *dest, void *src, size_t n );
+size_t memory_copy(void *dest, void *src, size_t n);
 
+#define NMASK(x) ((1 << (x)) - 1)
+static __inline unsigned long log2(unsigned long n)
+{
+	u8 l = 1;
+	while ((l < 32) && (n >> l)) l++;
+	return n & NMASK(l - 1) ? l : l - 1;
+}
 
 static __inline char *kstrchr(char *str, char c)
 {
