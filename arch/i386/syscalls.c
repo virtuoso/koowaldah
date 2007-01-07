@@ -37,6 +37,7 @@
 #include <textio.h>
 #include <bug.h>
 #include <uabi/errno.h>
+#include <uabi/syscalls.h>
 #include <file.h>
 #include <timers.h>
 #include <scheduler.h>
@@ -44,36 +45,36 @@
 u32 __attribute__((regparm(0))) sys_call_gate(u32 eax, u32 ebx, u32 ecx, u32 edx)
 {
 	switch (eax) {
-		case 0:
+		case __SYS_debug:
 			kprintf("# %s\n", (char *)ebx);
 			return 0;
 
-		case 1:
+		case __SYS_open:
 			return open((char *)ebx, (u32)ecx);
 
-		case 2:
+		case __SYS_close:
 			return close((int)ebx);
 
-		case 3:
+		case __SYS_read:
 			return read((int)ebx, (char *)ecx, (size_t)edx);
 
-		case 4:
+		case __SYS_write:
 			return write((int)ebx, (char *)ecx, (size_t)edx);
 
-		case 5:
+		case __SYS_tsleep:
 			return tsleep(ebx);
 
-		case 6:
+		case __SYS_fork:
 			return fork();
 
-		case 7:
+		case __SYS_yield:
 			scheduler_yield();
 			return 0;
 
-		case 8:
+		case __SYS_getpid:
 			return CURRENT()->pid;
 
-		case 9:
+		case __SYS_exec:
 			return thread_exec(CURRENT(), (char *)ebx);
 
 		default:
@@ -81,6 +82,5 @@ u32 __attribute__((regparm(0))) sys_call_gate(u32 eax, u32 ebx, u32 ecx, u32 edx
 			display_thread();
 			return -ENOSYS;
 	}
-	return -ENOSYS;
 }
 
