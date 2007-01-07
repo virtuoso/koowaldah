@@ -1,5 +1,6 @@
+
 /*
- * sys/types.h
+ * uabi/types.h
  *
  * Copyright (C) 2006 Alexander Shishkin
  *
@@ -32,14 +33,15 @@
 #ifndef __SYS_TYPES_H__
 #define __SYS_TYPES_H__
 
-#include <arch/types.h>
+#include <uabi/arch/types.h>
 
 /* ansi definitions */
-typedef u32 gid_t;
-typedef u32 uid_t;
-typedef u32 mode_t;
-typedef s32 off_t; /* XXX: should be s64 */
-typedef u32 size_t;
-typedef s32 pid_t;
+typedef __u32 __gid_t;
+typedef __u32 __uid_t;
+typedef __u32 __mode_t;
+typedef __s64 __off_t;
+typedef __u32 __size_t;
+typedef __s32 __pid_t;
 
 #endif
+
