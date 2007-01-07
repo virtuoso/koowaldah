@@ -1,4 +1,4 @@
-KOPTIONS_START(KERNEL_INIT, "Initialization options", 13)
+KOPTIONS_START(KERNEL_INIT, "Initialization options", 15)
 KOPTION(
 	"TEST_IRQS",
 	"Run irq serving test",
@@ -77,6 +77,20 @@ KOPTION(
 	"Test bug() function",
 	"Call bug() in the course of main kernel "
 	"thread execution, i.e. kill the kernel.",
+	KOPT_BOOL,
+	'N'
+       ),
+KOPTION(
+	"TEST_PANIC",
+	"Test panic() function",
+	"",
+	KOPT_BOOL,
+	'N'
+       ),
+KOPTION(
+	"TEST_PF",
+	"Test the Page Fault handler.",
+	"",
 	KOPT_BOOL,
 	'N'
        ),

@@ -826,6 +826,30 @@ static void test_rootfs()
 static void test_bug()
 {
 #ifdef OPT_TEST_BUG
+	kprintf("BUG!!!!!!!\n");
+	bug();
+#endif
+}
+
+static void test_panic()
+{
+#ifdef OPT_TEST_PANIC
+	kprintf("PANIC!!!!!!!\n");
+	panic("Test!");
+#endif
+}
+
+static void test_pf()
+{
+#ifdef OPT_TEST_PF
+	u32 * address = (u32 *) 0xDEADBEEF;
+	
+	kprintf("We are going to have a page fault at 0x%x\n",
+		(u32) address);
+
+	*address = 0;
+
+	/* We should be already dead now. */
 	bug();
 #endif
 }
@@ -844,5 +868,7 @@ void run_tests()
 	test_rootfs();
 	test_fslookup();
 	test_bug();
+	test_panic();
+	test_pf();
 }
 
