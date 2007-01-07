@@ -66,6 +66,7 @@ extern u8 kernel_started;
 #define __inline __attribute__((always_inline)) inline
 #define __noprof __attribute__((no_instrument_function))
 #define __regparm(n) __attribute__((regparm(n)))
+#define __noreturn __attribute__((noreturn))
 
 typedef int (*initfn)(void);
 

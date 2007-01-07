@@ -135,3 +135,6 @@ void writeback(const char *konfig,
 /* kuser.c */
 void ask_user();
 
+/* ktree.c */
+void process_konfig();
+
