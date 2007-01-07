@@ -1,6 +1,6 @@
 
 /*
- * uabi/types.h
+ * khui/types.h
  *
  * Copyright (C) 2006 Alexander Shishkin
  *
@@ -30,10 +30,10 @@
  * SUCH DAMAGE.
  */
 
-#ifndef __UABI_TYPES_H__
-#define __UABI_TYPES_H__
+#ifndef __KHUI_TYPES_H__
+#define __KHUI_TYPES_H__
 
-#include <uabi/arch/types.h>
+#include <khui/arch/types.h>
 
 /* ansi definitions */
 typedef __u32 __gid_t;
