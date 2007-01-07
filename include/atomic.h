@@ -41,7 +41,7 @@ typedef struct { volatile u16 v; } atomic_u16;
 typedef struct { volatile u8 v; } atomic_u8;
 
 #include <arch/atomic.h>
-#ifndef __ARCH_ATOMIC_H__
+#ifndef __ARCH_ATOMIC
 #error No atomic operations on your arch? Too bad.
 #endif
 
