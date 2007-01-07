@@ -4,12 +4,14 @@
 #include <arch/asm.h>
 #include <bug.h>
 
-void i386_display_regs(u32 *regs_dump)
+void i386_display_regs(struct register_frame frame)
 {
 	kprintf("EAX: 0x%x EBX: 0x%x ECX: 0x%x EDX: 0x%x\n"
-		"ESI: 0x%x EDI: 0x%x EBP: 0x%x ESP: 0x%x\n",
-		regs_dump[0], regs_dump[1], regs_dump[2], regs_dump[3],
-		regs_dump[4], regs_dump[5], regs_dump[6], regs_dump[7]);
+		"ESI: 0x%x EDI: 0x%x EBP: 0x%x ESP: 0x%x\n"
+		"EIP: 0x%x CS: 0x%x EFLAGS: 0x%x\n",
+		frame.eax, frame.ebx, frame.ecx, frame.edx,
+		frame.esi, frame.edi, frame.ebp, frame.esp,
+		frame.prev_eip, frame.prev_cs, frame.prev_eflags);
 }
 
 void i386_dump_stack(u32 * stack)

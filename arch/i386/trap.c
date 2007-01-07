@@ -40,6 +40,45 @@
 #include <mem_area.h>
 #include <page_alloc.h>
 #include <i386/segments.h>
+#include <arch/asm.h>
+
+
+void ud2_handler(struct register_frame frame)
+{
+	u32 eip;
+	u16 line;
+	char *file;
+
+	/*
+	 * XXX check that the instruction was really ud2 and that it was
+	 * issued from the kernel space. 
+	 */
+
+	eip = frame.prev_eip;
+	
+	/* eip now points at the ud2 instruction. */
+	
+	eip += 2; /* Skip the ud2 instruction. */
+	
+	line = (u16) *(u16 *)eip;
+
+	eip += 2; /* Skip the line number. */
+
+	
+	file = (char *) *(char **)eip;
+	
+	kprintf("Bug in file %s, line %d\n", file, line);
+	display_thread();
+	kprintf("Registers:\n");
+	i386_display_regs(frame);
+	kprintf("Stack:\n");
+	
+	i386_dump_stack((u32 *)frame.esp);
+	for(;;) {
+		kprintf("R.I.P.\n");
+		arch_halt();
+	}
+}
 
 void general_protection()
 {
@@ -95,8 +134,10 @@ void page_fault()
 }
 
 extern void sys_call_entry();
+extern void ud2_entry();
 void __init trap_init(void)
 {
+	trapgate_init(6, ud2_entry);
 	trapgate_init(13, general_protection);
 	trapgate_init(14, page_fault);
 	intgate_init(0x40, sys_call_entry);

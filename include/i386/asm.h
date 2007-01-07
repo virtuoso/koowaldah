@@ -93,9 +93,21 @@
 		CURRENT()->context.esp = (u32)CURRENT() - 4; \
 		root_tss.esp0 = (u32)CURRENT() - 4; \
 	} while (0);
-#endif /* __ASSEMBLY__ */
 
-#ifndef __ASSEMBLY__
+struct register_frame {
+	u32 eax;
+	u32 ebx;
+	u32 ecx;
+	u32 edx;
+	u32 esi;
+	u32 edi;
+	u32 ebp;
+	u32 esp;
+	u32 prev_eip;
+	u32 prev_cs;
+	u32 prev_eflags;
+};
+
 /* read/write cpu control registers */
 #define READ_REG(reg, REG) \
 static inline unsigned long read_ ##reg() \
