@@ -178,6 +178,6 @@ int spawn(char *path);
 void thread_init_stack(struct thread *t, thread_t func, void *data);
 void thread_switch_to(struct thread *thread);
 void thread_switch_context(struct thread *from, struct thread *to);
-void start_user(u32 eip, u32 ebp, u32 esp, u32 val);
+void __noreturn start_user(u32 eip, u32 ebp, u32 esp, u32 val);
 
 #endif /* __THREAD_H__ */

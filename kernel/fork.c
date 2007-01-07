@@ -40,7 +40,7 @@
 #include <arch/asm.h>
 #include <arch/fork.h>
 
-static void __attribute__((noreturn)) forker(void *data)
+static void __noreturn forker(void *data)
 {
 	u32 *p = (u32 *)((u32)CURRENT() & NOPAGE_MASK);
 

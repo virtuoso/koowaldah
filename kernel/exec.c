@@ -43,7 +43,7 @@
  * to prepare stacks and registers and jump to userspace.
  * Clobbers it's own stack frame, never returns.
  */
-static void __attribute__((noreturn)) user_thread(void *data)
+static void __noreturn user_thread(void *data)
 {
 	/* disregard everything on the current stack
 	 * as start_user() never returns */
