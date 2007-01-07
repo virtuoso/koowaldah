@@ -1,8 +1,8 @@
 
 /*
- * include/lib.h
+ * include/error.h
  *
- * Copyright (C) 2005 Alexey Zaytsev
+ * Copyright (C) 2005, 2006 Alexey Zaytsev
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -32,11 +32,4 @@
  */
 
 #include <uabi/errno.h>
-
-#if 0
-/* TODO: dG */
-#define ERR_NOMEMORY	1
-#define ERR_INVAL	2
-#define ERR_NOSPACE	3
-#endif
 
