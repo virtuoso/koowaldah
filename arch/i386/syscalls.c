@@ -36,7 +36,7 @@
 #include <koowaldah.h>
 #include <textio.h>
 #include <bug.h>
-#include <sys/errno.h>
+#include <uabi/errno.h>
 #include <file.h>
 #include <timers.h>
 #include <scheduler.h>

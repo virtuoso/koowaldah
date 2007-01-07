@@ -62,7 +62,7 @@
 #define	ENOSYS		78		/* Function not implemented */
 
 /*
- * Those values are currently unused, but are left to facilate later addition.
+ * Those values are currently unused, but were left to facilate later addition.
  */
 
 #if 0

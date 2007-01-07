@@ -37,7 +37,7 @@
 #include <textio.h>
 #include <lib.h>
 #include <klist0.h>
-#include <sys/errno.h>
+#include <uabi/errno.h>
 #include <scheduler.h>
 #include <spinlock.h>
 #include <thread.h>
