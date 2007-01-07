@@ -1,8 +1,17 @@
 
 /*
+ * include/uabi/errno.h
+ *
+ * Copyright (c) 2006 Alexander Shishkin.
+ * Copyright (c) 2006 Alexey Zaytsev.
+ *
+ * This file is derived from software contributed to the
+ * the University of California.
+ * 
  * Copyright (c) 1982, 1986, 1989, 1993
  *	The Regents of the University of California.  All rights reserved.
- * (c) UNIX System Laboratories, Inc.
+ * Copyright (c) UNIX System Laboratories, Inc.
+ * 
  * All or some portions of this file are derived from material licensed
  * to the University of California by American Telephone and Telegraph
  * Co. or Unix System Laboratories, Inc. and are reproduced herein with
@@ -34,32 +43,45 @@
  *
  */
 
-#ifndef _SYS_ERRNO_H_
-#define _SYS_ERRNO_H_
+#ifndef _UABI_ERRNO_H_
+#define _UABI_ERRNO_H_
+
+/*
+ * Here come the error numbers, used in the userspace-kernel interface.
+ * You can use them inside the kernel as well.
+ */
+
+#define	ENOENT		2		/* No such file or directory */
+#define	EIO		5		/* Input/output error */
+#define	EBADF		9		/* Bad file descriptor */
+#define	ENOMEM		12		/* Cannot allocate memory */
+#define	EBUSY		16		/* Device busy */
+#define	ENODEV		19		/* Operation not supported by device */
+#define	EISDIR		21		/* Is a directory */
+#define	EINVAL		22		/* Invalid argument */
+#define	ENOSYS		78		/* Function not implemented */
+
+/*
+ * Those values are currently unused, but are left to facilate later addition.
+ */
+
+#if 0
 
 #define	EPERM		1		/* Operation not permitted */
-#define	ENOENT		2		/* No such file or directory */
 #define	ESRCH		3		/* No such process */
 #define	EINTR		4		/* Interrupted system call */
-#define	EIO		5		/* Input/output error */
 #define	ENXIO		6		/* Device not configured */
 #define	E2BIG		7		/* Argument list too long */
 #define	ENOEXEC		8		/* Exec format error */
-#define	EBADF		9		/* Bad file descriptor */
 #define	ECHILD		10		/* No child processes */
 #define	EDEADLK		11		/* Resource deadlock avoided */
 					/* 11 was EAGAIN */
-#define	ENOMEM		12		/* Cannot allocate memory */
 #define	EACCES		13		/* Permission denied */
 #define	EFAULT		14		/* Bad address */
 #define	ENOTBLK		15		/* Block device required */
-#define	EBUSY		16		/* Device busy */
 #define	EEXIST		17		/* File exists */
 #define	EXDEV		18		/* Cross-device link */
-#define	ENODEV		19		/* Operation not supported by device */
 #define	ENOTDIR		20		/* Not a directory */
-#define	EISDIR		21		/* Is a directory */
-#define	EINVAL		22		/* Invalid argument */
 #define	ENFILE		23		/* Too many open files in system */
 #define	EMFILE		24		/* Too many open files */
 #define	ENOTTY		25		/* Inappropriate ioctl for device */
@@ -132,7 +154,6 @@
 #define	EPROCUNAVAIL	76		/* Bad procedure for program */
 
 #define	ENOLCK		77		/* No locks available */
-#define	ENOSYS		78		/* Function not implemented */
 
 #define	EFTYPE		79		/* Inappropriate file type or format */
 #define	EAUTH		80		/* Authentication error */
@@ -182,3 +203,4 @@
 #endif
 
 #endif /* !_SYS_ERRNO_H_ */
+#endif
