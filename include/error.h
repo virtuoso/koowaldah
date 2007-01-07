@@ -31,5 +31,10 @@
  * 
  */
 
-#include <uabi/errno.h>
+#ifndef __ERRNO_H__
+#define __ERRNO_H__
+
+#include <khui/errno.h>
+
+#endif
 

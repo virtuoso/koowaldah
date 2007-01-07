@@ -36,7 +36,7 @@
 #include <inode.h>
 #include <file.h>
 #include <page_alloc.h>
-#include <uabi/stat.h>
+#include <khui/stat.h>
 #include <thread.h>
 
 /*

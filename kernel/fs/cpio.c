@@ -33,7 +33,7 @@
 #include <koowaldah.h>
 #include <textio.h>
 #include <error.h>
-#include <uabi/stat.h>
+#include <khui/stat.h>
 #include <lib.h>
 #include <klist0.h>
 #include <device.h>

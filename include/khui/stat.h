@@ -1,4 +1,6 @@
 /*
+ * include/khui/stat.h
+ *
  * Copyright (c) 2006 Alexander Shishkin
  * Copyright (c) 1982, 1986, 1989, 1993
  *      The Regents of the University of California.  All rights reserved.
@@ -33,8 +35,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __SYS_STAT_H__
-#define __SYS_STAT_H__
+#ifndef __KHUI_STAT_H__
+#define __KHUI_STAT_H__
 
 #define S_IFMT  00170000
 #define S_IFSOCK 0140000

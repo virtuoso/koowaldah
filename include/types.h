@@ -32,7 +32,7 @@
 #ifndef __TYPES_H__
 #define __TYPES_H__
 
-#include <uabi/types.h>
+#include <khui/types.h>
 
 typedef __s8 s8;
 typedef __u8 u8;
