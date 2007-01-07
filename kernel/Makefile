@@ -16,7 +16,7 @@ SOURCES := \
 
 SUBDIRS := fs init lib
 
-include $(PRJROOT)/konfig.mk
+-include $(PRJROOT)/konfig.mk
 ifeq ($(MK_INSTRUMENT_PROFILER),Y)
  SOURCES += debug/profile.c debug/triggers.c
 endif
