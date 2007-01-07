@@ -7,7 +7,7 @@ CROSS_COMPILE  ?=
 HOSTCC          = gcc
 
 CC              = $(CROSS_COMPILE)gcc
-CC_FLAGS       += -Wall -ffreestanding -nostdinc -nostdlib -g -std = gnu89
+CC_FLAGS       += -Wall -ffreestanding -nostdinc -nostdlib -g -std=gnu89
 CC_FLAGS_KERN  := $(CC_FLAGS)
 
 LD              = $(CROSS_COMPILE)ld
