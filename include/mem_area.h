@@ -32,6 +32,8 @@
 #ifndef __MEM_AREA_H__
 #define __MEM_AREA_H__
 
+#include <page_alloc.h>
+
 /*
  * Memory area holds a group of contiguous pages of a similar nature:
  * processes' code, data, shared mappings and so on.
@@ -56,14 +58,14 @@ struct mem_area {
 #define MMA_STACK (0x04) /* mem_area can grow down (stack) */
 
 struct mem_area *mem_area_alloc(struct mapping *map, unsigned long start,
-		unsigned long phys, u32 pages, u32 flags);
+		struct klist0_node *page_list, u32 flags);
 struct mem_area *mem_area_alloc_new(struct mapping *map, unsigned long start,
 		u32 pages, u32 flags);
 struct mem_area *mem_area_clone(struct mapping *map, struct mem_area *mma);
 void mem_area_attach(struct mapping *dst, struct mem_area *mma);
 void mem_area_kill(struct mem_area *mma, struct mapping *map);
 void mem_area_put(struct mem_area *mma, struct mapping *map);
-void mem_area_add_page(struct mem_area *mma, void *addr);
+void mem_area_add_page(struct mem_area *mma, struct page *pg);
 
 /* XXX: dynamic arrays will obsolete this */
 #define MMA_MAX 8
@@ -86,6 +88,13 @@ void map_page(struct mapping *map, u32 virt, u32 phys, u16 flags);
 void unmap_page(struct mapping *map, u32 virt);
 void map_pages(struct mapping *map, u32 virt, u32 phys, u32 n, u16 flags);
 void free_map(struct mapping *map);
+
+static inline void  __mem_area_add_page(struct mem_area *mma, struct page *pg)
+{
+	pg->virt = mma->m_end;
+	mma->m_pages++;
+	mma->m_end += PAGE_SIZE;
+}
 
 #endif
 

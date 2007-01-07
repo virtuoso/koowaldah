@@ -56,10 +56,10 @@ void kill_user_map(struct mapping *map)
 }
 
 struct mem_area *mem_area_alloc(struct mapping *map, unsigned long start,
-		unsigned long phys, u32 pages, u32 flags)
+		struct klist0_node *page_list, u32 flags)
 {
 	struct mem_area *mma;
-	u32 p;
+	struct klist0_node *tmp;
 
 	bug_on(in_kernel(start));
 	bug_on(map == &root_map);
@@ -76,16 +76,19 @@ struct mem_area *mem_area_alloc(struct mapping *map, unsigned long start,
 	mma->m_users = 1;
 	mma->m_flags = flags;
 	mma->m_prot  = (flags & MMA_RW) ? PTF_RW : 0;
-	KLIST0_INIT(&mma->m_plist);
 
-	/* map given pages to the virtual address */
-	map_pages(map, start, phys, pages, mma->m_prot);
-
-	/* link corresponding page objects to mma */
-	for (p = 0; p < pages; p++)
-		mem_area_add_page(mma, (void *)phys + p * PAGE_SIZE);
+	klist0_reparent(page_list, &mma->m_plist);
+	
+	klist0_for_each(tmp, &mma->m_plist) {
+		struct page *pg = 
+			klist0_entry(tmp, struct page, area_list);
+		map_page(map, mma->m_end, 
+			(u32) page_to_addr(pg), mma->m_prot);
+		__mem_area_add_page(mma, pg);
+	}
 
 	return mma;
+
 }
 
 void mem_area_attach(struct mapping *dst, struct mem_area *mma)
@@ -104,7 +107,6 @@ void mem_area_attach(struct mapping *dst, struct mem_area *mma)
 	klist0_for_each(tmp, &mma->m_plist) {
 		pg = klist0_entry(tmp, struct page, area_list);
 
-		//kprintf("** %x => %x\n", pg->virt, page_to_addr(pg));
 		map_page(dst, pg->virt, (u32)page_to_addr(pg), mma->m_prot);
 	}
 }
@@ -112,11 +114,18 @@ void mem_area_attach(struct mapping *dst, struct mem_area *mma)
 struct mem_area *mem_area_alloc_new(struct mapping *map, unsigned long start,
 		u32 pages, u32 flags)
 {
-	unsigned long phys = (unsigned long)get_pages(ZONE_USER, log2(pages));
 
-	if (!phys) return NULL;
+	bug_on(pages < 0);
 
-	return mem_area_alloc(map, start, phys, pages, flags);
+	KLIST0_DECLARE(pg_list);
+
+	while(pages--) {
+		struct page *pg = alloc_page(ZONE_USER);
+		bug_on(!pg); /* XXX Try to recover here. */
+		klist0_append(&pg->area_list, &pg_list);
+	}
+
+	return mem_area_alloc(map, start, &pg_list, flags);
 }
 
 struct mem_area *mem_area_clone(struct mapping *map, struct mem_area *mma)
@@ -157,15 +166,10 @@ void mem_area_unmap(struct mem_area *mma, struct mapping *map, int free)
 		unmap_page(map, pg->virt);
 		dtmp = tmp->next;
 
-		/* XXX: can free_pages() handle deallocating like this? */
 		if (free) {
-			//free_pages(pg);
-			/*kprintf("### nearly freed %x/%x [%d]\n", pg->virt,
-					page_to_addr(pg), pg->private.order);*/
+			free_pages(pg);
 			pg->virt = NOPAGE_ADDR;
-		}/* else
-			kprintf("### unmapped %x/%x\n", pg->virt,
-					page_to_addr(pg));*/
+		}
 		tmp = dtmp;
 	}
 	
@@ -185,37 +189,27 @@ void mem_area_kill(struct mem_area *mma, struct mapping *map)
 		pg->virt = NOPAGE_ADDR;
 		dtmp = tmp->next;
 
-		/* XXX: can free_pages() handle deallocating like this? */
-		//free_pages(pg);
+		free_pages(pg);
 		tmp = dtmp;
 	}
 	
 	slice_free(mma, mma_pool);
 }
 
-void mem_area_add_page(struct mem_area *mma, void *addr)
+void mem_area_add_page(struct mem_area *mma, struct page *page)
 {
-	struct page *page = addr_to_page(addr);
-
-	/*kprintf("[page: %x/%x]\n", addr, page->virt);*/
 	if (!klist0_empty(&page->area_list))
 		bug();
 
 	klist0_prepend(&page->area_list, &mma->m_plist);
-	page->virt = mma->m_end;
-	mma->m_pages++;
-	mma->m_end += PAGE_SIZE;
+	__mem_area_add_page(mma, page);
 }
 
 void mem_area_put(struct mem_area *mma, struct mapping *map)
 {
-	//kprintf("### map=%x\n", mma->m_map);
-	if (!--mma->m_users) {
-		//kprintf("### killing %x..%x [%d]\n", mma->m_start, mma->m_end, mma->m_users);
+	if (!--mma->m_users)
 		mem_area_unmap(mma, map, 1);
-	} else {
-		//kprintf("### keeping %x..%x [%d]\n", mma->m_start, mma->m_end, mma->m_users);
+	else
 		mem_area_unmap(mma, map, 0);
-	}
 }
 
