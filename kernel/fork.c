@@ -33,7 +33,7 @@
 #include <mm_zone.h>
 #include <thread.h>
 #include <textio.h>
-#include <sys/errno.h>
+#include <uabi/errno.h>
 #include <bug.h>
 #include <scheduler.h>
 #include <lib.h>

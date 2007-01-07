@@ -31,10 +31,12 @@
  * 
  */
 
-#include <sys/errno.h>
+#include <uabi/errno.h>
 
+#if 0
 /* TODO: dG */
 #define ERR_NOMEMORY	1
 #define ERR_INVAL	2
 #define ERR_NOSPACE	3
+#endif
 

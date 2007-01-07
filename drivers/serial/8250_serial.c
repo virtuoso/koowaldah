@@ -38,7 +38,7 @@
 #include <thread.h>
 #include <file.h>
 #include <device.h>
-#include <sys/errno.h>
+#include <uabi/errno.h>
 #include <kqueue.h>
 #include <scheduler.h>
 
