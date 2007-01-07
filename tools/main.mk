@@ -4,10 +4,8 @@
 # Defines rules and functions that do most of the work.
 
 -include konfig.mk
-CC ?= gcc
-LD ?= ld
-ASM ?= gcc
-MAKE ?= make
+include $(PRJROOT)/tools/vars.mk
+include $(PRJROOT)/tools/verbosity.mk
 
 # some variables useful for building stuff
 # ----------------------------------------
@@ -27,8 +25,6 @@ OBJ2SRC = $(subst .o,.c,$(subst $(OBJDIR)/$(subst /,+,$(THISDIR))+,,$(1)))
 # the same, but convert dependency file names instead
 DEP2SRC = $(subst +,/,$(subst .d,.c,$(subst $(OBJDIR)/$(subst /,+,$(THISDIR))+,,$(1))))
 
-include $(PRJROOT)/tools/verbosity.mk
-
 # functions that do actual work
 # -----------------------------
 # call compiler to generate dependencies file
@@ -45,7 +41,6 @@ DO_GENDEPS = \
 # echo -n "  CC  $(1)... ";
 DO_CC = \
 	$(call OUTPUT,$(CC) $(3) -c $(1) -o $(2),CC $(1)... )
-
 # call linker
 # $(1) -- list of objects to link
 # $(2) -- output
@@ -164,4 +159,7 @@ printobjs:
 killobjs:
 	rm -f $(OBJDIR)/OBJECTS
 
-.PHONY: build build-local deps objects subdirs-deps subdirs-build clean clean-local printobjs init killobjs
+debugmakevars:
+	$(foreach v,$(V),$(warning $v = $($v)))
+
+.PHONY: build build-local deps objects subdirs-deps subdirs-build clean clean-local printobjs init killobjs debugmakevars
