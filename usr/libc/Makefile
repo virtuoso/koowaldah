@@ -30,7 +30,7 @@ OBJS := \
 all: libc.a
 
 libc.a: $(OBJS)
-	ar cru $@ $(OBJS)
+	$(AR) cru $@ $(OBJS)
 
 clean:
 	rm -f $(OBJS) libc.a

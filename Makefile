@@ -14,16 +14,7 @@ ifeq ($(MK_CPU_ARCH_ARM),Y)
 ARCH := arm
 endif
 
-
 #### CONFIGURATION SECTION END ####
-
-ASM ?= gcc
-ASM_FLAGS += -Wall -ffreestanding -nostdinc -nostdlib -g
-CC ?= gcc
-CC_FLAGS += -Wall -ffreestanding -nostdinc -nostdlib -g -std=gnu89
-CC_FLAGS_KERN := $(CC_FLAGS)
-LD ?= ld
-OBJCOPY ?= objcopy
 
 ifeq ($(MK_INSTRUMENT_PROFILER),Y)
   CC_FLAGS += -finstrument-functions
@@ -43,11 +34,11 @@ include/koptions.h: konfig/konfigure
 	cat KONFIG
 
 konfig/konfigure: konfig/konfigure.c
-	$(CC) -Wall -Ikonfig -I. -o konfig/konfigure.o -c konfig/konfigure.c
-	$(CC) -Wall -Ikonfig -I. -o konfig/kout.o -c konfig/kout.c
-	$(CC) -Wall -Ikonfig -I. -o konfig/ktree.o -c konfig/ktree.c
-	$(CC) -Wall -Ikonfig -I. -o konfig/kuser.o -c konfig/kuser.c
-	$(CC) -o $@ konfig/*.o
+	$(HOSTCC) -Wall -Ikonfig -I. -o konfig/konfigure.o -c konfig/konfigure.c
+	$(HOSTCC) -Wall -Ikonfig -I. -o konfig/kout.o -c konfig/kout.c
+	$(HOSTCC) -Wall -Ikonfig -I. -o konfig/ktree.o -c konfig/ktree.c
+	$(HOSTCC) -Wall -Ikonfig -I. -o konfig/kuser.o -c konfig/kuser.c
+	$(HOSTCC) -o $@ konfig/*.o
 
 image:	kernel
 	$(MAKE) -C rootfs
