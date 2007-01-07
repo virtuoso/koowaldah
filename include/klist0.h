@@ -136,5 +136,13 @@ static inline int klist0_empty(struct klist0_node *list)
 	return list->next == list;
 }
 
+static inline void klist0_reparent(struct klist0_node *from_head,
+				struct klist0_node *to_head)
+{
+	*to_head = *from_head;
+	to_head->prev->next = to_head->next->prev = to_head;
+	KLIST0_INIT(from_head);
+}
+
 #endif
 
