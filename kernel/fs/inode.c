@@ -34,7 +34,7 @@
 #include <super.h>
 #include <inode.h>
 #include <namespace.h>
-#include <sys/stat.h>
+#include <uabi/stat.h>
 
 /*
  * FS inode operations

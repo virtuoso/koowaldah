@@ -37,7 +37,7 @@
 #include <file.h>
 #include <namespace.h>
 #include <page_alloc.h>
-#include <sys/stat.h>
+#include <uabi/stat.h>
 #include "fs.h"
 
 /*
