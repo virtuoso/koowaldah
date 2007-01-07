@@ -32,60 +32,14 @@
 #ifndef __SYS_TYPES_H__
 #define __SYS_TYPES_H__
 
-#ifndef __ARCH_TYPES_H__
-#  include <arch/types.h>
-#endif
-
-/* BSD sources compatibility */
-#if defined(_BSD_SOURCE)
-typedef unsigned char  u_char;
-typedef unsigned short u_short;
-typedef unsigned int   u_int;
-typedef unsigned long  u_long;
-
-/* SysV compatibility */
-typedef unsigned char  uchar;
-typedef unsigned short ushort;
-typedef unsigned int   uint;
-typedef unsigned long  ulong;
-#endif
+#include <arch/types.h>
 
 /* ansi definitions */
-typedef u32 __gid_t;
-typedef u32 __uid_t;
-typedef u32 __mode_t;
-typedef s32 __off_t; /* XXX: should be s64 */
-typedef u32 __size_t;
-typedef s32 __pid_t;
-
-#ifndef gid_t
-typedef __gid_t  gid_t;
-#define gid_t    __gid_t
-#endif
-
-#ifndef uid_t
-typedef __uid_t  uid_t;
-#define uid_t    __uid_t
-#endif
-
-#ifndef mode_t
-typedef __mode_t mode_t;
-#define mode_t   __mode_t
-#endif
-
-#ifndef off_t
-typedef __off_t  off_t;
-#define off_t    __off_t
-#endif
-
-#ifndef size_t
-typedef __size_t size_t;
-#define size_t   __size_t
-#endif
-
-#ifndef pid_t
-typedef __pid_t  pid_t;
-#define pid_t    __pid_t
-#endif
+typedef u32 gid_t;
+typedef u32 uid_t;
+typedef u32 mode_t;
+typedef s32 off_t; /* XXX: should be s64 */
+typedef u32 size_t;
+typedef s32 pid_t;
 
 #endif
