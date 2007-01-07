@@ -46,6 +46,5 @@ typedef unsigned int u32;
 typedef signed long long s64;
 typedef unsigned long long u64;
 
-#define NULL (void *) 0 
 
 #endif /* __ARCH_TYPES_H__ */
