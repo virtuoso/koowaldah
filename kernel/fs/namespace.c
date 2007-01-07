@@ -37,7 +37,7 @@
 #include <inode.h>
 #include <file.h>
 #include <namespace.h>
-#include <sys/stat.h>
+#include <uabi/stat.h>
 
 /*
  * FS namespaces, names etc related code
