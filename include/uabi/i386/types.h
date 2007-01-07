@@ -1,8 +1,8 @@
 
 /*
- * include/i386/types.h
+ * include/uabi/i386/types.h
  *
- * Copyright (C) 2005 Alexey Zaytsev
+ * Copyright (C) 2005, 2006 Alexey Zaytsev
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -31,8 +31,8 @@
  *
  */
 
-#ifndef __ARCH_TYPES_H__
-#define __ARCH_TYPES_H__
+#ifndef __UABI_I386_TYPES_H__
+#define __UABI_I386_TYPES_H__
 
 typedef signed char __s8;
 typedef unsigned char __u8;
@@ -46,5 +46,5 @@ typedef unsigned int __u32;
 typedef signed long long __s64;
 typedef unsigned long long __u64;
 
-#endif /* __ARCH_TYPES_H__ */
+#endif /* __UABI_I386_TYPES_H__ */
 

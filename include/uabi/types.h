@@ -30,8 +30,8 @@
  * SUCH DAMAGE.
  */
 
-#ifndef __SYS_TYPES_H__
-#define __SYS_TYPES_H__
+#ifndef __UABI_TYPES_H__
+#define __UABI_TYPES_H__
 
 #include <uabi/arch/types.h>
 
