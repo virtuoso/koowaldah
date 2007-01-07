@@ -1,7 +1,8 @@
 /*
- * arch/i386/asm/syscall.S
+ * arch/i386/asm/interrupt.S
  *
  * Copyright (C) 2006 Alexander Shishkin
+ * Copyright (C) 2007 Alexey Zaytsev
  *
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions
@@ -61,3 +62,20 @@ sys_call_entry:
 	popl %esp		/* remove arguments */
 	iret
 
+.extern ud2_handler
+.globl ud2_entry
+ud2_entry:
+	pushl %esp
+	pushl %ebp
+	pushl %edi
+	pushl %esi
+	pushl %edx
+	pushl %ecx
+	pushl %ebx
+	pushl %eax
+
+1:	call ud2_handler
+	/* They never return, but just in case */
+	jmp 1
+
+	

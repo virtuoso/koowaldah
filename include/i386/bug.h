@@ -31,14 +31,13 @@
  * 
  */
 
-#ifndef __ARCH_BUG_H__
-#define __ARCH_BUG_H__
+#ifndef __I386_BUG_H__
+#define __I386_BUG_H__
 
 #include <koowaldah.h>
-//#include <thread.h>
 #include <arch/asm.h>
 
-void i386_display_regs(u32 *regs_dump);
+void i386_display_regs(struct register_frame frame);
 void i386_dump_stack(u32 * stack);
 void local_irq_disable();
 
@@ -81,14 +80,12 @@ void local_irq_disable();
 	} while (0)
 */
 	
-#define arch_display_registers()			\
+#define arch_display_registers()		\
 	do {					\
 		asm volatile (			\
-			"pushl %esp\n"		\
 			"call i386_display_regs\n"			\
-			"addl $36, %esp" /* remove all the dumped	\
-					    regs from the stack, 	\
-					    including %esp */		\
+			"addl $32, %esp" /* remove all the dumped	\
+					    regs from the stack */ 	\
 		);				\
 	} while (0)
 
@@ -100,6 +97,16 @@ void local_irq_disable();
 		);				\
 	} while (0)
 
-#endif /* __ARCH_BUG_H__ */
+#define __HAVE_ARCH_BUG
+
+#define bug() do { 			\
+	__asm__ __volatile__ (		\
+			"ud2\n"		\
+			".word %c0\n"	\
+			".long %c1\n"	\
+			:: "i" (__LINE__), "i" (__FILE__)); \
+} while (0)
+
+#endif /* __I386_BUG_H__ */
 
 

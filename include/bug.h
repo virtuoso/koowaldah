@@ -72,12 +72,18 @@ void display_thread();
 	}					\
 } while (0)
 
+
+#ifndef __HAVE_ARCH_BUG
+#warning "Have no arch BUG(), using the default one."
 #define bug() do {				\
 	panic("Bug in file %s, line %d", __FILE__, __LINE__); \
 } while (0)
+#endif /* __HAVE_ARCH_BUG */
 
+#ifndef __HAVE_ARCH_BUGON
 #define bug_on(cond) do {			\
 	if (cond) bug();			\
 } while (0);
+#endif /* __HAVE_ARCH_BUGON */
 
 #endif /* __BUG_H__ */

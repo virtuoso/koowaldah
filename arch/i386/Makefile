@@ -15,7 +15,7 @@ SOURCES := \
 	mm.c \
 	paging.c \
 	segments.c \
-	asm/syscall.S \
+	asm/interrupt.S \
 	asm/irq.S \
 	asm/context_switch.S
 
