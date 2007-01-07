@@ -1,6 +1,6 @@
 
 /*
- * include/i386/atimic.h
+ * include/i386/atomic.h
  *
  * Copyright (c) 2006, Alexander Shishkin
  * All rights reserved.
@@ -28,10 +28,11 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __ARCH_ATOMIC_H__
-#define __ARCH_ATOMIC_H__
+#ifndef __I386_ATOMIC_H__
+#define __I386_ATOMIC_H__
+
 /*
- * i386 atomic operations
+ * i386 atomic operations.
  * Partially derived from FreeBSD and NetBSD respective implementations
  * of those.
  */
@@ -85,5 +86,7 @@ ATOMIC_SUB_AND_TEST_ASM(u32)
 #define atomic_inc_u32(p) atomic_add_u32(p, 1)
 #define atomic_dec_u32(p) atomic_sub_u32(p, 1)
 #define atomic_dec_and_test_u32(p) atomic_sub_and_test_u32(p, 1)
+
+#define __ARCH_ATOMIC
 
 #endif
