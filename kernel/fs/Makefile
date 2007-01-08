@@ -3,6 +3,7 @@ SOURCES := \
 	inode.c \
 	file.c \
 	namespace.c \
+	message.c \
 	fs.c \
 	device.c \
 	aout.c \
