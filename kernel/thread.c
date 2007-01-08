@@ -41,6 +41,7 @@
 #include <textio.h>
 #include <thread.h>
 #include <bug.h>
+#include <debug.h>
 #include <klist0.h>
 #include <spinlock.h>
 #include <scheduler.h>
@@ -52,6 +53,22 @@ u32 get_free_pid()
 {
 	static u32 i = 0;
 	return i++;
+}
+
+/* omgwtf II */
+struct thread *thread_get(pid_t pid)
+{
+	struct klist0_node *tmp;
+	struct thread *t;
+
+	klist0_for_each(tmp, &thread_list.threads) {
+		t = klist0_entry(tmp, struct thread, kthreads);
+		
+		if (t->pid == pid)
+			return t;
+	}
+
+	return NULL;
 }
 
 void dump_thread(struct thread *thread)
@@ -77,14 +94,14 @@ struct thread *thread_create(thread_t func, char *name, void *data)
 	/* allocate stack space */
 	page = get_pages(/*THREAD_STACK_LIMIT/PAGE_SIZE*/0, 0);
 	if (!page) {
-		kprintf("Thread allocation screwed up. Don't panic!\n");
+		DPRINT("Thread allocation screwed up. Don't panic!\n");
 		return NULL;
 	}
 
 	/* now, place the task descriptor */
 	thread = THREAD(page);
 	thread->state = THREAD_NEW;
-	/*kprintf("page=%x, thread=%x\n", page, thread);*/
+	DPRINT("page=%x, thread=%x\n", page, thread);
 
 	thread_init_stack(thread, func, data);
 
@@ -98,6 +115,7 @@ struct thread *thread_create(thread_t func, char *name, void *data)
 	thread->ns = &root_ns;
 	thread->last_fd = 0;
 	KLIST0_INIT(&thread->files);
+	KLIST0_INIT(&thread->mbox);
 
 	/* use root memory mapping */
 	thread->map = &root_map;
@@ -106,9 +124,9 @@ struct thread *thread_create(thread_t func, char *name, void *data)
 	spin_lock_irqsave(&thread_list.lock, flags);
 	klist0_append(&thread->kthreads, &thread_list.threads);
 	spin_unlock_irqrestore(&thread_list.lock, flags);
-	/*kprintf("created thread, stack_base = %x, esp = %x, pid = %d\n",
-			thread->context.stack_base),
-			thread->context.esp, thread->pid);*/
+	DPRINT("created thread, stack_base = %x, esp = %x, pid = %d\n",
+			thread->context.stack_base,
+			thread->context.esp, thread->pid);
 
 	return thread;
 }
