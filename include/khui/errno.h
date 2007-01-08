@@ -55,6 +55,7 @@
 #define	EIO		5		/* Input/output error */
 #define	ENOEXEC		8		/* Exec format error */
 #define	EBADF		9		/* Bad file descriptor */
+#define	EAGAIN		11		/* Try again */
 #define	ENOMEM		12		/* Cannot allocate memory */
 #define	EBUSY		16		/* Device busy */
 #define	ENODEV		19		/* Operation not supported by device */
@@ -74,8 +75,6 @@
 #define	ENXIO		6		/* Device not configured */
 #define	E2BIG		7		/* Argument list too long */
 #define	ECHILD		10		/* No child processes */
-#define	EDEADLK		11		/* Resource deadlock avoided */
-					/* 11 was EAGAIN */
 #define	EACCES		13		/* Permission denied */
 #define	EFAULT		14		/* Bad address */
 #define	ENOTBLK		15		/* Block device required */
