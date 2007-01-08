@@ -77,6 +77,9 @@ struct mem_area *mem_area_alloc(struct mapping *map, unsigned long start,
 	mma->m_flags = flags;
 	mma->m_prot  = (flags & MMA_RW) ? PTF_RW : 0;
 
+	if (klist0_empty(page_list))
+		return mma;
+
 	klist0_reparent(page_list, &mma->m_plist);
 	
 	klist0_for_each(tmp, &mma->m_plist) {
@@ -203,6 +206,15 @@ void mem_area_add_page(struct mem_area *mma, struct page *page)
 
 	klist0_prepend(&page->area_list, &mma->m_plist);
 	__mem_area_add_page(mma, page);
+}
+
+void mem_area_remove_page(struct mem_area *mma, struct page *page)
+{
+	if (klist0_empty(&page->area_list))
+		bug();
+
+	klist0_unlink(&page->area_list);
+	__mem_area_remove_page(mma, page);
 }
 
 void mem_area_put(struct mem_area *mma, struct mapping *map)
