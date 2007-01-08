@@ -44,6 +44,8 @@
 #define SYS_yield 7
 #define SYS_getpid 8
 #define SYS_exec 9
+#define SYS_msg_send 10
+#define SYS_msg_retrieve 11
 
 int sys_debug(char *str);
 int sys_open(char *name, unsigned int mode);
@@ -55,4 +57,6 @@ int sys_fork();
 int sys_yield();
 int sys_getpid();
 int sys_exec(char *path);
+int sys_msg_send(int recp, char *buf, int len, unsigned int flags);
+int sys_msg_retrieve(int recp, char **buf, int len, unsigned int flags);
 
