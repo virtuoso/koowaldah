@@ -1,4 +1,4 @@
-KOPTIONS_START(MAIN, "General kernel configuration", 5)
+KOPTIONS_START(MAIN, "General kernel configuration", 7)
 KOPTION(
 	"BUILD_KERNEL",
 	"Do build the kernel?",
@@ -12,6 +12,22 @@ KOPTION(
 	"Append a custom string to the kernel version.",
 	KOPT_STRING,
 	"-ash"
+),
+KOPTION(
+	"GLOBAL_DEBUG",
+	"Turn on debugging output",
+	"This option enables debugging outout in the "
+	"entire kernel.",
+	KOPT_BOOL,
+	'N'
+),
+KOPTION(
+	"WERROR",
+	"Issue error for each warning",
+	"This is maintainer's option, it enables -Werror "
+	"to the C compiler.",
+	KOPT_BOOL,
+	'N'
 ),
 KOPTION_FULL(
 	"CPU_ARCH_I386",
