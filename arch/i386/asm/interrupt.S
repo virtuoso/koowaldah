@@ -32,6 +32,8 @@
 
 #include <i386/segments.h>
 
+.extern fault_code
+
 /*
  * from syscalls.c:
  * u32 sys_call_gate(u32 eax, u32 ebx, u32 ecx, u32 edx)
@@ -77,5 +79,30 @@ ud2_entry:
 1:	call ud2_handler
 	/* They never return, but just in case */
 	jmp 1
+
+.extern pf_handler
+.globl pf_entry
+pf_entry:
+	popl fault_code
+	pushl %esp
+	pushl %ebp
+	pushl %edi
+	pushl %esi
+	pushl %edx
+	pushl %ecx
+	pushl %ebx
+	pushl %eax
+
+	call pf_handler
+
+	popl %eax
+	popl %ebx
+	popl %ecx
+	popl %edx
+	popl %esi
+	popl %edi
+	popl %ebp
+	popl %esp
+	iret
 
 	

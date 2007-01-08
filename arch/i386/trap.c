@@ -43,6 +43,8 @@
 #include <arch/asm.h>
 
 
+u32 fault_code;
+
 void ud2_handler(struct register_frame frame)
 {
 	u32 eip;
@@ -92,54 +94,61 @@ void general_protection()
 static int dfault = 0;
 
 #define PFLT_ERRMAX 48
-void page_fault()
+void pf_handler(struct register_frame frame)
 {
 	u32 addr = read_cr2();
-	u32 *frame;
-	u32 err;
-	struct thread *me = CURRENT();
 	char errstr[PFLT_ERRMAX];
 
 	if (dfault)
 		panic("DOUBLE PAGE FAULT");
+	else
+		kprintf("### PAGE FAULT\n");
 
 	dfault++;
-	frame = (u32 *)me;
-	frame -= 7;
-	err = frame[0];
+
 	/* try and decipher error code */
 	snprintf(errstr, PFLT_ERRMAX, "%s%s%s%s",
-			(err & PFLT_RESB  ? "res. bit, "    : "--//--, "     ),
-			(err & PFLT_PROT  ? "protection, "  : "non-present, "),
-			(err & PFLT_WRITE ? "write, "       : "read, "       ),
-			(err & PFLT_USER  ? "user."         : "supervisor."  )
+		(fault_code & PFLT_RESB  ? "res. bit, "    : "--//--, "     ),
+		(fault_code & PFLT_PROT  ? "protection, "  : "non-present, "),
+		(fault_code & PFLT_WRITE ? "write, "       : "read, "       ),
+		(fault_code & PFLT_USER  ? "user."         : "supervisor."  )
 		);
-	kprintf("### ERROR:   %x: %s\n", err, errstr);
-	kprintf("### IP:      %x\n", frame[1]);
-	kprintf("### ESP:     %x\n", frame[4]);
-	kprintf("### ADDRESS: %x\n", addr);
-	kprintf("### ESPPHYS: %x\n", __virt2physpg(frame[4]));
+	kprintf("### ERROR:   0x%x: %s\n", fault_code, errstr);
+	kprintf("### IP:      0x%x\n", frame.prev_eip);
+	kprintf("### ESP:     0x%x\n", frame.esp);
+	kprintf("### ADDRESS: 0x%x\n", addr);
+	kprintf("### ESPPHYS: 0x%x\n", __virt2physpg(frame.prev_esp));
+	kprintf("### ESPVIRT: 0x%x\n", frame.prev_esp);
 
-	if (err & PFLT_USER) {
-		frame = (u32 *)frame[4];
-		while ((u32)frame < USERMEM_STACK+PAGE_SIZE) {
-			kprintf("%x:<%x> ", frame, *frame);
-			frame++;
-		}
+	display_thread();
+	kprintf("Registers:\n");
+	i386_display_regs(frame);
+
+	if (fault_code & PFLT_USER) {
+		char *stack = (char *) frame.prev_esp;
+		kprintf("User stack:\n");
+
+		hex_dump(stack, MIN((u32)4096, (u32) (USERMEM_STACK+PAGE_SIZE -
+			frame.prev_esp)));
 	} else
 		arch_display_stack();
-	
+
 	dfault--;
-	panic("PAGE_FAULT");
+
+	for (;;) {
+		kprintf("R.I.P\n");
+		arch_halt();
+	}
 }
 
 extern void sys_call_entry();
 extern void ud2_entry();
+extern void pf_entry();
 void __init trap_init(void)
 {
 	trapgate_init(6, ud2_entry);
 	trapgate_init(13, general_protection);
-	trapgate_init(14, page_fault);
+	trapgate_init(14, pf_entry);
 	intgate_init(0x40, sys_call_entry);
 }
 
