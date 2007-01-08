@@ -36,6 +36,7 @@
 #include <inode.h>
 #include <file.h>
 #include <namespace.h>
+#include <message.h>
 #include <page_alloc.h>
 #include <khui/stat.h>
 #include "fs.h"
@@ -183,5 +184,6 @@ void __init fs_init()
 
 	cpio_read();
 	devices_init();
+	messaging_init();
 }
 
