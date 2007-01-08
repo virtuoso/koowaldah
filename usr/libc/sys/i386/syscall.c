@@ -38,55 +38,67 @@
  */
 
 typedef unsigned int u32;
-extern u32 sys_call(u32,u32,u32,u32);
+extern u32 sys_call(u32,u32,u32,u32,u32,u32);
 
 int sys_debug(char *str)
 {
-	return sys_call(SYS_debug, (u32)str, 0, 0);
+	return sys_call(SYS_debug, (u32)str, 0, 0, 0, 0);
 }
 
 int sys_open(char *name, unsigned int mode)
 {
-	return sys_call(SYS_open, (u32)name, mode, 0);
+	return sys_call(SYS_open, (u32)name, mode, 0, 0, 0);
 }
 
 int sys_close(int fd)
 {
-	return sys_call(SYS_close, (u32)fd, 0, 0);
+	return sys_call(SYS_close, (u32)fd, 0, 0, 0, 0);
 }
 
 int sys_read(int fd, char *buf, unsigned int len)
 {
-	return sys_call(SYS_read, (u32)fd, (u32)buf, len);
+	return sys_call(SYS_read, (u32)fd, (u32)buf, len, 0, 0);
 }
 
 int sys_write(int fd, char *buf, unsigned int len)
 {
-	return sys_call(SYS_write, (u32)fd, (u32)buf, len);
+	return sys_call(SYS_write, (u32)fd, (u32)buf, len, 0, 0);
 }
 
 int sys_tsleep(unsigned int t)
 {
-	return sys_call(SYS_tsleep, t, 0, 0);
+	return sys_call(SYS_tsleep, t, 0, 0, 0, 0);
 }
 
 int sys_fork()
 {
-	return sys_call(SYS_fork, 0, 0, 0);
+	return sys_call(SYS_fork, 0, 0, 0, 0, 0);
 }
 
 int sys_yield()
 {
-	return sys_call(SYS_yield, 0, 0, 0);
+	return sys_call(SYS_yield, 0, 0, 0, 0, 0);
 }
 
 int sys_getpid()
 {
-	return sys_call(SYS_getpid, 0, 0, 0);
+	return sys_call(SYS_getpid, 0, 0, 0, 0, 0);
 }
 
 int sys_exec(char *path)
 {
-	return sys_call(SYS_exec, (u32)path, 0, 0);
+	return sys_call(SYS_exec, (u32)path, 0, 0, 0, 0);
+}
+
+int sys_msg_send(int recp, char *buf, int len, u32 flags)
+{
+	return sys_call(SYS_msg_send, (u32)recp, (u32)buf, (u32)len,
+			(u32)flags, 0);
+}
+
+int sys_msg_retrieve(int recp, char **buf, int len, u32 flags)
+{
+	return sys_call(SYS_msg_retrieve, (u32)recp, (u32)buf, (u32)len,
+			(u32)flags, 0);
 }
 
