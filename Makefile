@@ -16,6 +16,13 @@ endif
 
 #### CONFIGURATION SECTION END ####
 
+ifeq ($(MK_GLOBAL_DEBUG),Y)
+  CC_FLAGS += -DDEBUG=1
+endif
+ifeq ($(MK_WERROR),Y)
+  CC_FLAGS += -Werror
+endif
+
 ifeq ($(MK_INSTRUMENT_PROFILER),Y)
   CC_FLAGS += -finstrument-functions
 endif
