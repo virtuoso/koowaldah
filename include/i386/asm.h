@@ -107,6 +107,8 @@ struct register_frame {
 	u32 prev_eip;
 	u32 prev_cs;
 	u32 prev_eflags;
+	u32 prev_esp;
+	u32 prev_ss;
 };
 
 /* read/write cpu control registers */
