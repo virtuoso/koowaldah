@@ -136,6 +136,11 @@ static inline int klist0_empty(struct klist0_node *list)
 	return list->next == list;
 }
 
+/*
+ * Move list from one head to another.
+ * @from_head -- head of the list to be reparented
+ * @to_head   -- new head, must be empty
+ */
 static inline void klist0_reparent(struct klist0_node *from_head,
 				struct klist0_node *to_head)
 {
