@@ -49,6 +49,8 @@
 #define __SYS_yield 7
 #define __SYS_getpid 8
 #define __SYS_exec 9
+#define __SYS_msg_send 10
+#define __SYS_msg_retrieve 11
 
 int __sys_debug(const char *str);
 int __sys_open(const char *name, unsigned int mode);
@@ -59,6 +61,8 @@ int __sys_tsleep(unsigned int t);
 int __sys_fork();
 int __sys_yield();
 int __sys_getpid();
+int __sys_msg_send(int recp, char *buf, int len, unsigned int flags);
+int __sys_msg_retrieve(int recp, char **buf, int len, unsigned int flags);
 
 #endif /* __KHUI_I386_SYSCALLS_H__ */
 
