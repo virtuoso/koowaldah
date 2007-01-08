@@ -2,7 +2,11 @@
 IMG_TYPE ?= 1.44
 IMG_NAME := $(IMG_TYPE).image
 
-ROOTCMD ?= sudo
+# We only need root if we don't have e2tools installed.
+ifeq (,$(shell which e2cp))
+	ROOTCMD ?= sudo
+endif
+
 MKBIMAGE = $(ROOTCMD) /bin/mkbimage
 
 all: rootfs.img
