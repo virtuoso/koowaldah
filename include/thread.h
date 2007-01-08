@@ -37,6 +37,7 @@
 #include <spinlock.h>
 #include <klist0.h>
 #include <namespace.h>
+#include <message.h>
 
 #define THREAD_NAME_LEN 32
 #define MAX_THREADS 128
@@ -77,6 +78,7 @@ struct thread {
 	struct namespace			*ns;
 	struct klist0_node			files; /* or array? */
 	int					last_fd;
+	struct klist0_node                      mbox;
 };
 
 static inline void tq_init(struct thread_queue *q)
@@ -167,6 +169,7 @@ int tq_transfer_tail_to_head(struct thread_queue *from_q, struct thread_queue *t
 int tq_transfer_tail_to_tail(struct thread_queue *from_q, struct thread_queue *to_q);
 
 void dump_thread(struct thread *thread);
+struct thread *thread_get(pid_t pid);
 struct thread *thread_create(thread_t func, char *name, void *data);
 struct thread *thread_create_user(thread_t func, char *name, void *data);
 pid_t fork();
