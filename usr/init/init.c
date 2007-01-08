@@ -47,17 +47,22 @@ void _start()
 	int fd, l;
 	unsigned short c;
 	int pid = sys_getpid();
+		char *to = &buf;
 
+	memset(buf, 0, 48);
 	if (pid != 1) {
 		char *s = WRONGPID;
 		sys_debug(s);
-		for (;;)
-			sys_tsleep(1000);
+		l = 0;
+		for (;;) {
+			snprintf(buf, 32, "hello, init! (%d)", l++);
+			sys_msg_send(1, buf, strlen(buf)+1, 1 | 4);
+			sys_tsleep(200);
+		}
 	}
 
 	snprintf(buf, strlen(WELCOME), WELCOME);
 	sys_debug(buf);
-	memset(buf, 0, 48);
 	fd = sys_open("/init", 0);
 	if (fd < 0)
 		sys_debug("can't open /init");
@@ -77,10 +82,8 @@ void _start()
 
 	snprintf(buf, 16, "waking up [pid=%d]", pid);
 
-	for (;;) {
-		sys_debug(buf);
-		sys_tsleep(250*pid);
-		/*sys_yield();*/
-	}
+	for (;;)
+		while (sys_msg_retrieve(2, &to, 48, 4))
+			sys_debug(buf);
 }
 
