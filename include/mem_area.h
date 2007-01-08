@@ -66,6 +66,21 @@ void mem_area_attach(struct mapping *dst, struct mem_area *mma);
 void mem_area_kill(struct mem_area *mma, struct mapping *map);
 void mem_area_put(struct mem_area *mma, struct mapping *map);
 void mem_area_add_page(struct mem_area *mma, struct page *pg);
+void mem_area_remove_page(struct mem_area *mma, struct page *pg);
+
+static inline void  __mem_area_add_page(struct mem_area *mma, struct page *pg)
+{
+	pg->virt = mma->m_end;
+	mma->m_pages++;
+	mma->m_end += PAGE_SIZE;
+}
+
+static inline void  __mem_area_remove_page(struct mem_area *mma, struct page *pg)
+{
+	pg->virt = NOPAGE_ADDR;
+	mma->m_pages--;
+	mma->m_end -= PAGE_SIZE;
+}
 
 /* XXX: dynamic arrays will obsolete this */
 #define MMA_MAX 8
@@ -88,13 +103,6 @@ void map_page(struct mapping *map, u32 virt, u32 phys, u16 flags);
 void unmap_page(struct mapping *map, u32 virt);
 void map_pages(struct mapping *map, u32 virt, u32 phys, u32 n, u16 flags);
 void free_map(struct mapping *map);
-
-static inline void  __mem_area_add_page(struct mem_area *mma, struct page *pg)
-{
-	pg->virt = mma->m_end;
-	mma->m_pages++;
-	mma->m_end += PAGE_SIZE;
-}
 
 #endif
 
