@@ -42,7 +42,8 @@
 #include <timers.h>
 #include <scheduler.h>
 
-u32 __attribute__((regparm(0))) sys_call_gate(u32 eax, u32 ebx, u32 ecx, u32 edx)
+u32 __regparm(0) sys_call_gate(u32 eax, u32 ebx, u32 ecx, u32 edx,
+		u32 esi, u32 edi)
 {
 	switch (eax) {
 		case __SYS_debug:
@@ -76,6 +77,14 @@ u32 __attribute__((regparm(0))) sys_call_gate(u32 eax, u32 ebx, u32 ecx, u32 edx
 
 		case __SYS_exec:
 			return thread_exec(CURRENT(), (char *)ebx);
+
+		case __SYS_msg_send:
+			return msg_send((pid_t)ebx, (char *)ecx, (size_t)edx,
+					(u32)esi);
+
+		case __SYS_msg_retrieve:
+			return msg_retrieve((pid_t)ebx, (char **)ecx,
+					(size_t)edx, (u32)esi);
 
 		default:
 			kprintf("syscall %d not implemented\n", eax);
