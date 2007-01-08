@@ -40,6 +40,7 @@
 #define USERMEM_START 0x40000000
 #define USERMEM_STACK 0x7ffff000
 #define USERMEM_HEAP  0x80000000
+#define USERMEM_MBOX  0xa0000000
 #define in_kernel(p) ((u32)p < USERMEM_START ? 1 : 0)
 
 /* page size, bits, mask, unmask */
