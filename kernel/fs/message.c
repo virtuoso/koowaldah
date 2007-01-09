@@ -72,8 +72,8 @@ int msg_send(pid_t recp, char *buf, size_t len, u32 flags)
 	void *ppg;
 	struct page *pg;
 
-	kprintf("# sending message [%s] from %d to %d, flags %x\n",
-			buf, CURRENT()->pid, recp, flags);
+	/*kprintf("# sending message [%s] from %d to %d, flags %x\n",
+			buf, CURRENT()->pid, recp, flags);*/
 	/* these patterns are to be implemented */
 	if (flags & (MF_REMAP|MF_NOTIFY|MF_GRANU))
 		return -ENOSYS;
@@ -89,37 +89,43 @@ int msg_send(pid_t recp, char *buf, size_t len, u32 flags)
 	if (!msg)
 		return -ENOMEM;
 
-	ppg = get_page(ZONE_USER);
-	if (!ppg) {
-		slice_free(msg, msg_pool);
-		return -ENOMEM;
-	}
-	
-	memory_copy(ppg, buf, len);
-
-	pg = addr_to_page(ppg);
-	map = thread->map;
-
-	/* check if thread has 'mbox' mma and create if necessary */
-	if (map->m_nmma == 4) {
-		map->m_mma[map->m_nmma++] =
-			mem_area_alloc_new(map, USERMEM_MBOX, 0, MMA_GROWS);
-		if (!map->m_mma[4])
+	if (!(flags & MF_BLOCK)) {
+		ppg = get_page(ZONE_USER);
+		if (!ppg) {
+			slice_free(msg, msg_pool);
 			return -ENOMEM;
-	}
-	
-	/* add a page to recipient's 'mbox' mma */
-	map_page(thread->map, thread->map->m_mma[4]->m_end,
-			(u32)ppg, thread->map->m_mma[4]->m_prot);
-	mem_area_add_page(thread->map->m_mma[4], pg);
+		}
+
+		memory_copy(ppg, buf, len);
+
+		pg = addr_to_page(ppg);
+		map = thread->map;
+
+		/* check if thread has 'mbox' mma and create if necessary */
+		if (map->m_nmma == 4) {
+			map->m_mma[map->m_nmma++] =
+				mem_area_alloc_new(map, USERMEM_MBOX, 0,
+						MMA_GROWS);
+			if (!map->m_mma[4])
+				return -ENOMEM;
+		}
+
+		/* add a page to recipient's 'mbox' mma */
+		map_page(thread->map, thread->map->m_mma[4]->m_end,
+				(u32)ppg, thread->map->m_mma[4]->m_prot);
+		mem_area_add_page(thread->map->m_mma[4], pg);
+
+		msg->m_buf = (char *)pg->virt;
+	} else
+		msg->m_buf = __virt2phys((u32)buf);
 
 	/* initialize struct message fields */
 	KLIST0_INIT(&msg->m_mbox);
 	msg->m_sender = me->pid;
 	msg->m_flags  = flags;
-	msg->m_buf    = (char *)pg->virt;
 	msg->m_len    = len;
 	klist0_prepend(&msg->m_mbox, &thread->mbox);
+	tq_init(&msg->m_tq);
 
 	/* check if our recipient is on the sleepers queue */
 	klist0_for_each(tmp, &sleepers.threads) {
@@ -135,10 +141,14 @@ int msg_send(pid_t recp, char *buf, size_t len, u32 flags)
 
 			tq_insert_head(thread, &tq);
 			scheduler_enqueue(&tq);
-			scheduler_yield(); /* XXX */
 			break;
 		}
 	}
+
+	if (flags & MF_BLOCK)
+		scheduler_dequeue(&msg->m_tq);
+
+	scheduler_yield();
 
 	return len;
 }
@@ -158,6 +168,7 @@ int msg_retrieve(pid_t sender, char **buf, size_t len, u32 flags)
 	struct message *msg;
 	struct klist0_node *tmp;
 	void *phys;
+	size_t ret;
 
 	/* patterns to be implemented */
 	if (!sender || !len || !*buf)
@@ -165,6 +176,7 @@ int msg_retrieve(pid_t sender, char **buf, size_t len, u32 flags)
 
 	/* make sure we have something in mbox */
 	if (klist0_empty(&me->mbox)) {
+sleep:
 		if (flags & MF_BLOCK) {
 			scheduler_dequeue(&sleepers);
 
@@ -183,19 +195,26 @@ int msg_retrieve(pid_t sender, char **buf, size_t len, u32 flags)
 
 	/* we should more likely go back to sleep here if flags & MF_BLOCK */
 	if (msg->m_sender != sender)
-		return 0;
+		goto sleep;
 
 	memory_copy(*buf, msg->m_buf, msg->m_len);
-
-	/* shrink the heap */
-	phys = (void *)__virt2physpg((u32)msg->m_buf);
-	unmap_page(me->map, (u32)msg->m_buf);
-	mem_area_remove_page(me->map->m_mma[4], addr_to_page(phys));
+	if (!(msg->m_flags & MF_BLOCK)) {
+		/* shrink the heap */
+		phys = (void *)__virt2physpg((u32)msg->m_buf);
+		unmap_page(me->map, (u32)msg->m_buf);
+		mem_area_remove_page(me->map->m_mma[4], addr_to_page(phys));
+		put_pages(phys);
+	}
 	
+	if (msg->m_flags & MF_BLOCK && !klist0_empty(&msg->m_tq.threads))
+		scheduler_enqueue(&msg->m_tq);
+
+	ret = msg->m_len;
+
 	/* remove the message */
 	klist0_unlink(&msg->m_mbox);
 	slice_free(msg, msg_pool);
 
-	return 0;
+	return ret;
 }
 
