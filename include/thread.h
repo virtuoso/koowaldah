@@ -37,7 +37,6 @@
 #include <spinlock.h>
 #include <klist0.h>
 #include <namespace.h>
-#include <message.h>
 
 #define THREAD_NAME_LEN 32
 #define MAX_THREADS 128
