@@ -41,6 +41,7 @@
 #include <file.h>
 #include <timers.h>
 #include <scheduler.h>
+#include <message.h>
 
 u32 __regparm(0) sys_call_gate(u32 eax, u32 ebx, u32 ecx, u32 edx,
 		u32 esi, u32 edi)
