@@ -30,7 +30,7 @@ SECTIONS
 		late_init_start = .;
 		*(.init.late)
 		late_init_end = .;
-		*(.rodata)
+		*(.rodata*)
 	}
 
 	.data ALIGN (0x1000) :
