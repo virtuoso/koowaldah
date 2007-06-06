@@ -72,7 +72,7 @@ int generic_close(struct file *file)
 	return 0;
 }
 
-int generic_read(struct file *file, char *buf, off_t len)
+int generic_read(struct file *file, char *buf, size_t len)
 {
 	struct inode *inode = file->f_inode;
 	struct page **pages;
@@ -145,16 +145,43 @@ int generic_read(struct file *file, char *buf, off_t len)
 	return len;
 }
 
-int generic_write(struct file *file, char *buf, off_t offset)
+int generic_write(struct file *file, char *buf, size_t offset)
 {
 	return 0;
+}
+
+int generic_readdir(struct file *file, struct udirentry *udents, int count)
+{
+	struct direntry *dent;
+	struct klist0_node *d;
+	int i = 0;
+
+	if (!S_ISDIR(file->f_inode->i_mode))
+		return -EINVAL;
+
+	if (count <= 0)
+		return -EINVAL;
+
+	klist0_for_each(d, &file->f_inode->i_children) {
+		dent = klist0_entry(d, struct direntry, d_siblings);
+
+		memory_copy(udents->name, dent->d_name, FILENAME_MAX);
+
+		if (i++ == count)
+			break;
+
+		udents++;
+	}
+
+	return i;
 }
 
 static struct file_operations generic_fops = {
 	.open = generic_open,
 	.close = generic_close,
 	.read = generic_read,
-	.write = generic_write
+	.write = generic_write,
+	.readdir = generic_readdir,
 };
 
 /*
@@ -173,9 +200,6 @@ int open(char *name, mode_t mode)
 	dent = lookup_path(name);
 	if (!dent)
 		return -ENOENT;
-
-	if (S_ISDIR(dent->d_inode->i_mode))
-		return -EISDIR;
 
 	/* if it's a device file, look it up and hook its fops to
 	 * our file */
@@ -288,5 +312,35 @@ int close(fd)
 	release_inode(file->f_inode);
 	
 	return file->f_ops->close(file);
+}
+
+/*
+ * Read at most count entries from directory opened at fd into
+ * user-allocated udents array.
+ * @fd     -- file descriptor of directory to be read
+ * @udents -- preallocated array of 'struct udirentry' records
+ * @count  -- max number of entries to be read
+ * returns actual number of read direntries or
+ *         -EBADF for bad file descriptor (fd)
+ *         -EINVAL if 'readdir' is not defined for this directory.
+ */
+int readdir(int fd, struct udirentry *udents, int count)
+{
+	struct file *file;
+	struct inode *inode;
+
+	file = fd2file(fd);
+	if (!file)
+		return -EBADF;
+
+	if (!file->f_ops->readdir)
+		return -EINVAL;
+
+	if (!file->f_inode)
+		bug();
+
+	inode = file->f_inode;
+
+	return file->f_ops->readdir(file, udents, count);
 }
 
