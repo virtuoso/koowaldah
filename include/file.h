@@ -42,8 +42,9 @@ struct file;
 struct file_operations {
 	int (*open)(struct file *file);
 	int (*close)(struct file *file);
-	int (*read)(struct file *file, char *buf, off_t size);
-	int (*write)(struct file *file, char *buf, off_t size);
+	int (*read)(struct file *file, char *buf, size_t size);
+	int (*write)(struct file *file, char *buf, size_t size);
+	int (*readdir)(struct file *file, struct udirentry *udents, int count);
 };
 
 struct file {
@@ -55,8 +56,15 @@ struct file {
 	struct klist0_node f_tlist;
 };
 
+struct file *new_file();
+void kill_file(struct file *file);
+
+int generic_open(struct file *file);
+int generic_close(struct file *file);
+
 int open(char *name, mode_t mode);
 int close(int fd);
 int read(int fd, char *buf, size_t len);
 int write(int fd, char *buf, size_t len);
+int readdir(int fd, struct udirentry *udents, int count);
 #endif
