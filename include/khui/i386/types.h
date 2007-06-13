@@ -46,5 +46,17 @@ typedef unsigned int __u32;
 typedef signed long long __s64;
 typedef unsigned long long __u64;
 
+#ifndef ULONG_MAX
+#define ULONG_MAX 0xffffffff
+#endif
+
+#ifndef PAGE_SHIFT
+#define PAGE_SHIFT 12
+#endif
+
+#ifndef PAGE_SIZE
+#define PAGE_SIZE (1UL << PAGE_SHIFT)
+#endif
+
 #endif /* __KHUI_I386_TYPES_H__ */
 
