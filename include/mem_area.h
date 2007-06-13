@@ -41,6 +41,7 @@
 struct mem_area {
 	unsigned long      m_start;    /* where the area starts */
 	unsigned long      m_end;      /* where the area ends */
+	u32                m_sizelim;  /* size limit */
 	u32                m_pages;    /* how many pages are involved */
 	u32                m_users;    /* how many threads share this area */
 	u32                m_prot;     /* protection */
@@ -62,24 +63,55 @@ struct mem_area *mem_area_alloc(struct mapping *map, unsigned long start,
 struct mem_area *mem_area_alloc_new(struct mapping *map, unsigned long start,
 		u32 pages, u32 flags);
 struct mem_area *mem_area_clone(struct mapping *map, struct mem_area *mma);
+void mem_area_grow(struct mem_area *mma, u32 pages);
 void mem_area_attach(struct mapping *dst, struct mem_area *mma);
 void mem_area_kill(struct mem_area *mma, struct mapping *map);
 void mem_area_put(struct mem_area *mma, struct mapping *map);
 void mem_area_add_page(struct mem_area *mma, struct page *pg);
 void mem_area_remove_page(struct mem_area *mma, struct page *pg);
 
-static inline void  __mem_area_add_page(struct mem_area *mma, struct page *pg)
+static __inline void  __mem_area_add_page(struct mem_area *mma, struct page *pg)
 {
-	pg->virt = mma->m_end;
+	if (mma->m_flags & MMA_STACK) {
+		mma->m_start -= PAGE_SIZE;
+		pg->virt = mma->m_start;
+	} else {
+		pg->virt = mma->m_end;
+		mma->m_end += PAGE_SIZE;
+	}
+
 	mma->m_pages++;
-	mma->m_end += PAGE_SIZE;
 }
 
-static inline void  __mem_area_remove_page(struct mem_area *mma, struct page *pg)
+static __inline void  __mem_area_remove_page(struct mem_area *mma, struct page *pg)
 {
 	pg->virt = NOPAGE_ADDR;
 	mma->m_pages--;
 	mma->m_end -= PAGE_SIZE;
+}
+
+/*
+ * Check if an address is inside a mma or is within its possible size.
+ * Interesting for fault handlers.
+ * XXX: return value
+ */
+static __inline int mem_area_is_hit(struct mem_area *mma, u32 addr)
+{
+	if (addr >= mma->m_start && addr < mma->m_end)
+		return 1; /* exact hit */
+
+	/* check if we still hit within the size limit */
+	if (mma->m_flags & MMA_STACK)
+		return ((addr >= mma->m_end - mma->m_sizelim) &&
+			(addr < mma->m_end) ? (mma->m_start - addr) : 0);
+
+	if (mma->m_flags & MMA_GROWS)
+		return ((addr >= mma->m_start) &&
+			(addr < mma->m_start + mma->m_sizelim) ? 
+			(addr - mma->m_end) : 0);
+
+	/* miss */
+	return 0;
 }
 
 /* XXX: dynamic arrays will obsolete this */
@@ -97,12 +129,15 @@ struct mapping {
 extern struct mapping root_map;
 
 void clone_map(struct mapping *dst, struct mapping *map);
-int init_user_map(struct mapping *map, u32 cp, u32 dp, u32 hp);
 void switch_map(struct mapping *from, struct mapping *to);
 void map_page(struct mapping *map, u32 virt, u32 phys, u16 flags);
 void unmap_page(struct mapping *map, u32 virt);
 void map_pages(struct mapping *map, u32 virt, u32 phys, u32 n, u16 flags);
 void free_map(struct mapping *map);
+
+/* brk.c */
+void *sbrk(size_t inc);
+unsigned long brk(unsigned long end);
 
 #endif
 
