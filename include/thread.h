@@ -80,13 +80,13 @@ struct thread {
 	struct klist0_node                      mbox;
 };
 
-static inline void tq_init(struct thread_queue *q)
+static __inline void tq_init(struct thread_queue *q)
 {
 	KLIST0_INIT(&q->threads);
 	spinlock_init(&q->lock);
 }
 
-static inline int tq_is_empty(struct thread_queue *q)
+static __inline int tq_is_empty(struct thread_queue *q)
 {
 	bug_on(!q);
 	return klist0_empty(&q->threads);
@@ -95,7 +95,7 @@ static inline int tq_is_empty(struct thread_queue *q)
 /*
  * Put a thread into a thread queue'a head.
  */
-static inline void __tq_insert_head(struct thread *t, struct thread_queue *q)
+static __inline void __tq_insert_head(struct thread *t, struct thread_queue *q)
 {
 	bug_on(!klist0_empty(&t->krunq));
 	bug_on(!spin_trylock(&q->lock));
@@ -107,7 +107,7 @@ static inline void __tq_insert_head(struct thread *t, struct thread_queue *q)
 /*
  * Put a thread into a thread queue's tail.
  */
-static inline void __tq_insert_tail(struct thread *t, struct thread_queue *q)
+static __inline void __tq_insert_tail(struct thread *t, struct thread_queue *q)
 {
 	bug_on(!klist0_empty(&t->krunq));
 	bug_on(!spin_trylock(&q->lock));
@@ -119,7 +119,7 @@ static inline void __tq_insert_tail(struct thread *t, struct thread_queue *q)
 /*
  * Remove a thread from it's queue.
  */
-static inline void __tq_remove_thread(struct thread *t)
+static __inline void __tq_remove_thread(struct thread *t)
 {
 	bug_on(!t->krunq_head);
 	bug_on(klist0_empty(&t->krunq));
@@ -131,7 +131,7 @@ static inline void __tq_remove_thread(struct thread *t)
 /*
  * Dequeue a thread from the queue's head.
  */
-static inline struct thread * __tq_remove_head(struct thread_queue *q)
+static __inline struct thread * __tq_remove_head(struct thread_queue *q)
 {
 	struct thread *t = NULL;
 
@@ -146,7 +146,7 @@ static inline struct thread * __tq_remove_head(struct thread_queue *q)
 /*
  * Dequeue a thread from the queue's tail.
  */
-static inline struct thread * __tq_remove_tail(struct thread_queue *q)
+static __inline struct thread * __tq_remove_tail(struct thread_queue *q)
 {
 	struct thread *t = NULL;
 
@@ -175,6 +175,7 @@ pid_t fork();
 int thread_exec(struct thread *thread, char *path);
 int thread_exec_new(struct thread *thread, struct inode *inode);
 int spawn(char *path);
+void exit(int code);
 
 /* arch */
 void thread_init_stack(struct thread *t, thread_t func, void *data);

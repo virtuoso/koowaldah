@@ -60,18 +60,18 @@ typedef struct {
 #ifdef OPT_DEBUG_SPINLOCKS
 
 #define spin_lock(lock) do {		\
-	typeof(lock) __lock = (lock);	\
+	__typeof__(lock) __lock = (lock);	\
 	bug_on(__lock->counter != 0);	\
 	__lock->counter++;		\
 } while (0)
 
 #define spin_unlock(lock) do {		\
-	typeof(lock) __lock = (lock);	\
+	__typeof__(lock) __lock = (lock);	\
 	bug_on(__lock->counter != 1);	\
 	__lock->counter--;		\
 } while (0)
 
-static inline int spin_trylock(spinlock_t *lock)
+static __inline int spin_trylock(spinlock_t *lock)
 {
 	bug_on(lock->counter != 0 && lock->counter != 1);
 
@@ -90,7 +90,7 @@ static inline int spin_trylock(spinlock_t *lock)
 #define spin_unlock(lock) do {		\
 } while (0)
 
-static inline int spin_trylock(spinlock_t *lock)
+static __inline int spin_trylock(spinlock_t *lock)
 {
 	return 0;
 }

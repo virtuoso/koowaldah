@@ -64,7 +64,7 @@
 /*
  * Clear a number of bits starting from zero.
  */
-static inline void bitmask_zero(unsigned long * dst, int bits) 
+static __inline void bitmask_zero(unsigned long * dst, int bits) 
 {
 	while (bits >= BITS_PER_ULONG) {
 		*dst++ = 0;
@@ -76,7 +76,7 @@ static inline void bitmask_zero(unsigned long * dst, int bits)
 /*
  * Set a numer of bits starting from zero.
  */
-static inline void bitmask_fill(unsigned long * dst, int bits)
+static __inline void bitmask_fill(unsigned long * dst, int bits)
 {
 	while (bits >= BITS_PER_ULONG) {
 		*dst++ = ~0UL;
@@ -88,7 +88,7 @@ static inline void bitmask_fill(unsigned long * dst, int bits)
 /*
  * Set a single bit.
  */
-static inline void bitmask_bit_set(unsigned long * dst, int bit)
+static __inline void bitmask_bit_set(unsigned long * dst, int bit)
 {
 	dst[bit / BITS_PER_ULONG] = 
 		dst[bit / BITS_PER_ULONG] | 1 << (bit % BITS_PER_ULONG);
@@ -97,7 +97,7 @@ static inline void bitmask_bit_set(unsigned long * dst, int bit)
 /*
  * Clear a single bit.
  */
-static inline void bitmask_bit_clear(unsigned long * dst, int bit)
+static __inline void bitmask_bit_clear(unsigned long * dst, int bit)
 {
 	dst[bit / BITS_PER_ULONG] =
 		dst[bit / BITS_PER_ULONG] & ~(1 << (bit % BITS_PER_ULONG));
@@ -106,7 +106,7 @@ static inline void bitmask_bit_clear(unsigned long * dst, int bit)
 /*
  * Read a single bit.
  */
-static inline int bitmask_bit_get(unsigned long * dst, int bit)
+static __inline int bitmask_bit_get(unsigned long * dst, int bit)
 {
 	return dst[bit / BITS_PER_ULONG] & (1 << (bit % BITS_PER_ULONG));
 }

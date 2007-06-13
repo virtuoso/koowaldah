@@ -113,7 +113,7 @@ int serial_8250_close(struct file *file)
 	return 0;
 }
 
-int serial_8250_read(struct file *file, char *buf, off_t size)
+int serial_8250_read(struct file *file, char *buf, size_t size)
 {
 	int t;
 	off_t num_read = 0;
@@ -159,7 +159,7 @@ static void disable_tx_irq()
 
 
 
-int serial_8250_write(struct file *file, char *buf, off_t size)
+int serial_8250_write(struct file *file, char *buf, size_t size)
 {
 	int res;
 

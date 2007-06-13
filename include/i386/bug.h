@@ -45,14 +45,14 @@ void local_irq_disable();
 	do { 					\
 		for (;;) { 			\
 			local_irq_disable(); 	\
-			asm volatile ("hlt"); 	\
+			__asm__ __volatile__ ("hlt"); 	\
 		} 				\
 	} while (0)
 
 
 #define arch_dump_registers() 			\
 	do { 					\
-		asm volatile (			\
+		__asm__ __volatile__ (			\
 			"pushl %esp\n"		\
 			"pushl %ebp\n"		\
 			"pushl %edi\n"		\
@@ -67,7 +67,7 @@ void local_irq_disable();
 /*
 #define arch_dump_regs() 			\
 	do { 					\
-		asm volatile (			\
+		__asm__ __volatile__ (			\
 			"pushl $0xDEAD0001\n"		\
 			"pushl $0xDEAD0002\n"		\
 			"pushl $0xDEAD0003\n"		\
@@ -82,7 +82,7 @@ void local_irq_disable();
 	
 #define arch_display_registers()		\
 	do {					\
-		asm volatile (			\
+		__asm__ __volatile__ (			\
 			"call i386_display_regs\n"			\
 			"addl $32, %esp" /* remove all the dumped	\
 					    regs from the stack */ 	\
@@ -90,7 +90,7 @@ void local_irq_disable();
 	} while (0)
 
 #define arch_display_stack() do {		\
-		asm volatile (			\
+		__asm__ __volatile__ (			\
 			"pushl %esp\n"		\
 			"call i386_dump_stack\n"\
 			"addl $4, %esp"		\

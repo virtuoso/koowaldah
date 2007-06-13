@@ -72,7 +72,7 @@ struct klist0_node {
  * @node -- node to be added
  * @list -- node of the list
  */
-static inline void klist0_prepend(struct klist0_node *node,
+static __inline void klist0_prepend(struct klist0_node *node,
 		struct klist0_node *list)
 {
 	node->next = list;
@@ -86,7 +86,7 @@ static inline void klist0_prepend(struct klist0_node *node,
  * @node -- node to be added
  * @list -- node of the list
  */
-static inline void klist0_append(struct klist0_node *node,
+static __inline void klist0_append(struct klist0_node *node,
 		struct klist0_node *list)
 {
 	node->next = list->next; \
@@ -102,7 +102,7 @@ static inline void klist0_append(struct klist0_node *node,
  * @node -- node to be removed
  * Has no effect on an empty list: does no harm, but makes no sense.
  */
-static inline void klist0_unlink(struct klist0_node *node)
+static __inline void klist0_unlink(struct klist0_node *node)
 {
 	node->prev->next = node->next; \
 	node->next->prev = node->prev; \
@@ -131,7 +131,7 @@ static inline void klist0_unlink(struct klist0_node *node)
  * Check is list is empty (next/prev point to itself).
  * @list -- the list
  */
-static inline int klist0_empty(struct klist0_node *list)
+static __inline int klist0_empty(struct klist0_node *list)
 {
 	return list->next == list;
 }
@@ -141,7 +141,7 @@ static inline int klist0_empty(struct klist0_node *list)
  * @from_head -- head of the list to be reparented
  * @to_head   -- new head, must be empty
  */
-static inline void klist0_reparent(struct klist0_node *from_head,
+static __inline void klist0_reparent(struct klist0_node *from_head,
 				struct klist0_node *to_head)
 {
 	*to_head = *from_head;
