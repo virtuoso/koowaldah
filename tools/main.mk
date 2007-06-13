@@ -29,10 +29,12 @@ DEP2SRC = $(subst +,/,$(subst .d,.c,$(subst $(OBJDIR)/$(subst /,+,$(THISDIR))+,,
 # -----------------------------
 # call compiler to generate dependencies file
 # $(1) -- .c source
-# $(2) -- .o output
+# $(2) -- .d output
 # $(3) -- CFLAGS to use
 DO_GENDEPS = \
-	$(call OUTPUT,$(CC) -M $(3) -c $(1) -MT $(2:.d=.o) -MF $(2),GENDEPS $(1)... )
+	$(call OUTPUT,$(CC) -M $(3) -c $(1) -MT $(2:.d=.o) -MF $(2) && \
+		sed -i -e 's|: *[^ ]\+ |: $(PRJROOT)/$(THISDIR)/$(1) |'\
+		$(2),GENDEPS $(1)... )
 
 # call compiler to generate an object file
 # $(1) -- .c source
