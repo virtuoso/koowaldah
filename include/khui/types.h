@@ -36,6 +36,7 @@
 #include <khui/arch/types.h>
 
 /* ansi definitions */
+typedef __u32 __dev_t;
 typedef __u32 __gid_t;
 typedef __u32 __uid_t;
 typedef __u32 __mode_t;
