@@ -42,6 +42,8 @@
 #include <timers.h>
 #include <scheduler.h>
 #include <message.h>
+#include <mem_area.h>
+#include <mpipe.h>
 
 u32 __regparm(0) sys_call_gate(u32 eax, u32 ebx, u32 ecx, u32 edx,
 		u32 esi, u32 edi)
@@ -62,6 +64,10 @@ u32 __regparm(0) sys_call_gate(u32 eax, u32 ebx, u32 ecx, u32 edx,
 
 		case __SYS_write:
 			return write((int)ebx, (char *)ecx, (size_t)edx);
+
+		case __SYS_readdir:
+			return readdir((int)ebx, (struct udirentry *)ecx,
+					(int)edx);
 
 		case __SYS_tsleep:
 			return tsleep(ebx);
@@ -86,6 +92,18 @@ u32 __regparm(0) sys_call_gate(u32 eax, u32 ebx, u32 ecx, u32 edx,
 		case __SYS_msg_retrieve:
 			return msg_retrieve((pid_t)ebx, (char **)ecx,
 					(size_t)edx, (u32)esi);
+
+		case __SYS_mpipe_open:
+			return mpipe_open((char *)ebx);
+
+		case __SYS_exit:
+			exit((int)ebx);
+
+		case __SYS_sbrk:
+			return (u32)sbrk((size_t)ebx);
+
+		case __SYS_brk:
+			return brk((unsigned long)ebx);
 
 		default:
 			kprintf("syscall %d not implemented\n", eax);
