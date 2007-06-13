@@ -58,6 +58,17 @@ konfig: include/koptions.h
 
 SUBDIRS := arch/$(ARCH) kernel drivers/keyboard drivers/serial
 kernel-elf: deps objects printobjs
+	sh tools/symtab.sh /dev/null $(OBJDIR)/symtab.c
+	@$(call DO_CC,$(OBJDIR)/symtab.c,$(OBJDIR)/symtab.o,$(CC_FLAGS) -I$(PRJROOT)/include)
+	grep "$(OBJDIR)/symtab.o" $(OBJDIR)/OBJECTS || \
+		echo "$(OBJDIR)/symtab.o" >> $(OBJDIR)/OBJECTS
+	cat $(OBJDIR)/OBJECTS | \
+		xargs $(LD) -T arch/$(ARCH)/kernel-elf.lds -o kos-elf
+
+	sh tools/symtab.sh kos-elf $(OBJDIR)/symtab.c
+	@$(call DO_CC,$(OBJDIR)/symtab.c,$(OBJDIR)/symtab.o,$(CC_FLAGS) -I$(PRJROOT)/include)
+	grep "$(OBJDIR)/symtab.o" $(OBJDIR)/OBJECTS || \
+		echo "$(OBJDIR)/symtab.o" >> $(OBJDIR)/OBJECTS
 	cat $(OBJDIR)/OBJECTS | \
 		xargs $(LD) -T arch/$(ARCH)/kernel-elf.lds -o kos-elf
 	
