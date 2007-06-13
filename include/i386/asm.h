@@ -38,8 +38,10 @@
 #define KERN_ALLOWANCE 8
 
 #define USERMEM_START 0x40000000
-#define USERMEM_STACK 0x7ffff000
+#define USERMEM_STACK 0x80000000
+#define USERMEM_STACKLIM 0x0000f000
 #define USERMEM_HEAP  0x80000000
+#define USERMEM_HEAPLIM 0x00080000
 #define USERMEM_MBOX  0xa0000000
 #define in_kernel(p) ((u32)p < USERMEM_START ? 1 : 0)
 
@@ -113,7 +115,7 @@ struct register_frame {
 
 /* read/write cpu control registers */
 #define READ_REG(reg, REG) \
-static inline unsigned long read_ ##reg() \
+static __inline unsigned long read_ ##reg() \
 { \
 	unsigned long r; \
 	__asm__ __volatile__("movl " REG ", %0" : "=r"(r)); \
@@ -121,25 +123,25 @@ static inline unsigned long read_ ##reg() \
 }
 
 #define WRITE_REG(reg, REG) \
-static inline void write_ ##reg(unsigned long v) \
+static __inline void write_ ##reg(unsigned long v) \
 { \
 	__asm__ __volatile__("movl %0, " REG : : "r"(v)); \
 }
 
 /* read segment registers */
 #define READ_SEGREG(reg, OP) \
-static inline unsigned short read_ ##reg() \
+static __inline unsigned short read_ ##reg() \
 { \
 	unsigned short r; \
-	__asm__ __volatile__(OP "\nmovw %%ax, %0" : "=r"(r)); \
+	__asm__ __volatile__(OP "\nmovw %%ax, %0" : "=r"(r) : : "ax"); \
 	return r; \
 }
 
 /* write segment registers */
 #define WRITE_SEGREG(reg, OP) \
-static inline void write_ ##reg(unsigned short v) \
+static __inline void write_ ##reg(unsigned short v) \
 { \
-	__asm__ __volatile__("movw %0, %%ax\n" OP : : "m"(v)); \
+	__asm__ __volatile__("movw %0, %%ax\n" OP : : "m"(v) : "ax"); \
 }
 
 READ_REG(cr0, "%%cr0")
@@ -167,7 +169,7 @@ WRITE_SEGREG(gs, "movw %%ax, %%gs")
  * No checks are performed as to verify presence of a page;
  * in case of absence, page fault will raise.
  */
-static inline u32 __virt2physpg(u32 pgaddr)
+static __inline u32 __virt2physpg(u32 pgaddr)
 {
 	u32 ret;
 
@@ -187,7 +189,7 @@ static inline u32 __virt2physpg(u32 pgaddr)
 			"movl (%%eax), %%eax\n"
 			"andl $0xfffff000, %%eax\n"
 			"movl %%eax, %0"
-			: "=r"(ret) : "m"(pgaddr)
+			: "=r"(ret) : "m"(pgaddr) : "eax", "ebx", "ecx"
 		);
 	return ret;
 }
@@ -197,7 +199,7 @@ static inline u32 __virt2physpg(u32 pgaddr)
  * No checks are performed as to verify presence of a page;
  * in case of absence, page fault will raise.
  */
-static inline u32 __virt2phys(u32 addr)
+static __inline u32 __virt2phys(u32 addr)
 {
 	u32 ret;
 
@@ -220,55 +222,55 @@ static inline u32 __virt2phys(u32 addr)
 			"andl $0x00000fff, %%eax\n"
 			"orl %%edx, %%eax\n"
 			"movl %%eax, %0"
-			: "=r"(ret) : "m"(addr)
+			: "=r"(ret) : "m"(addr) : "eax", "ebx", "ecx", "edx"
 		);
 	return ret;
 }
 
-static inline u8 inb(u16 port)
+static __inline u8 inb(u16 port)
 {
 	u8 r;
 	__asm__ __volatile__("inb %w1, %0" : "=a"(r) : "d"(port));
 	return r;
 }
 
-static inline void outb(u16 port, u8 data)
+static __inline void outb(u16 port, u8 data)
 {
 	__asm__ __volatile__("outb %0, %w1" : : "a"(data), "d"(port));
 }
 
-static inline u16 inw(u16 port)
+static __inline u16 inw(u16 port)
 {
 	u16 r;
 	__asm__ __volatile__("inw %w1, %0" : "=a"(r) : "d"(port));
 	return r;
 }
 
-static inline void outw(u16 port, u16 data)
+static __inline void outw(u16 port, u16 data)
 {
 	__asm__ __volatile__("outb %0, %w1" : : "a"(data), "d"(port));
 }
 
 /* read/write cpu flags */
-static inline u32 read_eflags()
+static __inline u32 read_eflags()
 {
 	u32 f;
 	__asm__ __volatile__("pushfl; popl %0" : "=r"(f));
 	return f;
 }
 
-static inline void write_eflags(u32 f)
+static __inline void write_eflags(u32 f)
 {
 	__asm__ __volatile__("pushl %0; popfl" : : "r"(f));
 }
 #define EFLAGS_IF	0x0200
 
-static inline void local_irq_disable()
+static __inline void local_irq_disable()
 {
         __asm__ __volatile__ ("cli");
 }
 
-static inline void local_irq_enable()
+static __inline void local_irq_enable()
 {
         __asm__ __volatile__ ("sti");
 }

@@ -111,7 +111,7 @@ void pic_unmask_interrupt(u32 number){
 //	kprintf("after running pic1_mask = %x, pic2_mask = %x\n", pic1_mask, pic2_mask);
 }
 
-inline void pic_do_eoi(u32 number){
+__inline void pic_do_eoi(u32 number){
 	if(number > 15)
 		return;
 	

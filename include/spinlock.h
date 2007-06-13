@@ -34,6 +34,7 @@
 #ifndef __SPINLOCK_H__
 #define __SPINLOCK_H__
 
+#include <koowaldah.h>
 #include <arch/spinlock.h>
 #include <arch/irq.h>
 
@@ -48,7 +49,7 @@
 } while (0)
 
 
-static inline int spin_trylock_irqsave(spinlock_t *lock, u32 flags)
+static __inline int spin_trylock_irqsave(spinlock_t *lock, u32 flags)
 {
 	local_irq_save(flags);
 	if (spin_trylock(lock))

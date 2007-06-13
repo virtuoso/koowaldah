@@ -126,7 +126,7 @@ static int pckbd_dev_open(struct file *file)
 	return pckbd_open();
 }
 
-static int pckbd_dev_read(struct file *file, char *buf, off_t len)
+static int pckbd_dev_read(struct file *file, char *buf, size_t len)
 {
 	u16 data = pckbd_read();
 

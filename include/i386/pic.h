@@ -37,6 +37,6 @@
 void pic_clear();
 void pic_mask_interrupt(u32 number);
 void pic_unmask_interrupt(u32 number);
-inline void pic_do_eoi(u32 number);
+__inline void pic_do_eoi(u32 number);
 
 #endif /* __ARCH_PIC_H__ */

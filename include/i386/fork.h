@@ -41,7 +41,7 @@
  * stack top.
  * @thread -- newborn child thread
  */
-static inline void prepare_fork(struct thread *thread)
+static __inline void prepare_fork(struct thread *thread)
 {
 	struct thread *me = CURRENT();
 	u32 *p = (u32 *)me - 6;

@@ -45,15 +45,17 @@ extern u8 kernel_started;
 
 /* Generic MIN()/MAX() implementation */
 #define MIN(a,b) ({ \
-	typeof(a) _x = (a); \
-	typeof(b) _y = (b); \
+	__typeof__(a) _x = (a); \
+	__typeof__(b) _y = (b); \
 	(void) (&_x == &_y); \
 	_x < _y ? _x : _y; })
 #define MAX(a,b) ({ \
-	typeof(a) _x = (a); \
-	typeof(b) _y = (b); \
+	__typeof__(a) _x = (a); \
+	__typeof__(b) _y = (b); \
 	(void) (&_x == &_y); \
 	_x > _y ? _x : _y; })
+
+#define ARRSZ(arr) (sizeof(arr) / sizeof(__typeof__(*arr)))
 
 #ifdef __builtin_offsetof
 #define offsetof(TYPE, MEMBER) __builtin_offsetof(TYPE, MEMBER)
@@ -63,7 +65,7 @@ extern u8 kernel_started;
 
 #define __init   __attribute__((section(".init")))
 #define __future __attribute__((unused))
-#define __inline __attribute__((always_inline)) inline
+#define __inline __attribute__((always_inline)) __inline__
 #define __noprof __attribute__((no_instrument_function))
 #define __regparm(n) __attribute__((regparm(n)))
 #define __noreturn __attribute__((noreturn))
@@ -72,6 +74,8 @@ typedef int (*initfn)(void);
 
 #define late_init(f) \
 	__attribute__((section(".init.late"))) initfn __ ##f## _late = f;
+
+#include <debug.h>
 
 #endif /* __KOOWALDAH_H_ */
 
