@@ -40,6 +40,14 @@
 size_t memory_set(void *s, char c, size_t n);
 size_t memory_copy(void *dest, void *src, size_t n);
 
+#define isdigit(__c) (__c >= '0' && __c <= '9')
+#define isupper(__c) (__c >= 'A' && __c <= 'Z')
+#define islower(__c) (__c >= 'a' && __c <= 'a')
+#define isalpha(__c) (isupper(__c) || islower(__c))
+#define isspace(__c) (__c == ' ' || __c == '\t' || __c == '\n' || __c == '\r')
+
+u32 strtoul(char *nptr);
+
 #define NMASK(x) ((1 << (x)) - 1)
 static __inline unsigned long log2(unsigned long n)
 {
@@ -65,6 +73,7 @@ static __inline size_t kstrlen(char *str)
 	while ('\0' != *(++p));
 	return p - str;
 }
+#define kstrlen_(__s) (kstrlen(__s) + 1)
 
 static __inline char *kstrrchr(char *str, char c)
 {
