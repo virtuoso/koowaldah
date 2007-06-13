@@ -117,7 +117,7 @@ int msg_send(pid_t recp, char *buf, size_t len, u32 flags)
 
 		msg->m_buf = (char *)pg->virt;
 	} else
-		msg->m_buf = __virt2phys((u32)buf);
+		msg->m_buf = (char *)__virt2phys((u32)buf);
 
 	/* initialize struct message fields */
 	KLIST0_INIT(&msg->m_mbox);
@@ -165,7 +165,7 @@ int msg_send(pid_t recp, char *buf, size_t len, u32 flags)
 int msg_retrieve(pid_t sender, char **buf, size_t len, u32 flags)
 {
 	struct thread *me = CURRENT();
-	struct message *msg;
+	struct message *msg = NULL;
 	struct klist0_node *tmp;
 	void *phys;
 	size_t ret;
@@ -205,7 +205,7 @@ sleep:
 		mem_area_remove_page(me->map->m_mma[4], addr_to_page(phys));
 		put_pages(phys);
 	}
-	
+
 	if (msg->m_flags & MF_BLOCK && !klist0_empty(&msg->m_tq.threads))
 		scheduler_enqueue(&msg->m_tq);
 
