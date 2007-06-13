@@ -1,4 +1,5 @@
 PRJROOT := $(shell echo $(CURDIR))
+DESTDIR ?= /tmp
 
 include tools/main.mk
 
@@ -74,6 +75,11 @@ kernel-elf: deps objects printobjs
 	
 kernel: killobjs konfig initfs
 	$(MAKE) -R kernel-elf
+
+install_dev: include/khui
+	@echo "Installing development headers to $(DESTDIR)"
+	@[ -d "$(DESTDIR)" ] || mkdir -p $(DESTDIR)
+	@tar cf - include/khui | ( cd $(DESTDIR); tar xf - )
 
 tests:
 	$(MAKE) -C tests test
