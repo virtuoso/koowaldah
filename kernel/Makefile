@@ -4,12 +4,15 @@ SOURCES := \
 	thread.c \
 	fork.c \
 	exec.c \
+	exit.c \
 	thread_queue.c \
 	scheduler.c \
 	sched0.c \
 	timecore.c \
+	symtab.c \
 	mm_zone.c \
 	mem_area.c \
+	brk.c \
 	page_alloc.c \
 	slice.c \
 	galloc.c
