@@ -49,5 +49,7 @@ void fs_insert_entry(char *pathname, mode_t mode, dev_t dev, char *buf,
 void __init fs_init_super();
 int __init fs_init_inodes();
 void __init fs_init_namespace();
+void __init fs_init_mount();
+void __init fs_init_virtfs();
 
 #endif

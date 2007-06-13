@@ -39,7 +39,7 @@
 #include <lib.h>
 #include <error.h>
 
-static struct klist0_node devices;
+struct klist0_node devices;
 
 /*
  * Register a new device within the device list

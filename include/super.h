@@ -30,6 +30,7 @@
 
 #include <klist0.h>
 #include <device.h>
+#include <khui/fs.h>
 #include <inode.h>
 
 /* magic of a "rootfs" superblock */
@@ -54,8 +55,10 @@ struct superblock {
 	dev_t s_dev;
 	u32 s_flags;
 	struct super_operations *s_ops;
+	struct inode_operations *s_iops; /* this propagates to inodes */
 };
 
+struct superblock *alloc_super(dev_t dev);
 struct superblock *get_super(dev_t dev);
 
 #endif
