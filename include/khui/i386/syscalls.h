@@ -51,6 +51,11 @@
 #define __SYS_exec 9
 #define __SYS_msg_send 10
 #define __SYS_msg_retrieve 11
+#define __SYS_readdir 12
+#define __SYS_mpipe_open 13
+#define __SYS_exit 14
+#define __SYS_sbrk 15
+#define __SYS_brk 16
 
 int __sys_debug(const char *str);
 int __sys_open(const char *name, unsigned int mode);
@@ -63,6 +68,10 @@ int __sys_yield();
 int __sys_getpid();
 int __sys_msg_send(int recp, char *buf, int len, unsigned int flags);
 int __sys_msg_retrieve(int recp, char **buf, int len, unsigned int flags);
+int __sys_mpipe_open(const char *name);
+void __attribute__((noreturn)) __sys_exit(int code);
+void *__sys_sbrk(unsigned int inc);
+unsigned long __sys_brk(unsigned long end);
 
 #endif /* __KHUI_I386_SYSCALLS_H__ */
 
