@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006, Alexander Shishkin
+ * Copyright (c) 2006, 2007 Alexander Shishkin
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -32,6 +32,7 @@
 #include <atomic.h>
 #include <super.h>
 #include <file.h>
+#include <mount.h>
 /* yes, I'm aware of cross-inclusion */
 
 typedef u32 ino_t;
@@ -46,16 +47,24 @@ struct inode_mapping {
 	/* and this assumes consequent reading only */
 	struct page 	*i_pages[INODE_PAGES];
 	u32		i_filled;     /* how many pages are there */
-	
+
 	/* I don't see the point in separating these */
 	int (*read_page)(struct page *page, off_t offset);
 	int (*write_page)(struct page *page, off_t offset);
+};
+
+struct inode;
+
+struct inode_operations {
+	struct direntry *(*lookup)(struct inode *inode, char *name);
 };
 
 struct inode {
 	struct klist0_node i_sblist;  /* sb list linkage */
 	struct klist0_node i_dent;    /* direntries */
 	struct superblock *i_sb;      /* our sb */
+	struct mount *i_mount;
+	void *i_private;
 	u32 i_state;
 	ino_t i_ino;
 	atomic_u32 i_refcnt;
@@ -68,9 +77,11 @@ struct inode {
 	u32 i_atime;
 	u32 i_ctime;
 	u32 i_mtime;
+	void *i_ctl;
 	struct inode_mapping i_map;    /* what's inside */
 	struct klist0_node i_children; /* direntries list */
 	struct inode *i_parent;
+	struct inode_operations *i_ops;
 	struct file_operations *i_fops;/* this propagates to file */
 };
 

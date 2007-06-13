@@ -47,6 +47,25 @@
 static struct klist0_node anon_inodes;
 
 /*
+ * Generic lookup method,
+ * a noop, for rootfs all the names are in the cache
+ */
+struct direntry *generic_lookup(struct inode *inode, char *name)
+{
+	if (!S_ISDIR(inode->i_mode))
+		return NULL; /* ERRPTR=-EINVAL */
+
+	return NULL; /* ERRPTR=-ENOENT */
+}
+
+/*
+ * Generic inode operations
+ */
+static struct inode_operations generic_iops = {
+	.lookup = generic_lookup,
+};
+
+/*
  * Generic inode allocation method
  */
 struct inode *alloc_inode()
@@ -101,6 +120,8 @@ struct inode *new_inode(struct superblock *sb)
 
 	inode->i_state = INODE_NEW;
 
+	inode->i_mount = NULL;
+
 	/* following fields must be filled in by fs driver */
 	inode->i_ino = 0;
 	inode->i_mode = 0;
@@ -109,6 +130,7 @@ struct inode *new_inode(struct superblock *sb)
 	inode->i_nlinks = 0;
 	inode->i_uid = inode->i_gid = 0;
 	inode->i_atime = inode->i_ctime = inode->i_mtime = 0;
+	inode->i_ops = sb->s_iops ? sb->s_iops : &generic_iops;
 	inode->i_fops = NULL;
 	inode->i_map.i_filled = 0;
 	inode->i_map.read_page = NULL;
@@ -136,6 +158,10 @@ void free_inode(struct inode *inode)
 			free_direntry(dent);
 		} while (t != &inode->i_dent);
 	}
+
+	/* remove mountpoint(s), if any */
+	if (inode->i_mount)
+		kill_mount(inode->i_mount);
 
 	if (inode->i_sb)
 		inode->i_sb->s_ops->kill_inode(inode);

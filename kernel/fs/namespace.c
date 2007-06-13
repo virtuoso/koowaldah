@@ -69,8 +69,10 @@ struct direntry *new_direntry(char *name, struct inode *inode)
 void free_direntry(struct direntry *dent)
 {
 	/* direntry should be unused */
-	if (atomic_read(&dent->d_refcnt))
+	if (atomic_read(&dent->d_refcnt)) {
+		kprintf("# tried to free %s dent\n", dent->d_name);
 		bug();
+	}
 
 	klist0_unlink(&dent->d_idlist);
 	memory_release(dent);
@@ -89,19 +91,16 @@ struct direntry *lookup_direntry(char *name, struct inode *inode)
 	if (!S_ISDIR(inode->i_mode))
 		return NULL;
 
-	/* we don't have inode ops yet */
-#if 0
-	if (klist0_empty(&inode->i_children))
-		inode->i_ops->readdir(inode);
-#endif
-
 	klist0_for_each(d, &inode->i_children) {
 		child_dent = klist0_entry(d, struct direntry, d_siblings);
 		if (!kstrcmp(child_dent->d_name, name))
 			return child_dent;
 	}
 
-	return NULL;
+	/* cache lookup failed, let's ask the filesystem driver */
+	child_dent = inode->i_ops->lookup(inode, name);
+
+	return child_dent;
 }
 
 /*
@@ -117,8 +116,11 @@ struct direntry *lookup_path(char *pathname)
 	char *p = pathname;
 	char *n;
 
-	if (*pathname == '/')
+	while (*p == '/')
 		p++;
+
+	if (*p == '\0')
+		return root_ns.n_dent;
 
 	while ((n = kstrchr(p, '/'))) {
 		memory_copy(name, p, n - p);
@@ -133,11 +135,24 @@ struct direntry *lookup_path(char *pathname)
 		inode = dent->d_inode;
 		if (!inode)
 			bug();
+
+		if (inode->i_mount)
+			inode = inode->i_mount->m_sb->s_root;
 	}
 
 	dent = lookup_direntry(p, inode);
 
 	return dent;
+}
+
+void release_direntry(struct direntry *dent)
+{
+	struct inode *inode = dent->d_inode;
+
+	if (atomic_dec_and_test_u32(&dent->d_refcnt))
+		free_direntry(dent);
+
+	release_inode(inode);
 }
 
 /*
@@ -163,5 +178,6 @@ void __init fs_init_namespace()
 	dent = new_direntry("/", inode);
 
 	root_ns.n_inode = inode;
+	root_ns.n_dent = dent;
 }
 

@@ -159,6 +159,7 @@ void fs_insert_entry(char *pathname, mode_t mode, dev_t dev, char *buf,
  *  /dev/console
  *  /initfs
  *  /mnt
+ *  /koowaldah
  */
 void __init fs_init()
 {
@@ -169,6 +170,7 @@ void __init fs_init()
 	fs_init_super();
 	fs_init_inodes();
 	fs_init_namespace();
+	fs_init_mount();
 
 	sb = get_super(ROOTFSDEV);
 	sb->s_ops->read_inode = fs_read_inode;
@@ -181,9 +183,11 @@ void __init fs_init()
 	fs_add_entry(p, "serial", S_IFCHR, DEV_DEVICE(12, 34));
 	p = fs_add_entry(root, "initfs", S_IFDIR, NODEV);
 	p = fs_add_entry(root, "mnt", S_IFDIR, NODEV);
+	p = fs_add_entry(root, "koowaldah", S_IFDIR, NODEV);
 
 	cpio_read();
 	devices_init();
 	messaging_init();
+	fs_init_virtfs();
 }
 

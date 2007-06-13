@@ -39,8 +39,6 @@
 
 extern struct namespace root_ns;
 
-#define FILENAME_MAX (size_t)256
-
 struct direntry {
 	struct inode *d_inode;
 	struct klist0_node d_idlist;   /* i_dent linkage */
@@ -54,9 +52,11 @@ void free_direntry(struct direntry *dent);
 
 struct direntry *lookup_direntry(char *name, struct inode *inode);
 struct direntry *lookup_path(char *pathname);
+void release_direntry(struct direntry *dent);
 
 struct namespace {
 	struct inode *n_inode;  /* inode to start the namespace */
+	struct direntry *n_dent;
 };
 
 #endif
