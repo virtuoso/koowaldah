@@ -1,7 +1,7 @@
 /*
  * kernel/mem_area.c
  *
- * Copyright (C) 2006 Alexander Shishkin
+ * Copyright (C) 2006, 2007 Alexander Shishkin
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -85,8 +85,12 @@ struct mem_area *mem_area_alloc(struct mapping *map, unsigned long start,
 	klist0_for_each(tmp, &mma->m_plist) {
 		struct page *pg = 
 			klist0_entry(tmp, struct page, area_list);
-		map_page(map, mma->m_end, 
-			(u32) page_to_addr(pg), mma->m_prot);
+		if (mma->m_flags & MMA_STACK)
+			map_page(map, mma->m_start - PAGE_SIZE, 
+					(u32) page_to_addr(pg), mma->m_prot);
+		else
+			map_page(map, mma->m_end, 
+					(u32) page_to_addr(pg), mma->m_prot);
 		__mem_area_add_page(mma, pg);
 	}
 
@@ -117,7 +121,6 @@ void mem_area_attach(struct mapping *dst, struct mem_area *mma)
 struct mem_area *mem_area_alloc_new(struct mapping *map, unsigned long start,
 		u32 pages, u32 flags)
 {
-
 	bug_on(pages < 0);
 
 	KLIST0_DECLARE(pg_list);
@@ -129,6 +132,25 @@ struct mem_area *mem_area_alloc_new(struct mapping *map, unsigned long start,
 	}
 
 	return mem_area_alloc(map, start, &pg_list, flags);
+}
+
+void mem_area_grow(struct mem_area *mma, u32 pages)
+{
+	if (!(mma->m_flags & (MMA_GROWS | MMA_STACK)))
+		return; /* things like this don't grow */
+
+	if (pages < 0)
+		return;
+
+	while(pages--) {
+		struct page *pg = alloc_page(ZONE_USER);
+		bug_on(!pg); /* XXX Try to recover here. */
+
+		mem_area_add_page(mma, pg);
+		map_page(mma->m_map, pg->virt,
+				(u32)page_to_addr(pg),
+				mma->m_prot);
+	}
 }
 
 struct mem_area *mem_area_clone(struct mapping *map, struct mem_area *mma)
