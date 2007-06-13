@@ -52,7 +52,7 @@ struct klist *klist_new(u32 size)
 	return list;
 }
 
-static inline void klist_pointer_add(struct klist *new, 
+static __inline void klist_pointer_add(struct klist *new, 
 		struct klist *prev_node, struct klist *next_node)
 {
 	next_node->prev = new;
@@ -87,7 +87,7 @@ void klist_add_tail(struct klist *new, struct klist **list)
 		*list = new;
 }
 
-static inline void klist_pointer_remove(struct klist *prev_node, struct klist *next_node)
+static __inline void klist_pointer_remove(struct klist *prev_node, struct klist *next_node)
 {
 	next_node->prev = prev_node;
 	prev_node->next = next_node;

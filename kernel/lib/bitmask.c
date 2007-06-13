@@ -107,7 +107,7 @@ int bitmask_all_unset(unsigned long * dst, int limit)
 	return limit ? (!((*dst) & (~0UL >> (BITS_PER_ULONG - limit)))) : 1;
 }
 
-static inline void bitmask_print_ulong(unsigned long data, int nbits)
+static __inline void bitmask_print_ulong(unsigned long data, int nbits)
 {
 	int i;
 	for (i = 0; i < nbits; i++)

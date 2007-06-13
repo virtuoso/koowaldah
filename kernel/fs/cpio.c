@@ -69,7 +69,7 @@ typedef struct {
 
 #define ALIGN4(x) ({ \
 		unsigned long __r = ((unsigned long)(x) + 3) & ~3; \
-		(typeof (x))__r; \
+		(__typeof__ (x))__r; \
 	})
 
 #define _cast(x) ((HD_BCPIO *)x)
