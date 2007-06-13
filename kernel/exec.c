@@ -68,17 +68,18 @@ int thread_exec_new(struct thread *thread, struct inode *inode)
 	int ret;
 
 	/* load the binary
-	 * this normally allocates 2 mmas: .text and .data */
+	 * this normally allocates 2 mmas: .text and .data [0] [1] */
 	ret = aout_load(inode, map);
 	if (ret)
 		return ret;
 	
-	/* allocate stack */
+	/* allocate stack [2] */
 	map->m_mma[map->m_nmma] = mem_area_alloc_new(map,
 			USERMEM_STACK, 1, MMA_RW | MMA_STACK);
+	map->m_mma[map->m_nmma]->m_sizelim = USERMEM_STACKLIM;
 	map->m_nmma++;
 	
-	/* allocate heap */
+	/* allocate heap [3] */
 	map->m_mma[map->m_nmma] = mem_area_alloc_new(map,
 			USERMEM_HEAP, 1, MMA_RW | MMA_GROWS);
 	map->m_nmma++;
