@@ -52,15 +52,23 @@
  */
 
 #define	ENOENT		2		/* No such file or directory */
+#define	EINTR		4		/* Interrupted system call */
 #define	EIO		5		/* Input/output error */
 #define	ENOEXEC		8		/* Exec format error */
 #define	EBADF		9		/* Bad file descriptor */
 #define	EAGAIN		11		/* Try again */
 #define	ENOMEM		12		/* Cannot allocate memory */
+#define	EACCES		13		/* Permission denied */
 #define	EBUSY		16		/* Device busy */
 #define	ENODEV		19		/* Operation not supported by device */
+#define	ENOTDIR		20		/* Not a directory */
 #define	EISDIR		21		/* Is a directory */
 #define	EINVAL		22		/* Invalid argument */
+#define	ERANGE		34		/* Result too large or too small */
+
+/* non-blocking and interrupt i/o */
+#define	EWOULDBLOCK	EAGAIN		/* Operation would block */
+
 #define	ENOSYS		78		/* Function not implemented */
 
 /*
@@ -71,16 +79,13 @@
 
 #define	EPERM		1		/* Operation not permitted */
 #define	ESRCH		3		/* No such process */
-#define	EINTR		4		/* Interrupted system call */
 #define	ENXIO		6		/* Device not configured */
 #define	E2BIG		7		/* Argument list too long */
 #define	ECHILD		10		/* No child processes */
-#define	EACCES		13		/* Permission denied */
 #define	EFAULT		14		/* Bad address */
 #define	ENOTBLK		15		/* Block device required */
 #define	EEXIST		17		/* File exists */
 #define	EXDEV		18		/* Cross-device link */
-#define	ENOTDIR		20		/* Not a directory */
 #define	ENFILE		23		/* Too many open files in system */
 #define	EMFILE		24		/* Too many open files */
 #define	ENOTTY		25		/* Inappropriate ioctl for device */
@@ -94,11 +99,8 @@
 
 /* math software */
 #define	EDOM		33		/* Numerical argument out of domain */
-#define	ERANGE		34		/* Result too large or too small */
 
-/* non-blocking and interrupt i/o */
 #define	EAGAIN		35		/* Resource temporarily unavailable */
-#define	EWOULDBLOCK	EAGAIN		/* Operation would block */
 #define	EINPROGRESS	36		/* Operation now in progress */
 #define	EALREADY	37		/* Operation already in progress */
 
