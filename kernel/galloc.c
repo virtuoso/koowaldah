@@ -66,7 +66,7 @@ struct chunk_info {
 
 static struct slice_pool *galloc_sp[NPOOLS];
 
-static inline u32 *galloc_from_slice(u32 flags, size_t size)
+static __inline u32 *galloc_from_slice(u32 flags, size_t size)
 {
 	int i;
 	struct chunk_info *ci;
@@ -92,7 +92,7 @@ static inline u32 *galloc_from_slice(u32 flags, size_t size)
 	return NULL;
 }
 
-static inline u32 *galloc_from_pages(u32 flags, size_t size)
+static __inline u32 *galloc_from_pages(u32 flags, size_t size)
 {
 
 	int i;

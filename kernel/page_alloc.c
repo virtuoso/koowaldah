@@ -65,7 +65,7 @@
 
 #include <debug.h>
 
-static inline int idx_order(u32 index)
+static __inline int idx_order(u32 index)
 {
 	int i;
 	
@@ -229,7 +229,7 @@ struct page *__alloc_pages(u32 flags, struct mem_zone *zone, u32 order)
 /*
  * Allocate 2^order pages.
  */
-inline struct page *alloc_pages(u32 flags, u32 order)
+__inline struct page *alloc_pages(u32 flags, u32 order)
 {
 	struct mem_zone *zone = (flags & ZONE_USER) ? &user_zone : &boot_zone;
 	return __alloc_pages(flags, zone, order);
@@ -270,7 +270,7 @@ struct page *addr_to_page(u32 *addr)
 /*
  * Allocate 2^order pages and return page frame address of the first one.
  */
-inline u32 *get_pages(u32 flags, u32 order)
+__inline u32 *get_pages(u32 flags, u32 order)
 {
 	return page_to_addr(alloc_pages(flags, order));
 }
@@ -278,7 +278,7 @@ inline u32 *get_pages(u32 flags, u32 order)
 /*
  * Deallocate a page range by page frame number of its first page
  */
-inline void put_pages(void *addr)
+__inline void put_pages(void *addr)
 {
 	free_pages(addr_to_page(addr));
 }

@@ -93,7 +93,7 @@ static u32 bootup_fn = 0;
 /*
  * Dump said amount of event from the event log
  */
-static inline void __noprof dump_events(u32 t)
+static __inline void __noprof dump_events(u32 t)
 {
 	u32 i;
 
@@ -130,7 +130,7 @@ static void __noprof flush_events()
  * @func -- function address where we are at the moment
  * @type -- either entry or exit
  */
-static inline int __noprof start_trigger(void *func, u8 type) 
+static __inline int __noprof start_trigger(void *func, u8 type) 
 {
 	int i;
 
@@ -154,7 +154,7 @@ static inline int __noprof start_trigger(void *func, u8 type)
  * @func -- function address where we are at the moment
  * @type -- either entry or exit
  */
-static inline int __noprof stop_trigger(void *func, u8 type) 
+static __inline int __noprof stop_trigger(void *func, u8 type) 
 {
 	int i;
 
@@ -194,7 +194,7 @@ static void __noprof log_event(void *this_fn, void *call_site, u8 type)
 /*
  * Behave depending on current operation mode, the main part of FSM.
  */
-static inline void __noprof do_profile(void *this_fn, void *call_site, u8 type)
+static __inline void __noprof do_profile(void *this_fn, void *call_site, u8 type)
 {
 check_mode:
 	switch (mode) {
