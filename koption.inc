@@ -1,4 +1,4 @@
-KOPTIONS_START(MAIN, "General kernel configuration", 7)
+KOPTIONS_START(MAIN, "General kernel configuration", 9)
 KOPTION(
 	"BUILD_KERNEL",
 	"Do build the kernel?",
@@ -28,6 +28,21 @@ KOPTION(
 	"to the C compiler.",
 	KOPT_BOOL,
 	'N'
+),
+KOPTION(
+	"ROOTFS_DIR",
+	"Rootfs directory",
+	"Use this directory to build initial rootfs.",
+	KOPT_STRING,
+	"/tmp/rootfs"
+),
+KOPTION(
+	"LOCAL_LIBC",
+	"Use local libc and init",
+	"If you want to build initial root filesystem "
+	"from off-tree binaries (and C library), say 'N' here.",
+	KOPT_BOOL,
+	'Y'
 ),
 KOPTION_FULL(
 	"CPU_ARCH_I386",
