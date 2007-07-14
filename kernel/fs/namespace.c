@@ -30,7 +30,7 @@
 #include <error.h>
 #include <klist0.h>
 #include <thread.h>
-#include <mm.h>
+#include <galloc.h>
 #include <lib.h>
 #include <device.h>
 #include <super.h>
@@ -52,7 +52,7 @@ struct direntry *new_direntry(char *name, struct inode *inode)
 	if (!inode || !name)
 		bug();
 
-	dent = memory_alloc(sizeof(struct direntry));
+	dent = gobj_alloc(struct direntry);
 	if (!dent)
 		return NULL;
 	
@@ -75,7 +75,7 @@ void free_direntry(struct direntry *dent)
 	}
 
 	klist0_unlink(&dent->d_idlist);
-	memory_release(dent);
+	gobj_free(dent);
 }
 
 /*

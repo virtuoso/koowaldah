@@ -30,7 +30,7 @@
 #include <error.h>
 #include <lib.h>
 #include <klist0.h>
-#include <mm.h>
+#include <galloc.h>
 #include <device.h>
 #include <super.h>
 #include <inode.h>
@@ -46,7 +46,7 @@ struct file *new_file()
 {
 	struct file *file;
 
-	file = memory_alloc(sizeof(struct file));
+	file = gobj_alloc(struct file);
 	if (!file)
 		return NULL;
 
@@ -59,7 +59,7 @@ struct file *new_file()
 
 void kill_file(struct file *file)
 {
-	memory_release(file);
+	gobj_free(file);
 }
 
 int generic_open(struct file *file)

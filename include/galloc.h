@@ -37,4 +37,8 @@
 u32 * galloc(u32 flags, u32 size);
 void gfree(u32 * chunk);
 
+#define gobj_alloc(__t)                  \
+	((__t *) galloc(0, sizeof(__t)))
+#define gobj_free(__p) (gfree((u32 *)__p))
+
 #endif /* __GALLOC_H__ */

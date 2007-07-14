@@ -36,7 +36,6 @@
 #include <i386/asm.h>
 #include <page_alloc.h>
 #include <mm_zone.h>
-#include <mm.h>
 #include <textio.h>
 #include <error.h>
 

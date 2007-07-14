@@ -1,5 +1,4 @@
 SOURCES := \
-	klist.c \
 	klib.c \
 	vsnprintf.c \
 	bitmask.c \

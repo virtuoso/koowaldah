@@ -36,7 +36,7 @@
 
 
 #include <koowaldah.h>
-#include <mm.h>
+#include <galloc.h>
 #include <mm_zone.h>
 #include <textio.h>
 #include <thread.h>
@@ -137,7 +137,7 @@ struct thread *thread_create_user(thread_t func, char *name, void *data)
 
 	thread = thread_create(func, name, data);
 	if (thread) {
-		thread->map = memory_alloc(sizeof(struct mapping));
+		thread->map = gobj_alloc(struct mapping);
 		clone_map(thread->map, &root_map);
 	}
 

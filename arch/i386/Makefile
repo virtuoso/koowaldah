@@ -12,7 +12,6 @@ SOURCES := \
 	timer.c \
 	thread.c \
 	bootmem_zone.c \
-	mm.c \
 	paging.c \
 	segments.c \
 	asm/interrupt.S \

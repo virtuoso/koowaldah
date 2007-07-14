@@ -42,7 +42,6 @@
 #include <irq.h>
 #include <timers.h>
 #include <textio.h>
-#include <klist.h>
 #include <thread.h>
 #include <scheduler.h>
 #include <namespace.h>
@@ -491,62 +490,6 @@ static void test_galloc()
 #endif
 }
 
-static void test_klist()
-{
-#ifdef OPT_TEST_KLIST
-        struct klist * list = NULL;
-        struct klist * tmp;
-
-        kprintf("Testing the klist implementation\n");
-
-        kprintf("klist_is_empty(&list) = %d\n", klist_is_empty(&list));
-
-        kprintf("tmp = klist_new(), tmp->data = 1\n");
-        tmp = klist_new();
-        tmp->data = (void *)1;
-
-        kprintf("klist_add(tmp, list)\n");
-        klist_add(tmp, &list);
-
-        kprintf("klist_is_empty(&list) = %d\n", klist_is_empty(&list));
-
-        kprintf("Traversing the list\n");
-
-        if (!klist_is_empty(&list)) {
-                tmp = list->next;
-                do{
-                        kprintf("got entry, list->data = %d\n", (u32) list->data);
-                        klist_iter(&list);
-
-                }while (tmp != list);
-        }
-
-        kprintf("Done with traversing\n");
-
-        kprintf("adding 2 and 3\n");
-        tmp = klist_new();
-        tmp->data = (void *)2;
-        klist_add(tmp, &list);
-        tmp = klist_new();
-        tmp->data = (void *)3;
-        klist_add(tmp, &list);
-
-        kprintf("Traversing the list\n");
-
-        if (!klist_is_empty(&list)) {
-                tmp = list;
-                do {
-                        kprintf("got entry, list->data = %d\n", (u32) list->data);
-                        klist_iter(&list);
-
-                } while (tmp != list);
-        }
-
-        kprintf("Done with traversing\n");
-
-#endif /* OPT_TEST_KLIST */
-}
-
 static void test_kqueue()
 {
 #ifdef OPT_TEST_KQUEUE
@@ -859,7 +802,6 @@ void run_tests()
 	test_mm();
 	test_slice_alloc();
 	test_galloc();
-	test_klist();
 	test_kqueue();
 	test_threads();
 	test_pckbd();
