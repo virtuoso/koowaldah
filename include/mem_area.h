@@ -33,6 +33,7 @@
 #define __MEM_AREA_H__
 
 #include <page_alloc.h>
+#include <arch/memory.h>
 
 /*
  * Memory area holds a group of contiguous pages of a similar nature:
