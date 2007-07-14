@@ -34,7 +34,6 @@
 
 #include <koowaldah.h>
 #include <mm_zone.h>
-#include <mm.h>
 #include <bug.h>
 
 extern void arch_init_boot_zone(struct mem_zone *zone, struct mem_zone *user);

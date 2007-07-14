@@ -29,7 +29,7 @@
 #include <bug.h>
 #include <error.h>
 #include <klist0.h>
-#include <mm.h>
+#include <galloc.h>
 #include <device.h>
 #include <super.h>
 #include <inode.h>
@@ -72,7 +72,7 @@ struct inode *alloc_inode()
 {
 	struct inode *inode;
 	
-	inode = memory_alloc(sizeof(struct inode));
+	inode = gobj_alloc(struct inode);
 	if (!inode)
 		return NULL; /* XXX: ERRPTR again */
 
@@ -91,7 +91,7 @@ void kill_inode(struct inode *inode)
 		bug();
 
 	klist0_unlink(&inode->i_sblist);
-	memory_release(inode);
+	gobj_free(inode);
 }
 
 /*

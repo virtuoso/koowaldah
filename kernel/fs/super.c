@@ -28,7 +28,7 @@
 #include <koowaldah.h>
 #include <error.h>
 #include <klist0.h>
-#include <mm.h>
+#include <galloc.h>
 #include <device.h>
 #include <super.h>
 #include <inode.h>
@@ -55,7 +55,7 @@ struct superblock *alloc_super(dev_t dev)
 {
 	struct superblock *sb;
 
-	sb = memory_alloc(sizeof(struct superblock));
+	sb = gobj_alloc(struct superblock);
 	if (!sb)
 		return NULL; /* XXX: ERRPTR? */
 
@@ -81,7 +81,7 @@ int kill_super(struct superblock *sb)
 {
 	/* free sb->s_ilist */
 	klist0_unlink(&sb->s_blocks);
-	memory_release(sb);
+	gobj_free(sb);
 
 	return 0;
 }

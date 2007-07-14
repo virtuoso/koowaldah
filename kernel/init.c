@@ -39,7 +39,6 @@
 #include <irq.h>
 #include <timer.h>
 #include <textio.h>
-#include <klist.h>
 #include <lib.h>
 #include <kqueue.h>
 #include <thread.h>
@@ -61,7 +60,7 @@ void fs_init(void);
 void init_mem_info(void);
 void slice_init(void);
 void galloc_init(void);
-void mm_init(void); /* legacy mm */
+void paging_init(void);
 void kqueue_init(void);
 
 /* this is also needed only once */
@@ -80,7 +79,7 @@ void __init kern_start()
 	
 	/* memory allocation machinery */
 	init_mem_info();
-	mm_init();
+	paging_init();
 	slice_init();
 	galloc_init();
 
