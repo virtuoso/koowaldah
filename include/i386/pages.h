@@ -87,21 +87,23 @@ static __inline u32 __virt2physpg(u32 pgaddr)
 
 	__asm__ __volatile__(
 			"movl %1, %%eax\n"
-			"andl $0xffc00000, %%eax\n"
+			"andl %2, %%eax\n"    /* PGD_MASK */
 			"shrl $20, %%eax\n"
 			"movl %%cr3, %%ebx\n" /* page dir */
 			"addl %%ebx, %%eax\n"
 			"movl (%%eax), %%eax\n"
-			"andl $0xfffff000, %%eax\n"
+			"andl %3, %%eax\n"    /* NOPAGE_MASK */
 			"movl %%eax, %%ebx\n" /* page table */
 			"movl %1, %%eax\n"
-			"andl $0x003ff000, %%eax\n"
+			"andl %4, %%eax\n"    /* PGT_MASK */
 			"shrl $10, %%eax\n"
 			"lea (%%eax, %%ebx, 1), %%eax\n"
 			"movl (%%eax), %%eax\n"
-			"andl $0xfffff000, %%eax\n"
+			"andl %3, %%eax\n"    /* NOPAGE_MASK */
 			"movl %%eax, %0"
-			: "=r"(ret) : "m"(pgaddr) : "eax", "ebx"
+			: "=r"(ret) : "m"(pgaddr),
+			"i"(PGD_MASK), "i"(NOPAGE_MASK), "i"(PGT_MASK)
+			: "eax", "ebx"
 		);
 	return ret;
 }
@@ -117,24 +119,26 @@ static __inline u32 __virt2phys(u32 addr)
 
 	__asm__ __volatile__(
 			"movl %1, %%eax\n"
-			"andl $0xffc00000, %%eax\n"
+			"andl %2, %%eax\n"    /* PGD_MASK */
 			"shrl $20, %%eax\n"
 			"movl %%cr3, %%ebx\n" /* page dir */
 			"addl %%ebx, %%eax\n"
 			"movl (%%eax), %%eax\n"
-			"andl $0xfffff000, %%eax\n"
+			"andl %3, %%eax\n"    /* NOPAGE_MASK */
 			"movl %%eax, %%ebx\n" /* page table */
 			"movl %1, %%eax\n"
-			"andl $0x003ff000, %%eax\n"
+			"andl %4, %%eax\n"    /* PGT_MASK */
 			"shrl $10, %%eax\n"
 			"lea (%%eax, %%ebx, 1), %%eax\n"
 			"movl (%%eax), %%ebx\n"
-			"andl $0xfffff000, %%ebx\n"
+			"andl %3, %%ebx\n"    /* NOPAGE_MASK */
 			"movl %1, %%eax\n"
-			"andl $0x00000fff, %%eax\n"
+			"andl %5, %%eax\n"    /* PAGE_MASK */
 			"orl %%ebx, %%eax\n"
 			"movl %%eax, %0"
-			: "=r"(ret) : "m"(addr) : "eax", "ebx"
+			: "=r"(ret) : "m"(addr),
+			"i"(PGD_MASK), "i"(NOPAGE_MASK), "i"(PGT_MASK),
+			"i"(PAGE_MASK) : "eax", "ebx"
 		);
 	return ret;
 }
