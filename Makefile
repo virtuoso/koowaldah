@@ -36,9 +36,13 @@ endif
 
 all-local: kernel
 
+include/arch:
+	ln -sf $(ARCH) $@
+
 include/koptions.h: konfig/konfigure
 	konfig/konfigure
 	mkdir -p $(OBJDIR)
+	$(MAKE) include/arch
 	cat KONFIG
 
 konfig/konfigure: konfig/konfigure.c
@@ -92,6 +96,7 @@ clean-local:
 	$(MAKE) clean -C usr
 	$(MAKE) clean -C tests
 	rm -rf $(OBJDIR)
+	rm -f include/arch
 	rm -f kos-elf
 	rm -f include/koptions.h konfig/konfigure konfig/*.o konfig.mk
 
