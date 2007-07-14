@@ -10,6 +10,8 @@ endif
 MKBIMAGE = $(ROOTCMD) /bin/mkbimage
 
 all: rootfs.img
+	rm -f rootfs.tar
+
 clean:
 	-rm -f *.image device.map rootfs.tar rootfs.img
 	-rm -fr *.image1
@@ -22,5 +24,6 @@ $(IMG_NAME): rootfs.tar
 
 rootfs.tar: forge
 	cp -a ../kos-elf forge/boot
+	strip forge/boot/kos-elf
 	( cd forge; tar cf ../rootfs.tar ./* )
 
