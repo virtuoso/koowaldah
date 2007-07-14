@@ -3,15 +3,6 @@ ENTRY (multiboot_start)
 
 SECTIONS
 {
-
-	. = 0x10000;
-	kernel_stack = .;
-
-	. = 0x11000;
-	alloc_mem_start = .;
-	. = 0x9FFFF;
-	alloc_mem_end = .;
-
 	/* The kernel starts from 1 MB. */
 	. = 0x100000;
 

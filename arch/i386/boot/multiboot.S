@@ -32,7 +32,6 @@
 #include <i386/segments.h>
 
 .extern kern_start
-.extern kernel_stack
 .extern multiboot_info
 .globl multiboot_start
 
@@ -100,4 +99,7 @@ idt_desc:
 .globl idt_table
 idt_table:
 	.fill IDT_ENTRIES,8,0
+
+kernel_stack:
+	.fill 4096,1,0
 
