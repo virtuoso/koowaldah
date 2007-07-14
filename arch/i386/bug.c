@@ -1,7 +1,7 @@
 
 #include <koowaldah.h>
 #include <textio.h>
-#include <arch/asm.h>
+#include <i386/pages.h>
 #include <bug.h>
 #include <thread.h>
 #include <symtab.h>

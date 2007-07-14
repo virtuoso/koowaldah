@@ -1,9 +1,8 @@
-
 /*
- * include/page_alloc.h
+ * include/i386/memory.h
  *
- * Copyright (C) 2005 Alexey Zaytsev
- * 
+ * Copyright (C) 2006, 2007 Alexander Shishkin
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -13,14 +12,14 @@
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in the
  *    documentation and/or other materials provided with the distribution.
- * 3. Neither the name of the Koowaldah developers nor the names of their 
+ * 3. Neither the name of the Koowaldah developers nor the names of their
  *    contributors may be used to endorse or promote products derived from
  *    this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND
+ * THIS SOFTWARE IS PROVIDED BY THE DEVELOPERS AND CONTRIBUTORS ``AS IS'' AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE DEVELOPERS OR CONTRIBUTORS BE LIABLE
  * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
  * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
  * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
@@ -28,49 +27,23 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
- * 
+ *
  */
 
-#ifndef __PAGE_ALLOC_H__
-#define __PAGE_ALLOC_H__
+#ifndef __ARCH_MEMORY_H__
+#define __ARCH_MEMORY_H__
 
-#include <koowaldah.h>
-#include <klist0.h>
-#include <arch/pages.h>
+/* allow kernel to consume 1/KERN_ALLOWANCE of available physical memory */
+#define KERN_ALLOWANCE 8
 
-#define MAX_ORDER 11
+/* virtual addresses and limits for basic mem_areas */
+#define USERMEM_START    0x40000000
+#define USERMEM_STACK    0x80000000
+#define USERMEM_STACKLIM 0x0000f000
+#define USERMEM_HEAP     0x80000000
+#define USERMEM_HEAPLIM  0x00080000
+#define USERMEM_MBOX     0xa0000000
+#define in_kernel(p) ((u32)p < USERMEM_START ? 1 : 0)
 
-
-struct mem_zone;
-
-struct page {
-	u32 index;
-	unsigned long virt;
-	struct klist0_node list;
-	struct klist0_node area_list;
-	union {
-		u32 order;
-	} private;
-	struct mem_zone *zone;
-};
-
-struct page *alloc_pages(u32 flags, u32 order);
-u32 *get_pages(u32 flags, u32 order);
-void *page_to_addr(struct page *page);
-struct page *addr_to_page(u32 *page);
-
-#define alloc_page(flags) alloc_pages(flags, 0) 
-#define get_page(flags) get_pages(flags, 0)
-
-void free_pages(struct page *pg);
-void put_pages(void *addr);
-
-#define free_page(page) free_pages(page)
-#define put_page(addr) put_pages(addr)
-
-void print_alloc_info();
-
-#endif /* __MM_H__ */
-
-
+#endif
 

@@ -37,6 +37,7 @@
 #include <thread.h>
 #include <scheduler.h>
 #include <virtfs.h>
+#include <page_alloc.h>
 #include <slice.h>
 #include <khui/stat.h>
 #include <error.h>

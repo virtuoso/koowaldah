@@ -38,6 +38,7 @@
 
 #include <i386/i386.h>
 #include <i386/asm.h>
+#include <i386/segments.h>
 
 struct thread_context {
 	u32 stack_base;
@@ -54,5 +55,14 @@ struct thread_context {
 	unsigned long __r; \
 	__asm__ __volatile__("mov %%esp, %0" : "=m"(__r)); \
 	THREAD(__r); } )
+
+/* initial value for per-thread eflags register */
+#define EFLAGS_IF	0x0200
+
+#define reset_stack() \
+	do { \
+		CURRENT()->context.esp = (u32)CURRENT() - 4; \
+		root_tss.esp0 = (u32)CURRENT() - 4; \
+	} while (0);
 
 #endif
