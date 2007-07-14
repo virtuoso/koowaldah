@@ -93,15 +93,15 @@ static __inline u32 __virt2physpg(u32 pgaddr)
 			"addl %%ebx, %%eax\n"
 			"movl (%%eax), %%eax\n"
 			"andl $0xfffff000, %%eax\n"
-			"movl %%eax, %%ecx\n" /* page table */
+			"movl %%eax, %%ebx\n" /* page table */
 			"movl %1, %%eax\n"
 			"andl $0x003ff000, %%eax\n"
 			"shrl $10, %%eax\n"
-			"lea (%%eax, %%ecx, 1), %%eax\n"
+			"lea (%%eax, %%ebx, 1), %%eax\n"
 			"movl (%%eax), %%eax\n"
 			"andl $0xfffff000, %%eax\n"
 			"movl %%eax, %0"
-			: "=r"(ret) : "m"(pgaddr) : "eax", "ebx", "ecx"
+			: "=r"(ret) : "m"(pgaddr) : "eax", "ebx"
 		);
 	return ret;
 }
@@ -123,18 +123,18 @@ static __inline u32 __virt2phys(u32 addr)
 			"addl %%ebx, %%eax\n"
 			"movl (%%eax), %%eax\n"
 			"andl $0xfffff000, %%eax\n"
-			"movl %%eax, %%ecx\n" /* page table */
+			"movl %%eax, %%ebx\n" /* page table */
 			"movl %1, %%eax\n"
 			"andl $0x003ff000, %%eax\n"
 			"shrl $10, %%eax\n"
-			"lea (%%eax, %%ecx, 1), %%eax\n"
-			"movl (%%eax), %%edx\n"
-			"andl $0xfffff000, %%edx\n"
+			"lea (%%eax, %%ebx, 1), %%eax\n"
+			"movl (%%eax), %%ebx\n"
+			"andl $0xfffff000, %%ebx\n"
 			"movl %1, %%eax\n"
 			"andl $0x00000fff, %%eax\n"
-			"orl %%edx, %%eax\n"
+			"orl %%ebx, %%eax\n"
 			"movl %%eax, %0"
-			: "=r"(ret) : "m"(addr) : "eax", "ebx", "ecx", "edx"
+			: "=r"(ret) : "m"(addr) : "eax", "ebx"
 		);
 	return ret;
 }
