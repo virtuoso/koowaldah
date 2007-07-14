@@ -101,31 +101,28 @@ void pf_handler(struct register_frame frame)
 
 	if (dfault)
 		panic("DOUBLE PAGE FAULT");
-	else
-		kprintf("### PAGE FAULT\n");
 
 	dfault++;
 
 	if (fault_code & PFLT_USER) {
 		struct thread *t;
 		struct mapping *map;
-		/*char *stack = (char *) frame.prev_esp;*/
 		int dist, i;
 
 		/* chance is that we need to increase stack a bit */
 		t = CURRENT();
 		map = t->map;
-		kprintf("# address causing fault: %x\n", addr);
+		DPRINT("# address causing fault: %x\n", addr);
 		for (i = 0; i < map->m_nmma; i++) {
-			kprintf("# mma[%d]: %x..%x +/- %x\n", i,
+			DPRINT("# mma[%d]: %x..%x +/- %x\n", i,
 					map->m_mma[i]->m_start,
 					map->m_mma[i]->m_end,
 					map->m_mma[i]->m_sizelim);
 
 			dist = mem_area_is_hit(map->m_mma[i], addr);
 			if (dist && dist != 1) {
-				kprintf("The process hit the mma[%d]:\n", i);
-				kprintf(" * dist=%x, adding %d pages\n",
+				DPRINT("The process hit the mma[%d]:\n", i);
+				DPRINT(" * dist=%x, adding %d pages\n",
 						dist, (dist + PAGE_MASK) >> PAGE_SHIFT);
 
 				/* now fix up quickly, before anybody sees */
@@ -138,12 +135,11 @@ void pf_handler(struct register_frame frame)
 		}
 
 		/* couldn't recover */
-		kprintf("User stack:\n");
-
-		/*hex_dump(stack, MIN((u32)4096, (u32) (USERMEM_STACK+PAGE_SIZE -
-			frame.prev_esp)));*/
-	} else
+		kprintf("PAGE FAULT in user mode\n");
+	} else {
+		kprintf("PAGE FAULT in supervisor mode\n");
 		arch_display_stack();
+	}
 
 	/* try and decipher error code */
 	snprintf(errstr, PFLT_ERRMAX, "%s%s%s%s",

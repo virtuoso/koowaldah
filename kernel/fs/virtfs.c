@@ -114,7 +114,7 @@ struct direntry *virtfs_lookup(struct inode *inode, char *name)
 	struct virtfs_entry *ve;
 	struct virtfs_entry *root_ve = inode->i_private;
 
-	kprintf("# %s(): %s\n", __FUNCTION__, name);
+	DPRINT("# %s(): %s\n", __FUNCTION__, name);
 	if (!S_ISDIR(inode->i_mode))
 		return NULL; /* ERRPTR=-EINVAL */
 
