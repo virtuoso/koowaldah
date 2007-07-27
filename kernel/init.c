@@ -147,7 +147,7 @@ void __noprof kernel_main_thread(void *data)
 
 	for (;;) {
 		scheduler_yield();
-		__asm__ __volatile__("hlt");
+		arch_idle();
 	}
 
 	bug();
