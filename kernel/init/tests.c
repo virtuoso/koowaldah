@@ -38,7 +38,6 @@
 #include <galloc.h>
 #include <mm_zone.h>
 #include <arch/asm.h>
-#include <arch/isr.h>
 #include <irq.h>
 #include <timers.h>
 #include <textio.h>
