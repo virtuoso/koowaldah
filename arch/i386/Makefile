@@ -1,3 +1,8 @@
+# kernel images
+kos_nosyms := $(OBJDIR)/kos-elf.0
+kos_final  := $(PRJROOT)/kos-elf
+
+# architecture-specific kernel code
 SOURCES := \
 	boot/multiboot.S \
 	syscalls.c \
@@ -19,4 +24,7 @@ SOURCES := \
 	asm/context_switch.S
 
 include $(PRJROOT)/tools/main.mk
+
+LD_FLAGS := -T kernel-elf.lds -z defs
+include $(PRJROOT)/tools/link-kernel.mk
 

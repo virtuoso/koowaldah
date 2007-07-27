@@ -5,6 +5,9 @@ include tools/main.mk
 
 #### CONFIGURATION SECTION START ####
 
+ifeq ($(MK_CPU_ARCH_DUMMY),Y)
+ARCH := dummy
+endif
 ifeq ($(MK_CPU_ARCH_I386),Y)
 ARCH := i386
 endif
@@ -56,27 +59,18 @@ image:	kernel
 	$(MAKE) -C rootfs
 
 initfs:
-	$(MAKE) -C usr
-	echo usr/rootfs.o >> $(OBJDIR)/OBJECTS
+	$(MAKE) -C usr AS="$(CROSS_COMPILE)as"
+	echo $(PRJROOT)/usr/rootfs.o >> $(OBJDIR)/OBJECTS
 
 konfig: include/koptions.h
 
 SUBDIRS := arch/$(ARCH) kernel drivers/keyboard drivers/serial
-kernel-elf: deps objects printobjs
-	sh tools/symtab.sh /dev/null $(OBJDIR)/symtab.c
-	@$(call DO_CC,$(OBJDIR)/symtab.c,$(OBJDIR)/symtab.o,$(CC_FLAGS) -I$(PRJROOT)/include)
-	grep "$(OBJDIR)/symtab.o" $(OBJDIR)/OBJECTS || \
-		echo "$(OBJDIR)/symtab.o" >> $(OBJDIR)/OBJECTS
-	cat $(OBJDIR)/OBJECTS | \
-		xargs $(LD) -T arch/$(ARCH)/kernel-elf.lds -o kos-elf
 
-	sh tools/symtab.sh kos-elf $(OBJDIR)/symtab.c
-	@$(call DO_CC,$(OBJDIR)/symtab.c,$(OBJDIR)/symtab.o,$(CC_FLAGS) -I$(PRJROOT)/include)
-	grep "$(OBJDIR)/symtab.o" $(OBJDIR)/OBJECTS || \
-		echo "$(OBJDIR)/symtab.o" >> $(OBJDIR)/OBJECTS
-	cat $(OBJDIR)/OBJECTS | \
-		xargs $(LD) -T arch/$(ARCH)/kernel-elf.lds -o kos-elf
-	
+kernel-elf: deps objects printobjs
+	$(MAKE) link-kernel -C $(PRJROOT)/arch/$(ARCH) \
+		PRJROOT="$(PRJROOT)" \
+		OBJDIR="$(OBJDIR)"
+
 kernel: killobjs konfig initfs
 	$(MAKE) -R kernel-elf
 
@@ -97,7 +91,6 @@ clean-local:
 	$(MAKE) clean -C tests
 	rm -rf $(OBJDIR)
 	rm -f include/arch
-	rm -f kos-elf
 	rm -f include/koptions.h konfig/konfigure konfig/*.o konfig.mk
 
 .PHONY: konfig tests image initfs kernel-elf
