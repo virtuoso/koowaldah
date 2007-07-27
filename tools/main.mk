@@ -73,7 +73,6 @@ deps: $(DEPS)
 			CC=$(CC) \
 			LD=$(LD) \
 			ASM=$(ASM) \
-			CC_FLAGS="$(CC_FLAGS)" \
 			NODEPS=0 \
 			-C $$d; \
 	done
@@ -87,7 +86,6 @@ objects: $(OBJECTS) $(SUBDIRS)
 			CC=$(CC) \
 			LD=$(LD) \
 			ASM=$(ASM) \
-			CC_FLAGS="$(CC_FLAGS)" \
 			NODEPS=0 \
 			-C $$d; \
 		if [ "$$?" != "0" ]; then \
@@ -99,7 +97,7 @@ objects: $(OBJECTS) $(SUBDIRS)
 #          files from $(OBJDIR) and calls itself for all
 #          subdirectories
 clean:
-	@rm -f $(OBJECTS) $(DEPS)
+	@rm -f $(OBJECTS) $(DEPS) $(CLEAN_FILES)
 	@for d in $(SUBDIRS); do \
 		$(MAKE) clean \
 			PRJROOT=$(PRJROOT) \
@@ -107,7 +105,6 @@ clean:
 			CC=$(CC) \
 			LD=$(LD) \
 			ASM=$(ASM) \
-			CC_FLAGS="$(CC_FLAGS)" \
 			NODEPS=1 \
 			-C $$d; \
 	done
@@ -164,4 +161,4 @@ killobjs:
 debugmakevars:
 	$(foreach v,$(V),$(warning $v = $($v)))
 
-.PHONY: build build-local deps objects subdirs-deps subdirs-build clean clean-local printobjs init killobjs debugmakevars
+.PHONY: build build-local all-local deps objects subdirs-deps subdirs-build clean clean-local printobjs init killobjs debugmakevars
