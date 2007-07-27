@@ -41,11 +41,14 @@ void i386_display_regs(struct register_frame frame);
 void i386_dump_stack(u32 * stack);
 void local_irq_disable();
 
+#define arch_idle() \
+	__asm__ __volatile__ ("hlt");
+
 #define arch_halt() \
 	do { 					\
 		for (;;) { 			\
 			local_irq_disable(); 	\
-			__asm__ __volatile__ ("hlt"); 	\
+			arch_idle();            \
 		} 				\
 	} while (0)
 
