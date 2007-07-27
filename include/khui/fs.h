@@ -32,7 +32,7 @@
 #ifndef __KHUI_FS_H__
 #define __KHUI_FS_H__
 
-#define FILENAME_MAX (size_t)256
+#define FILENAME_MAX (__size_t)256
 
 struct udirentry {
 	char name[FILENAME_MAX];
