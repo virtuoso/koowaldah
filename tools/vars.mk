@@ -8,7 +8,7 @@ HOSTCC          = gcc
 
 CC              = $(CROSS_COMPILE)gcc
 ifndef CC_FLAGS
-CC_FLAGS        = -Werror -Wall -ffreestanding -nostdinc -nostdlib -g -O2 -std=gnu89 -fno-strict-aliasing -funsigned-bitfields -funsigned-char -fno-asm -fno-builtin -fno-cond-mismatch -fno-force-addr -finline-limit=1200 -fno-omit-frame-pointer
+CC_FLAGS        = -Werror -Wall -ffreestanding -nostdinc -nostdlib -g -O2 -std=gnu89 -fno-strict-aliasing -funsigned-bitfields -funsigned-char -fno-asm -fno-builtin -fno-cond-mismatch -fno-force-addr -finline-limit=1200 -fno-omit-frame-pointer $(shell [ ! -f $(PRJROOT)/confdefs ] || cat $(PRJROOT)/confdefs)
 endif
 
 CC_FLAGS_KERN  := $(CC_FLAGS)
