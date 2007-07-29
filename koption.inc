@@ -1,4 +1,4 @@
-KOPTIONS_START(MAIN, "General kernel configuration", 9)
+KOPTIONS_START(MAIN, "General kernel configuration", 10)
 KOPTION(
 	"BUILD_KERNEL",
 	"Do build the kernel?",
@@ -45,12 +45,22 @@ KOPTION(
 	'Y'
 ),
 KOPTION_FULL(
+	"CPU_ARCH_DUMMY",
+	"Target CPU architecture is 'dummy'",
+	"Select this if you want to build a kernel for "
+	"a non-existent architecture called 'dummy'. It is "
+	"really a user-mode target.",
+	KOPT_BOOL,
+	CONFLICTS("CPU_ARCH_POWERPC", "CPU_ARCH_ARM", "CPU_ARCH_I386"),
+	'Y'
+),
+KOPTION_FULL(
 	"CPU_ARCH_I386",
 	"Target CPU architecture is i386",
 	"Select this if you want to build a kernel for "
 	"i386 target.",
 	KOPT_BOOL,
-	CONFLICTS("CPU_ARCH_POWERPC", "CPU_ARCH_ARM"),
+	CONFLICTS("CPU_ARCH_POWERPC", "CPU_ARCH_ARM", "CPU_ARCH_DUMMY"),
 	'Y'
 ),
 KOPTION_FULL(
@@ -59,7 +69,7 @@ KOPTION_FULL(
 	"Select this if you want to build a kernel for "
 	"POWER CPU family target.",
 	KOPT_BOOL,
-	CONFLICTS("CPU_ARCH_I386", "CPU_ARCH_ARM"),
+	CONFLICTS("CPU_ARCH_I386", "CPU_ARCH_ARM", "CPU_ARCH_DUMMY"),
 	'Y'
 ),
 KOPTION_FULL(
@@ -68,7 +78,7 @@ KOPTION_FULL(
 	"Select this if you want to build a kernel for "
 	"ARM CPU family target.",
 	KOPT_BOOL,
-	CONFLICTS("CPU_ARCH_I386", "CPU_ARCH_POWERPC"),
+	CONFLICTS("CPU_ARCH_I386", "CPU_ARCH_POWERPC", "CPU_ARCH_DUMMY"),
 	'Y'
 ),
 KOPTIONS_END
