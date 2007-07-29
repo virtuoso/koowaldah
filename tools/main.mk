@@ -161,4 +161,4 @@ killobjs:
 debugmakevars:
 	$(foreach v,$(V),$(warning $v = $($v)))
 
-.PHONY: build build-local all-local deps objects subdirs-deps subdirs-build clean clean-local printobjs init killobjs debugmakevars
+.PHONY: build build-local all-local deps objects subdirs-deps subdirs-build clean clean-local printobjs init killobjs debugmakevars pre-compile

@@ -62,7 +62,13 @@ initfs:
 	$(MAKE) -C usr AS="$(CROSS_COMPILE)as"
 	echo $(PRJROOT)/usr/rootfs.o >> $(OBJDIR)/OBJECTS
 
+pre-compile:
+	$(MAKE) pre-compile -C arch/$(ARCH) \
+		PRJROOT="$(PRJROOT)" \
+		OBJDIR="$(OBJDIR)"
+
 konfig: include/koptions.h
+	$(MAKE) pre-compile
 
 SUBDIRS := arch/$(ARCH) kernel drivers/keyboard drivers/serial
 
