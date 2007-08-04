@@ -64,6 +64,9 @@ extern u8 kernel_started;
 #endif
 
 #define __init   __attribute__((section(".init")))
+#define __data   __attribute__((section(".data")))
+#define __alias(x) __attribute__((weak,alias(#x)))
+#define ALIAS(x, p) extern __typeof__(p) x __alias(p)
 #define __future __attribute__((unused))
 #define __inline __attribute__((always_inline)) __inline__
 #define __noprof __attribute__((no_instrument_function))
