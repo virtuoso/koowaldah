@@ -17,7 +17,10 @@ $(PRJROOT)/confdefs: tests/ucontext_size.c tests/page_shift.c
 
 # architecture-specific kernel code
 SOURCES := \
-	   symbols.c
+	   late_init.c \
+	   memory.c    \
+	   threads.c   \
+	   machine.c
 
 include $(PRJROOT)/tools/main.mk
 
