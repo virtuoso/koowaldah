@@ -49,8 +49,8 @@ static void __noreturn user_thread(void *data)
 	 * as start_user() never returns */
 	reset_stack();
 	start_user(USERMEM_START,
-			USERMEM_STACK + PAGE_SIZE - 4,
-			USERMEM_STACK + PAGE_SIZE - 4,
+			USERMEM_STACK - 4,
+			USERMEM_STACK - 4,
 			0);
 	bug();
 }
