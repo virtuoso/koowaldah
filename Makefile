@@ -1,6 +1,9 @@
 PRJROOT := $(shell echo $(CURDIR))
 DESTDIR ?= /tmp
 
+# GNU make's default rules make debugging lots harder
+MAKEFLAGS      := --no-print-directory -rR
+
 include tools/main.mk
 
 #### CONFIGURATION SECTION START ####
@@ -42,7 +45,7 @@ all-local: kernel
 include/arch:
 	ln -sf $(ARCH) $@
 
-include/koptions.h: konfig/konfigure
+include/koptions.h $(PRJROOT)/konfig.mk: konfig/konfigure
 	konfig/konfigure
 	mkdir -p $(OBJDIR)
 	$(MAKE) include/arch

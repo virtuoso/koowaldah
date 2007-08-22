@@ -3,7 +3,7 @@
 
 # Defines rules and functions that do most of the work.
 
--include konfig.mk
+-include $(PRJROOT)/konfig.mk
 include $(PRJROOT)/tools/vars.mk
 include $(PRJROOT)/tools/verbosity.mk
 
