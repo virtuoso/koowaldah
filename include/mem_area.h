@@ -100,19 +100,26 @@ static __inline int mem_area_is_hit(struct mem_area *mma, u32 addr)
 {
 	if (addr >= mma->m_start && addr < mma->m_end)
 		return 1; /* exact hit */
+	return 0;
+}
 
+/* returns absolute offset */
+static __inline unsigned long mem_area_hit_offset(struct mem_area *mma, u32 addr)
+{
 	/* check if we still hit within the size limit */
 	if (mma->m_flags & MMA_STACK)
 		return ((addr >= mma->m_end - mma->m_sizelim) &&
-			(addr < mma->m_end) ? (mma->m_start - addr) : 0);
+			(addr < mma->m_end) ? (mma->m_start - addr)
+			: NOPAGE_ADDR);
 
 	if (mma->m_flags & MMA_GROWS)
 		return ((addr >= mma->m_start) &&
 			(addr < mma->m_start + mma->m_sizelim) ? 
-			(addr - mma->m_end) : 0);
+			(addr - mma->m_end)
+			: NOPAGE_ADDR);
 
 	/* miss */
-	return 0;
+	return NOPAGE_ADDR;
 }
 
 /* XXX: dynamic arrays will obsolete this */
