@@ -119,18 +119,22 @@ void pf_handler(struct register_frame frame)
 					map->m_mma[i]->m_end,
 					map->m_mma[i]->m_sizelim);
 
-			dist = mem_area_is_hit(map->m_mma[i], addr);
-			if (dist && dist != 1) {
-				DPRINT("The process hit the mma[%d]:\n", i);
-				DPRINT(" * dist=%x, adding %d pages\n",
+			if (!mem_area_is_hit(map->m_mma[i], addr)) {
+				dist = mem_area_hit_offset(map->m_mma[i], addr);
+				if (dist != -1) {
+					if(!dist)
+						dist += PAGE_SIZE;
+					DPRINT("The process hit the mma[%d]:\n", i);
+					DPRINT(" * dist=%x, adding %d pages\n",
 						dist, (dist + PAGE_MASK) >> PAGE_SHIFT);
 
-				/* now fix up quickly, before anybody sees */
-				mem_area_grow(map->m_mma[i],
-					     	(dist + PAGE_MASK)
-						>> PAGE_SHIFT);
-				dfault--;
-				return;
+					/* now fix up quickly, before anybody sees */
+					mem_area_grow(map->m_mma[i],
+							(dist + PAGE_MASK)
+							>> PAGE_SHIFT);
+					dfault--;
+					return;
+				}
 			}
 		}
 
