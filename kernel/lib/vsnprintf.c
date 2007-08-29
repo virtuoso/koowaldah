@@ -103,7 +103,7 @@ int __noprof vsnprintf(char *buf, size_t size, const char *format, va_list args)
 	int fill_num = 0;
 	/* args */
 	long a_x;
-	/*char a_c;*/
+	char a_c;
 	char sbuf[12]; /* <-- this is evil also */
 	char *a_s;
 
@@ -162,12 +162,10 @@ reswitch:
 				fill_tag = fill_num = 0;
 				break;
 
-#if 0
 			case 'c':
-				a_c = va_arg(args, char);
+				a_c = va_arg(args, int);
 				*pos++ = a_c;
 				break;
-#endif
 
 			case 's':
 				a_s = va_arg(args, char *);
