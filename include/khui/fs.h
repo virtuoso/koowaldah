@@ -32,6 +32,8 @@
 #ifndef __KHUI_FS_H__
 #define __KHUI_FS_H__
 
+#include <khui/types.h>
+
 #define FILENAME_MAX (__size_t)256
 
 struct udirentry {
