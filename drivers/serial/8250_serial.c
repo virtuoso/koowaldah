@@ -194,6 +194,10 @@ static void serial_8250_intr(u32 number)
 		DPRINT("Got byte: 0x%x\n", c);
 
 		if (read_queue) {
+			/* XXX Should go as soon as we get proper tty support. */
+			kprintf("%c", c);
+			if (c == '\r')
+				kprintf("\n");
 			kqueue_push(read_queue, (char *)&c, 1);
 			scheduler_enqueue(&tq);
 		}
