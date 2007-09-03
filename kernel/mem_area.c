@@ -70,7 +70,7 @@ struct mem_area *mem_area_alloc(struct mapping *map, unsigned long start,
 
 	/* initialize mma structure */
 	mma->m_map   = map;
-	mma->m_start = 
+	mma->m_start =
 	mma->m_end   = start;
 	mma->m_pages = 0;
 	mma->m_users = 1;
@@ -81,15 +81,15 @@ struct mem_area *mem_area_alloc(struct mapping *map, unsigned long start,
 		return mma;
 
 	klist0_reparent(page_list, &mma->m_plist);
-	
+
 	klist0_for_each(tmp, &mma->m_plist) {
-		struct page *pg = 
+		struct page *pg =
 			klist0_entry(tmp, struct page, area_list);
 		if (mma->m_flags & MMA_STACK)
-			map_page(map, mma->m_start - PAGE_SIZE, 
+			map_page(map, mma->m_start - PAGE_SIZE,
 					(u32) page_to_addr(pg), mma->m_prot);
 		else
-			map_page(map, mma->m_end, 
+			map_page(map, mma->m_end,
 					(u32) page_to_addr(pg), mma->m_prot);
 		__mem_area_add_page(mma, pg);
 	}
@@ -107,7 +107,7 @@ void mem_area_attach(struct mapping *dst, struct mem_area *mma)
 		kprintf("Cannot add more mem_areas to this map\n");
 		return;
 	}
-	
+
 	dst->m_mma[dst->m_nmma++] = mma;
 	mma->m_users++;
 
@@ -189,7 +189,7 @@ void mem_area_unmap(struct mem_area *mma, struct mapping *map, int free)
 
 	while (tmp != &mma->m_plist) {
 		pg = klist0_entry(tmp, struct page, area_list);
-	
+
 		unmap_page(map, pg->virt);
 		dtmp = tmp->next;
 
@@ -199,7 +199,7 @@ void mem_area_unmap(struct mem_area *mma, struct mapping *map, int free)
 		}
 		tmp = dtmp;
 	}
-	
+
 	slice_free(mma, mma_pool);
 }
 
@@ -211,7 +211,7 @@ void mem_area_kill(struct mem_area *mma, struct mapping *map)
 
 	while (tmp != &mma->m_plist) {
 		pg = klist0_entry(tmp, struct page, area_list);
-	
+
 		unmap_page(map, pg->virt);
 		pg->virt = NOPAGE_ADDR;
 		dtmp = tmp->next;
@@ -219,7 +219,7 @@ void mem_area_kill(struct mem_area *mma, struct mapping *map)
 		free_pages(pg);
 		tmp = dtmp;
 	}
-	
+
 	slice_free(mma, mma_pool);
 }
 
