@@ -160,7 +160,7 @@ struct mem_area *mem_area_clone(struct mapping *map, struct mem_area *mma)
 	struct page *pg1, *pg2;
 
 	ret = mem_area_alloc_new(map, mma->m_start, mma->m_pages,
-			mma->m_flags);
+			mma->m_flags & ~MMA_STACK);
 	if (!ret)
 		return NULL;
 
@@ -175,6 +175,8 @@ struct mem_area *mem_area_clone(struct mapping *map, struct mem_area *mma)
 				(void *)page_to_addr(pg1), PAGE_SIZE);
 		tmp2 = tmp2->next;
 	}
+
+	ret->m_sizelim = mma->m_sizelim;
 
 	return ret;
 }
