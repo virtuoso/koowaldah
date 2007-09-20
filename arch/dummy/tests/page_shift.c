@@ -30,7 +30,7 @@
  */
 
 #include <stdio.h>
-#include <sys/user.h>
+#include <asm/page.h>
 
 int main()
 {
