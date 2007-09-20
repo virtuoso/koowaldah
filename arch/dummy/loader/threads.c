@@ -61,11 +61,10 @@ EXPORT void dummy_create_thread(void *threadptr, ucontext_t *ucp,
 {
 	unsigned long stackaddr = (unsigned long)threadptr & 0xfffff000;
 
-	getcontext(&ucp_start);
-	getcontext(ucp);
+	memset(ucp, 0, sizeof(ucontext_t));
 	ucp->uc_stack.ss_sp = (void *)stackaddr;
 	ucp->uc_stack.ss_size = (unsigned long)threadptr - stackaddr;
-	ucp->uc_link = &ucp_start;
+	ucp->uc_link = NULL;
 	makecontext(ucp, func, 1, data);
 }
 
@@ -77,10 +76,9 @@ EXPORT void dummy_start(ucontext_t *ucp)
 {
 	int r;
 
-	r = swapcontext(&ucp_start, ucp);
+	r = setcontext(ucp);
 	if (r == -1)
-		perror("swapcontext");
-	printf("Returning\n");
+		perror("setcontext");
 }
 
 /*
@@ -92,11 +90,10 @@ EXPORT void dummy_switch_context(ucontext_t *ucp_from, ucontext_t *ucp_to)
 {
 	int r;
 
-	ucp_to->uc_link = ucp_from;
+	ucp_to->uc_link = NULL;
 	r = swapcontext(ucp_from, ucp_to);
 	if (r == -1)
 		perror("swapcontext");
-	printf("Returning\n");
 }
 
 /*
