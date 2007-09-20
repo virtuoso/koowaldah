@@ -37,8 +37,12 @@
 #define EXPORT __attribute__((used,visibility("protected")))
 #define PRIVATE __attribute__((visibility("internal")))
 
+extern void *H;
+
 int init_memory();
 int dummy_get_mem_size();
+
+void init_timers(void);
 
 #endif
 

@@ -1,7 +1,7 @@
 # dummy architecture provides a so-called loader which is
 # a normal host executable
 loader     := $(PRJROOT)/kos-loader
-local_OBJS := $(OBJDIR)/main.oH $(OBJDIR)/memory.oH $(OBJDIR)/threads.oH
+local_OBJS := $(OBJDIR)/main.oH $(OBJDIR)/memory.oH $(OBJDIR)/threads.oH $(OBJDIR)/timer.oH
 
 # kernel images
 kos_nosyms := $(OBJDIR)/kos-shared.0
