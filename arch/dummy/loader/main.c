@@ -60,6 +60,12 @@ EXPORT void dummy_bug(const char *file, const int line)
 	dummy_abort();
 }
 
+EXPORT void dummy_putc(char c)
+{
+	putchar(c);
+	fflush(stdout);
+}
+
 PRIVATE int main(int argc, const char **argv)
 {
 	if (argc != 2) {
