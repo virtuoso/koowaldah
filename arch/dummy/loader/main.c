@@ -31,6 +31,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <unistd.h>
 #include <dlfcn.h>
 #include <sys/mman.h>
 #include "loader.h"
@@ -64,6 +65,11 @@ EXPORT void dummy_putc(char c)
 {
 	putchar(c);
 	fflush(stdout);
+}
+
+EXPORT void dummy_delay()
+{
+	usleep(5000);
 }
 
 PRIVATE int main(int argc, const char **argv)

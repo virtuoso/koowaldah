@@ -38,8 +38,9 @@
 
 void dummy_abort();
 void dummy_bug(const char *file, const int line);
+void dummy_delay();
 
-#define arch_idle() do {} while (0)
+#define arch_idle() dummy_delay()
 
 #define arch_halt() \
 	dummy_abort();
