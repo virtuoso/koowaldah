@@ -37,7 +37,7 @@ u64 __volatile__ jiffies;
 /* IO */
 void console_put_char(char c)
 {
-	putchar(c);
+	dummy_putc(c);
 }
 
 void mach_start()

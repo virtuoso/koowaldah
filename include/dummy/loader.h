@@ -49,7 +49,7 @@ int dummy_get_mem_size();
 /*
  * this comes right from libc: outputs a single char to stdout
  */
-extern void putchar(char);
+extern void dummy_putc(char);
 
 /*
  * stub to make a real noreturn function
