@@ -31,6 +31,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <ucontext.h>
 #include <setjmp.h>
 #include "loader.h"
@@ -43,8 +44,6 @@
 
 /* Warning: this conflicts with kernel definition */
 typedef void (*thread_t)(void);
-
-static ucontext_t ucp_start;
 
 /*
  * Create a thread context
@@ -106,8 +105,9 @@ EXPORT void dummy_start_user(unsigned long pc, unsigned long sp)
 	jmp_buf env;
 
 	setjmp(env);
-	env[0].__jmpbuf[JB_SP] = sp;
-	env[0].__jmpbuf[JB_PC] = pc;
+#warning Messing with jmpbuf is a bad idea
+	env[0].__jmpbuf[0] = sp;
+	env[0].__jmpbuf[1] = pc;
 	longjmp(env, 0);
 }
 
