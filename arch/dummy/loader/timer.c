@@ -1,5 +1,5 @@
 /*
- * arch/dummy/loader/main.c
+ * arch/dummy/loader/timer.c
  *
  * Copyright (C) 2007 Alexander Shishkin
  *
@@ -29,79 +29,59 @@
  * SUCH DAMAGE.
  */
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <unistd.h>
-#include <dlfcn.h>
-#include <sys/mman.h>
-#include "loader.h"
-
 /*
- * This is 'dummy' architecture realm for koowaldah, that is,
- * user-mode kernel execution helper/loader/emulator.
+ * Timer function emulation: use a SIGALRM handler to simulate ticks.
  */
 
-void *H;                   /* kernel so handle */
-void (*kern_start)();      /* kernel entry point */
+#include <stdlib.h>
+#include <signal.h>
+#include <dlfcn.h>
+#include <sys/time.h>
+#include "loader.h"
 
-EXPORT void __attribute__((noreturn))  dummy_abort()
+typedef int (*inthandler_t)(void);
+
+static inthandler_t timer_handler = NULL;
+
+static void sigalrm_handler(int signum);
+
+static void install_handler()
 {
-	/* clean up */
-	exit(EXIT_SUCCESS);
+	struct itimerval t;
+
+	signal(SIGALRM, sigalrm_handler);
+
+	t.it_interval.tv_sec =
+	t.it_value.tv_sec = 0;
+
+	t.it_interval.tv_usec =
+	t.it_value.tv_usec = 5000;
+
+	setitimer(ITIMER_REAL, &t, NULL);
 }
 
-EXPORT void dummy_noreturn()
+static void sigalrm_handler(int signum)
 {
-	printf("NORETURN!\n");
+	if (!timer_handler)
+		return;
+
+	(*timer_handler)();
+
+	signal(SIGALRM, sigalrm_handler);
 }
 
-EXPORT void dummy_bug(const char *file, const int line)
+/*
+ * Find timer "interrupt handler" function in kernel .so
+ * and setup timer function
+ */
+PRIVATE void init_timers(void)
 {
-	printf("Kernel bug at %s:%d\n", file, line);
-	dummy_abort();
-}
-
-EXPORT void dummy_putc(char c)
-{
-	putchar(c);
-	fflush(stdout);
-}
-
-EXPORT void dummy_delay()
-{
-	usleep(5000);
-}
-
-PRIVATE int main(int argc, const char **argv)
-{
-	if (argc != 2) {
-		fprintf(stderr, "Missing argument: kernel shared object\n");
-		exit(EXIT_FAILURE);
-	}
-
-	printf("Starting koowaldah 'dummy' execution realm\n");
-
-	if (init_memory()) {
-		fprintf(stderr, "Can't allocate %d bytes of memory.\n",
-				dummy_get_mem_size());
-		exit(EXIT_FAILURE);
-	}
-
-	H = dlopen(argv[1], RTLD_LAZY | RTLD_GLOBAL);
-	if (!H) {
+	timer_handler = dlsym(H, "timer_handler");
+	if (!timer_handler) {
 		perror(dlerror());
 		exit(EXIT_FAILURE);
 	}
 
-	kern_start = dlsym(H, "kern_start");
-	if (!kern_start) {
-		perror(dlerror());
-		exit(EXIT_FAILURE);
-	}
-
-	init_timers();
-	kern_start();
-
-	return 0;
+	install_handler();
 }
 

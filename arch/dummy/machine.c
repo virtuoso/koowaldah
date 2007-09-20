@@ -30,6 +30,7 @@
  */
 
 #include <koowaldah.h>
+#include <machine.h>
 #include <dummy/loader.h>
 
 u64 __volatile__ jiffies;
@@ -55,5 +56,19 @@ int register_irq_handler(u32 number, void (*handler)(u32 number))
 
 void unregister_irq_handler(u32 number)
 {
+}
+
+extern void update_timers();
+
+/*
+ * First of all, we should maintain internal timer(s)
+ */
+int timer_handler(void)
+{
+        jiffies++;
+        /*XXX: if (mach_state == MACH_RUNNING)*/
+                update_timers();
+
+	return 0;
 }
 
