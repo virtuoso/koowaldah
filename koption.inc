@@ -11,7 +11,7 @@ KOPTION(
 	"Custom version suffix",
 	"Append a custom string to the kernel version.",
 	KOPT_STRING,
-	"-ash"
+	""
 ),
 KOPTION(
 	"GLOBAL_DEBUG",
