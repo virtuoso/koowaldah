@@ -66,9 +66,9 @@ static __inline char *kstrchr(char *str, char c)
 	return p;
 }
 
-static __inline size_t kstrlen(char *str)
+static __inline size_t kstrlen(const char *str)
 {
-	char *p = str;
+	const char *p = str;
 
 	while ('\0' != *(++p));
 	return p - str;
