@@ -58,13 +58,6 @@ konfig/konfigure: konfig/konfigure.c
 	$(HOSTCC) -Wall -Ikonfig -I. -o konfig/kuser.o -c konfig/kuser.c
 	$(HOSTCC) -o $@ konfig/*.o
 
-image:	kernel
-	$(MAKE) -C rootfs
-
-initfs:
-	$(MAKE) -C usr AS="$(CROSS_COMPILE)as"
-	echo $(PRJROOT)/usr/rootfs.o >> $(OBJDIR)/OBJECTS
-
 pre-compile:
 	$(MAKE) pre-compile -C arch/$(ARCH) \
 		PRJROOT="$(PRJROOT)" \
@@ -73,7 +66,7 @@ pre-compile:
 konfig: include/koptions.h
 	$(MAKE) pre-compile
 
-SUBDIRS := arch/$(ARCH) kernel drivers/keyboard drivers/serial
+SUBDIRS := arch/$(ARCH) kernel drivers/keyboard drivers/serial usr
 
 kernel-elf: deps objects printobjs
 	$(MAKE) link-kernel -C $(PRJROOT)/arch/$(ARCH) \
@@ -96,7 +89,6 @@ retest:
 
 clean-local:
 	$(MAKE) clean -C rootfs
-	$(MAKE) clean -C usr
 	$(MAKE) clean -C tests
 	rm -rf $(OBJDIR)
 	rm -f include/arch
