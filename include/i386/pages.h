@@ -69,6 +69,10 @@
 	 (attrs)                   \
 	)
 
+/* Extract parts of page table/page directory entries */
+#define PE_ADDR(pe) (pe & 0xFFFFF000)
+#define PE_FLAGS(pe) (pe & 0x00000FFF)
+
 /* page fault error code bits                                        */
 /*      name      bit         cause / otherwise                      */
 #define PFLT_PROT  (0x01)  /* protection violation, oth. non-present */

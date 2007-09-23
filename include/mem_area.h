@@ -136,6 +136,7 @@ struct mapping {
 
 extern struct mapping root_map;
 
+void display_map(struct mapping *map);
 void clone_map(struct mapping *dst, struct mapping *map);
 void switch_map(struct mapping *from, struct mapping *to);
 void map_page(struct mapping *map, u32 virt, u32 phys, u16 flags);
