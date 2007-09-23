@@ -90,7 +90,7 @@ static size_t __noprof sprint_int_unsigned(char *buf, unsigned long i, char base
 int __noprof vsnprintf(char *buf, size_t size, const char *format, va_list args)
 {
 	/* format string length */
-	int flen = kstrlen((char *)format) + 1;
+	int flen = kstrlen(format) + 1;
 	/* current position on the format string */
 	char *cur = (char *)format;
 	/* previous position on the format string */
