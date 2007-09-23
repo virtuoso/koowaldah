@@ -140,6 +140,7 @@ void pf_handler(struct register_frame frame)
 
 		/* couldn't recover */
 		kprintf("PAGE FAULT in user mode\n");
+		display_map(map);
 	} else {
 		kprintf("PAGE FAULT in supervisor mode\n");
 		arch_display_stack();

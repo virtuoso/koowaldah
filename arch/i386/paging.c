@@ -45,6 +45,60 @@ struct mapping root_map;
 u32 phys_mem;
 u32 phys_pgs;
 
+static __inline void display_pe_flags(int flags)
+{
+	if (flags & PTF_PRESENT)
+		kprintf("PRESENT ");
+
+	if (flags & PTF_RW)
+		kprintf("RW ");
+
+	if (flags & PTF_USER)
+		kprintf("USER ");
+
+	if (flags & PTF_PWT)
+		kprintf("PTW ");
+
+	if (flags & PTF_PCD)
+		kprintf("PCD ");
+
+	if (flags & PTF_ACCESSED)
+		kprintf("ACCESSED ");
+
+	if (flags & PTF_DIRTY)
+		kprintf("DIRTY ");
+
+	if (flags & PTF_PGSIZE)
+		kprintf("PGSIZE ");
+
+	if (flags & PTF_GLOBAL)
+		kprintf("GLOBAL ");
+}
+
+void display_map(struct mapping *mp)
+{
+	int __future pgt_idx, pg_idx;
+
+
+	kprintf("Mapping: [%x]\n", mp->m_pgdir);
+	for (pgt_idx = 0; pgt_idx < PGD_ENTRIES; pgt_idx++) {
+		if (PE_FLAGS(mp->m_pgdir[pgt_idx]) & PTF_PRESENT) {
+			kprintf("pgdir[%x] 0x%08x ", pgt_idx,  pgt_idx * PGT_ENTRIES * PAGE_SIZE);
+			display_pe_flags(PE_FLAGS(mp->m_pgdir[pgt_idx]));
+			kprintf("\n");
+#if 0
+			for (pg_idx = 0; pg_idx < PGT_ENTRIES; pg_idx++) {
+				kprintf("pgtable[%x] 0x%08x ", pg_idx,
+				pgt_idx * PGT_ENTRIES * PAGE_SIZE + pg_idx * PAGE_SIZE);
+				display_pe_flags(PE_FLAGS(mp->m_pgdir[pgt_idx]));
+				kprintf("\n");
+			}
+#endif
+		}
+	}
+}
+
+
 /*
  * Initialize a flat 1:1 mapping
  * which is stored in global root_map
@@ -52,28 +106,41 @@ u32 phys_pgs;
 static void init_rootmap()
 {
 	u32 pgaddr = 0;
-	int d, t;
+	int pg_idx = 0;
+	int pgt_idx = 0;
 	u32 tablesz;
 	u32 *pgtable;
 	u32 *pgdir;
 
 	tablesz = phys_pgs / PGT_ENTRIES;
+	if (phys_pgs % PGT_ENTRIES)
+		tablesz++;
+
 	root_map.m_pgdir =
 	pgdir = get_pages(0, 0); /* just one page for pgdir */
 
 	root_map.m_pgtable =
 	pgtable = get_pages(0, log2(tablesz));
 
-	for (d = 0; d < tablesz; d++) {
-		for (t = 0; t < PGT_ENTRIES; t++)
-			pgtable[t] = PTE_DESC(pgaddr++, PTF_PRESENT | PTF_RW);
 
-		pgdir[d] = (u32)pgtable | PTF_PRESENT | PTF_RW | PTF_GLOBAL;
-		pgtable += PAGE_SIZE / PTE_BYTES;
+	/* Fill the page tables */
+	while (pg_idx < phys_pgs)
+		pgtable[pg_idx++] = PTE_DESC(pgaddr++, PTF_PRESENT | PTF_RW);
+
+	/* Clear the remainder of the last page table */
+	while (pg_idx % PGT_ENTRIES)
+		pgtable[pg_idx++] = 0 | PTF_USER | PTF_RW;
+
+	/* Add the filled page tables to the page directory */
+	for (; pgt_idx < tablesz; pgt_idx++) {
+		pgdir[pgt_idx] = (u32)(pgtable + pgt_idx * PGT_ENTRIES) | PTF_PRESENT | PTF_RW | PTF_GLOBAL;
 	}
 
-	for (; d < PGD_ENTRIES; d++)
-		pgdir[d] = 0 | PTF_USER | PTF_RW;
+	while (pgt_idx < PGT_ENTRIES)
+		pgdir[pgt_idx++] = 0 | PTF_USER | PTF_RW;
+#ifdef DEBUG
+	display_map(&root_map);
+#endif
 }
 
 /*
