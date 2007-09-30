@@ -34,6 +34,7 @@
 .extern kern_start
 .extern multiboot_info
 .globl multiboot_start
+.type multiboot_start, @function
 
 /* setting up the Multiboot header - see GRUB docs for details */
 #define MODULEALIGN (0x01)           /* align loaded modules on page boundaries */
@@ -66,6 +67,7 @@ l1:	movl $KERN_DATA, %eax	/* set the rest */
 	jmp kern_start
 	cli
 	hlt
+	.size multiboot_start, . - multiboot_start
 
 /* GDT size and ptr */
 gdt_desc:
@@ -74,6 +76,7 @@ gdt_desc:
 
 /* the GDT */
 .globl gdt_table
+.align 16
 gdt_table:
 	/* null entry */
 	SEGDESC_EMPTY
@@ -100,6 +103,8 @@ idt_desc:
 idt_table:
 	.fill IDT_ENTRIES,8,0
 
-kernel_stack:
-	.fill 4096,1,0
+.align 4
+__kernel_stack_start:
+	.fill 0x1000,1,0
+.equ kernel_stack,. - 4
 
