@@ -34,7 +34,7 @@
  * This is KOPT, the KOS kernel configuration system
  */
 #define OPTNAME_MAX 32
-
+#define VALUE_MAX 256
 #define CONFLICT_MAX 32
 
 /*
