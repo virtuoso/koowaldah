@@ -52,7 +52,7 @@
 static __inline int spin_trylock_irqsave(spinlock_t *lock, u32 flags)
 {
 	local_irq_save(flags);
-	if (spin_trylock(lock))
+	if (!spin_trylock(lock))
 		return 0;
 	local_irq_restore(flags);
 	return 1;
