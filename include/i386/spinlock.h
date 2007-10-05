@@ -45,7 +45,7 @@
 #include <koowaldah.h>
 #include <bug.h>
 
-typedef __future  struct {
+typedef struct {
 #ifdef OPT_DEBUG_SPINLOCKS
 	u32 counter;
 #endif
@@ -84,12 +84,16 @@ static __inline int spin_trylock(spinlock_t *lock)
 #else /* !OPT_DEBUG_SPINLOCKS */
 
 #define SPINLOCK(name) spinlock_t name;
-#define spinlock_init(lock) do { } while (0)
+#define spinlock_init(lock) do {	\
+	spinlock_t __future *l = lock;	\
+} while (0)
 
 #define spin_lock(lock) do {		\
+	spinlock_t __future *l = lock;	\
 } while (0)
 
 #define spin_unlock(lock) do {		\
+	spinlock_t __future *l = lock;	\
 } while (0)
 
 static __inline int spin_trylock(spinlock_t *lock)
