@@ -98,7 +98,7 @@ static __inline int tq_is_empty(struct thread_queue *q)
 static __inline void __tq_insert_head(struct thread *t, struct thread_queue *q)
 {
 	bug_on(!klist0_empty(&t->krunq));
-	bug_on(!spin_trylock(&q->lock));
+	bug_on(spin_trylock(&q->lock));
 
 	klist0_append(&t->krunq, &q->threads);
 	t->krunq_head = q;
@@ -110,7 +110,7 @@ static __inline void __tq_insert_head(struct thread *t, struct thread_queue *q)
 static __inline void __tq_insert_tail(struct thread *t, struct thread_queue *q)
 {
 	bug_on(!klist0_empty(&t->krunq));
-	bug_on(!spin_trylock(&q->lock));
+	bug_on(spin_trylock(&q->lock));
 
 	klist0_prepend(&t->krunq, &q->threads);
 	t->krunq_head = q;
