@@ -130,7 +130,7 @@ int cpio_read()
 					NODEV,
 					body, fsize);
 
-			t = ALIGN4(body + fsize);
+			t = body + fsize;
 		} else {
 			fs_insert_entry(name, mode,
 					DEV_DEVICE(r->h_rdev[1], r->h_rdev[0]),
