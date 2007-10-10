@@ -67,8 +67,8 @@ typedef struct {
 #define cpio2ru16(s, f) ((u16)s->f[0] << 8 | s->f[1])
 #define cpio2u16(s, f) (reverse ? cpio2ru16(s,f) : cpio2su16(s,f))
 
-#define ALIGN4(x) ({ \
-		unsigned long __r = ((unsigned long)(x) + 3) & ~3; \
+#define ALIGN2(x) ({ \
+		unsigned long __r = ((unsigned long)(x) + 1) & ~1; \
 		(__typeof__ (x))__r; \
 	})
 
@@ -125,17 +125,17 @@ int cpio_read()
 		kprintf("name: %s, size=%d\n", name, fsize);
 #endif
 		if (!S_ISCHR(mode) && !S_ISDIR(mode)) {
-			body = ALIGN4(name + cpio2u16(r, h_namesize));
+			body = name + ALIGN2(cpio2u16(r, h_namesize));
 			fs_insert_entry(name, mode,
 					NODEV,
 					body, fsize);
 
-			t = body + fsize;
+			t = body + ALIGN2(fsize);
 		} else {
 			fs_insert_entry(name, mode,
 					DEV_DEVICE(r->h_rdev[1], r->h_rdev[0]),
 					NULL, 0);
-			t = ALIGN4(t + sizeof(HD_BCPIO));
+			t = name + ALIGN2(cpio2u16(r, h_namesize));
 		}
 	}
 
