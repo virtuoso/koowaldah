@@ -154,7 +154,8 @@ void clone_map(struct mapping *dst, struct mapping *map)
 
 	dst->m_nmma = 0;
 	dst->m_pgdir = get_pages(0, 0);
-	dst->m_pgtable = pgtable = get_pages(0, log2(phys_pgs/PGT_ENTRIES));
+	dst->m_pgtable = pgtable = get_pages(0,
+			log2((phys_pgs + PGT_ENTRIES - 1)/PGT_ENTRIES));
 	for (d = 0; d < PGD_ENTRIES; d++) {
 		/* copy flags as-is */
 		dst->m_pgdir[d] = map->m_pgdir[d] & PAGE_MASK;
