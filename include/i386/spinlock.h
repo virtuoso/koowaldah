@@ -52,12 +52,11 @@ typedef struct {
 } spinlock_t;
 
 
-#define SPINLOCK(name) spinlock_t name;
-
-#define spinlock_init(lock) do { (lock)->counter = 0; } while (0)
-
 
 #ifdef OPT_DEBUG_SPINLOCKS
+
+#define SPINLOCK(name) spinlock_t name = {0};
+#define spinlock_init(lock) do { (lock)->counter = 0; } while (0)
 
 #define spin_lock(lock) do {		\
 	__typeof__(lock) __lock = (lock);	\
@@ -76,23 +75,30 @@ static __inline int spin_trylock(spinlock_t *lock)
 	bug_on(lock->counter != 0 && lock->counter != 1);
 
 	if (lock->counter)
-		return 1;
+		return 0;
 
 	lock->counter++;
-	return 0;
+	return 1;
 }
 
 #else /* !OPT_DEBUG_SPINLOCKS */
 
+#define SPINLOCK(name) spinlock_t name;
+#define spinlock_init(lock) do {	\
+	spinlock_t __future *l = lock;	\
+} while (0)
+
 #define spin_lock(lock) do {		\
+	spinlock_t __future *l = lock;	\
 } while (0)
 
 #define spin_unlock(lock) do {		\
+	spinlock_t __future *l = lock;	\
 } while (0)
 
 static __inline int spin_trylock(spinlock_t *lock)
 {
-	return 0;
+	return 1;
 }
 
 #endif /* OPT_DEBUG_SPINLOCKS */
