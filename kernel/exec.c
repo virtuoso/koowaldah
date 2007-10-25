@@ -30,6 +30,7 @@
  */
 
 #include <koowaldah.h>
+#include <lib.h>
 #include <thread.h>
 #include <scheduler.h>
 #include <debug.h>
@@ -156,6 +157,9 @@ int thread_exec(struct thread *thread, char *path)
 
 	i = thread_exec_new(thread, inode);
 	if (i) return i;
+
+	/* rename the thread accordingly */
+	snprintf(thread->name, THREAD_NAME_LEN, path);
 
 	if (thread == CURRENT()) {
 		/* ensure TLB flush since the mapping has changed badly */
