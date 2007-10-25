@@ -62,6 +62,9 @@ static void pckbd_intr(u32 number)
 {
 	u8 scancode = inb(KEYBOARD_IO);
 
+	if (!users)
+		return;
+
 	/* skip key releases for now */
 	if (scancode & 0x80)
 		return;
