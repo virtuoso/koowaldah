@@ -51,6 +51,9 @@ void dummy_delay();
 
 #define arch_display_stack() do {} while (0)
 
+#define arch_dump_stack(s) \
+	dummy_bug(__FILE__, __LINE__);
+
 #define __HAVE_ARCH_BUG
 
 #define bug()      			\

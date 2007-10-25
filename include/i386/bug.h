@@ -100,6 +100,8 @@ void local_irq_disable();
 		);				\
 	} while (0)
 
+#define arch_dump_stack(s) i386_dump_stack(s)
+
 #define __HAVE_ARCH_BUG
 
 #define bug() do { 			\
