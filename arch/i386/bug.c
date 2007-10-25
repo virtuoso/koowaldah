@@ -18,7 +18,7 @@ void i386_display_regs(struct register_frame frame)
 
 void i386_dump_stack(u32 *stack)
 {
-	u32 *stop = (u32 *)CURRENT();
+	u32 *stop = (u32 *)THREAD(stack);
 	u32 *frame;
 	int sym;
 
