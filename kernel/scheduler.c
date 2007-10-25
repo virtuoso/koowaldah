@@ -80,9 +80,13 @@ void list_threads()
 	spin_lock_irqsave(&thread_list.lock, flags);
 	klist0_for_each(t, &thread_list.threads) {
 		thread = klist0_entry(t, struct thread, kthreads);
-		kprintf("# [%s] pid=%d, state=%x, last_tick=%d\n",
+		
+		kprintf("# [%s] pid=%d, state=%x, last_tick=%d",
 				thread->name, thread->pid,
 				thread->state, thread->last_tick);
+		arch_dump_stack((u32 *)thread->context.esp);
+		kprintf("\n");
+
 		if (i++ > MAX_THREADS) bug();
 	}
 	spin_unlock_irqrestore(&thread_list.lock, flags);
