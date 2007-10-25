@@ -193,6 +193,12 @@ static void serial_8250_intr(u32 number)
 		c = inb(SERIO_1_BASE);
 		DPRINT("Got byte: 0x%x\n", c);
 
+		/* sysrq */
+		if (c == 0x00) {
+			list_threads();
+			return;
+		}
+
 		if (read_queue) {
 			/* XXX Should go as soon as we get proper tty support. */
 			kprintf("%c", c);
