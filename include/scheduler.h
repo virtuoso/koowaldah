@@ -80,6 +80,10 @@ void scheduler_start();
 void scheduler_stop();
 
 
-void list_threads();
+/* debug: print diagnostics for kernel threads */
+#define LIST_CURRENT   0x00000001 /* only show current thread */
+#define LIST_BACKTRACE 0x00000002 /* include full call trace */
+#define LIST_MAPPING   0x00000004 /* include memory mapping */
+void list_threads(u32 ops);
 
 #endif /* __SCHEDULER_H__ */
