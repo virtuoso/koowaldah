@@ -24,5 +24,9 @@ ifeq ($(MK_INSTRUMENT_PROFILER),Y)
  SOURCES += debug/profile.c debug/triggers.c
 endif
 
+ifeq ($(MK_SYSRQ_DEBUG),Y)
+ SOURCES += debug/sysrq.c
+endif
+
 include $(PRJROOT)/tools/main.mk
 
