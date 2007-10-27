@@ -1,0 +1,16 @@
+*.o
+solver
+include/arch
+
+# konfig
+KONFIG
+konfig.mk
+include/koptions.h
+konfig/konfigure
+
+# binaries
+kos-elf
+kos-image
+kos-loader
+kos-shared.so
+
