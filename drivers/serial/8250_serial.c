@@ -195,7 +195,7 @@ static void serial_8250_intr(u32 number)
 
 		/* sysrq */
 		if (c == 0x00) {
-			list_threads();
+			list_threads(LIST_BACKTRACE);
 			return;
 		}
 

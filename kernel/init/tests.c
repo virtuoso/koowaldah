@@ -589,7 +589,7 @@ static void keyboard_irq_handler(u32 number)
         c = io_port_in(0x60);
 	switch (c) {
 		case 31:
-			list_threads();
+			list_threads(LIST_BACKTRACE);
 			break;
 		case 32:
 			bug();

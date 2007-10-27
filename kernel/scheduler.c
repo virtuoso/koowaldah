@@ -33,6 +33,7 @@
 
 
 #include <koowaldah.h>
+#include <mem_area.h> /* for display_map() */
 #include <irq.h>
 #include <textio.h>
 #include <lib.h>
@@ -70,7 +71,7 @@ struct thread *next_thread;
  * List all threads in the system
  * Prints a lot of rubbish.
  */
-void list_threads()
+void list_threads(u32 ops)
 {
 	struct klist0_node *t;
 	struct thread *thread;
@@ -81,10 +82,19 @@ void list_threads()
 	klist0_for_each(t, &thread_list.threads) {
 		thread = klist0_entry(t, struct thread, kthreads);
 		
+		if (ops & LIST_CURRENT && thread != CURRENT())
+			continue;
+
 		kprintf("# [%s] pid=%d, state=%x, last_tick=%d",
 				thread->name, thread->pid,
 				thread->state, thread->last_tick);
-		arch_dump_stack((u32 *)thread->context.esp);
+
+		if (ops & LIST_BACKTRACE)
+			arch_dump_stack((u32 *)thread->context.esp);
+
+		if (ops & LIST_MAPPING)
+			display_map(thread->map);
+
 		kprintf("\n");
 
 		if (i++ > MAX_THREADS) bug();
