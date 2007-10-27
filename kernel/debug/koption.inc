@@ -1,4 +1,4 @@
-KOPTIONS_START(DEBUG, "Kernel debugging options", 3)
+KOPTIONS_START(DEBUG, "Kernel debugging options", 4)
 KOPTION(
 	"INSTRUMENT_PROFILER",
 	"Simple static instrumentation profiler",
@@ -22,7 +22,14 @@ KOPTION(
 	"Check spin locks and associated counters",
 	"",
 	KOPT_BOOL,
-	'Y'
+	'N'
+),
+KOPTION(
+	"SYSRQ_DEBUG",
+	"Use sysrq key to print system information",
+	"",
+	KOPT_BOOL,
+	'N'
 ),
 KOPTIONS_END
 

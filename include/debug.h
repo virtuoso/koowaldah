@@ -42,5 +42,17 @@
 #define DPRINT(fmt, args ...) 
 #endif /* DEBUG */
 
+#ifdef OPT_INSTRUMENT_PROFILER
+void flush_events();
+#else
+#include <bug.h>
+#define flush_events() bug()
+#endif
+
+#ifdef OPT_SYSRQ_DEBUG
+int sysrq_hit(char n);
+#else
+#define sysrq_hit(n) 0
+#endif
 
 #endif /* __DEBUG_H__ */

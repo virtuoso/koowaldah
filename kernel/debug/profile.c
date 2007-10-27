@@ -108,7 +108,7 @@ static __inline void __noprof dump_events(u32 t)
 /*
  * Flush the event log (dump and empty)
  */
-static void __noprof flush_events()
+void __noprof flush_events()
 {
 	dump_events(top);
 	top = 0;

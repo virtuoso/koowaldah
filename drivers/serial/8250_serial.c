@@ -194,10 +194,8 @@ static void serial_8250_intr(u32 number)
 		DPRINT("Got byte: 0x%x\n", c);
 
 		/* sysrq */
-		if (c == 0x00) {
-			list_threads(LIST_BACKTRACE);
-			return;
-		}
+		if (sysrq_hit(c ? c : 0xff))
+ 			return;
 
 		if (read_queue) {
 			/* XXX Should go as soon as we get proper tty support. */
