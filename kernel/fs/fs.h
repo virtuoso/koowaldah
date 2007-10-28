@@ -51,5 +51,6 @@ int __init fs_init_inodes();
 void __init fs_init_namespace();
 void __init fs_init_mount();
 void __init fs_init_virtfs();
+void __init fs_mpipe_init();
 
 #endif
