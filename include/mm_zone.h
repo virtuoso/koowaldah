@@ -54,5 +54,4 @@ struct mem_info {
 
 void mem_zone_init(struct mem_zone *zone);
 
-
 #endif /* __MM_ZONE_H__ */

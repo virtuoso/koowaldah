@@ -40,7 +40,6 @@
 
 #define MAX_ORDER 11
 
-
 struct mem_zone;
 
 struct page {
@@ -71,6 +70,4 @@ void put_pages(void *addr);
 void print_alloc_info();
 
 #endif /* __MM_H__ */
-
-
 

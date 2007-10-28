@@ -40,6 +40,4 @@
 int register_irq_handler(u32 number, void (*handler)());
 void unregister_irq_handler(u32 number);
 
-
-
 #endif /* __INTERRUPTS_H__ */
