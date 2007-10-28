@@ -37,7 +37,6 @@
 #include <console.h>
 #include <i386/asm.h>
 #include <i386/irq.h>
-#include <timer.h>
 #include <scheduler.h>
 
 u32 mach_state = MACH_BOOTUP;
@@ -46,6 +45,7 @@ void interrupts_init(void);
 void trap_init(void);
 void early_console_init(void);
 void init_root_tss(void);
+int timer_init(void);
 
 /*
  * Finalize boot-time hw initialization
