@@ -184,7 +184,7 @@ int mpipe_open(char *name)
 	return file->f_fd;
 }
 
-void __init mpipe_init()
+void __init fs_mpipe_init()
 {
 	mpipe_pool = slice_pool_create(0, sizeof(struct mpipe_ctl));
 	bug_on(!mpipe_pool);

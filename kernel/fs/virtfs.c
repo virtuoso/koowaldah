@@ -41,6 +41,7 @@
 #include <slice.h>
 #include <virtfs.h>
 #include <mpipe.h>
+#include "fs.h"
 
 struct virtfs_operations veops_nop = { NULL, NULL, NULL };
 
@@ -332,6 +333,6 @@ void __init fs_init_virtfs()
 	if (r)
 		panic("Virtfs mount failed\n");
 
-	mpipe_init();
+	fs_mpipe_init();
 }
 
