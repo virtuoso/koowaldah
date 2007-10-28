@@ -45,7 +45,7 @@ all-local: kernel
 include/arch:
 	ln -sf $(ARCH) $@
 
-include/koptions.h $(PRJROOT)/konfig.mk: konfig/konfigure
+include/koptions.h $(PRJROOT)/konfig.mk: konfig/konfigure KONFIG
 	konfig/konfigure
 	mkdir -p $(OBJDIR)
 	$(MAKE) include/arch
