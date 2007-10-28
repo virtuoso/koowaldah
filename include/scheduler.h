@@ -63,22 +63,13 @@ extern struct thread *next_thread;
 
 int register_cpusched(struct cpu_scheduler *sched);
 /* int deregister_cpusched() to come as soon as it's needed */
-/*
-int scheduler_enqueue_nolock(struct thread *thread);
-int scheduler_dequeue_nolock(struct thread *thread);
-*/
 int scheduler_enqueue(struct thread_queue *from_q);
 void scheduler_dequeue(struct thread_queue *to);
-/*
-void scheduler_enqueue(struct thread *thread, struct thread_queue *from_q);
-void scheduler_dequeue(struct thread *thread, struct thread_queue *to_q);
-*/
 void scheduler_yield();
 void scheduler_tick();
 void schedule();
 void scheduler_start();
 void scheduler_stop();
-
 
 /* debug: print diagnostics for kernel threads */
 #define LIST_CURRENT   0x00000001 /* only show current thread */

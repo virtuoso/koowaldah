@@ -47,7 +47,6 @@ struct slice_pool {
 	u32 flags;
 };
 
-
 void slice_pool_info(struct slice_pool *);
 struct slice_pool *slice_pool_create(u32 flags, int obj_size);
 void slice_pool_shrink(struct slice_pool *pool);
