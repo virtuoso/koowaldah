@@ -37,7 +37,6 @@
 #include <mm_zone.h>
 #include <arch/asm.h>
 #include <irq.h>
-#include <timer.h>
 #include <textio.h>
 #include <lib.h>
 #include <kqueue.h>
