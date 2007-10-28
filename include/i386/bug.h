@@ -67,22 +67,6 @@ void local_irq_disable();
 		);				\
 	} while (0)
 
-/*
-#define arch_dump_regs() 			\
-	do { 					\
-		__asm__ __volatile__ (			\
-			"pushl $0xDEAD0001\n"		\
-			"pushl $0xDEAD0002\n"		\
-			"pushl $0xDEAD0003\n"		\
-			"pushl $0xDEAD0004\n"		\
-			"pushl $0xDEAD0005\n"		\
-			"pushl $0xDEAD0006\n"		\
-			"pushl $0xDEAD0007\n"		\
-			"pushl $0xDEAD0008\n"		\
-		);				\
-	} while (0)
-*/
-	
 #define arch_display_registers()		\
 	do {					\
 		__asm__ __volatile__ (			\
