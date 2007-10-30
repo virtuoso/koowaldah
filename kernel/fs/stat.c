@@ -1,5 +1,5 @@
 /*
- * include/khui/fs.h
+ * kernel/fs/stat.c
  *
  * Copyright (C) 2007 Alexander Shishkin
  *
@@ -27,25 +27,25 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
- *
  */
-#ifndef __KHUI_FS_H__
-#define __KHUI_FS_H__
 
-#include <khui/types.h>
+#include <koowaldah.h>
+#include <namespace.h>
+#include <error.h>
 
-#define FILENAME_MAX (__size_t)256
+int stat(char *path, struct stat *buf)
+{
+	struct direntry *dent;
 
-struct udirentry {
-	char name[FILENAME_MAX];
-};
+	dent = lookup_path(path);
+	if (!dent)
+		return -ENOENT;
 
-struct stat {
-	unsigned long st_ino;
-	unsigned int st_dev;
-	unsigned int st_mode;
-	unsigned long st_size;
-};
+	buf->st_ino  = dent->d_inode->i_ino;
+	buf->st_dev  = dent->d_inode->i_dev;
+	buf->st_mode = dent->d_inode->i_mode;
+	buf->st_size = dent->d_inode->i_size;
 
-#endif
+	return 0;
+}
 
