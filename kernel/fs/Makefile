@@ -2,6 +2,7 @@ SOURCES := \
 	super.c \
 	inode.c \
 	file.c \
+	stat.c \
 	namespace.c \
 	message.c \
 	mount.c \

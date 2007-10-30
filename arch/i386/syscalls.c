@@ -44,6 +44,7 @@
 #include <message.h>
 #include <mem_area.h>
 #include <mpipe.h>
+#include <stat.h>
 
 u32 __regparm(0) sys_call_gate(u32 eax, u32 ebx, u32 ecx, u32 edx,
 		u32 esi, u32 edi)
@@ -104,6 +105,9 @@ u32 __regparm(0) sys_call_gate(u32 eax, u32 ebx, u32 ecx, u32 edx,
 
 		case __SYS_brk:
 			return brk((unsigned long)ebx);
+
+		case __SYS_stat:
+			return stat((char *)ebx, (struct stat *)ecx);
 
 		default:
 			kprintf("syscall %d not implemented\n", eax);

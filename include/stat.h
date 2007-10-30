@@ -1,5 +1,5 @@
 /*
- * include/khui/fs.h
+ * include/stat.h
  *
  * Copyright (C) 2007 Alexander Shishkin
  *
@@ -27,25 +27,14 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
- *
  */
-#ifndef __KHUI_FS_H__
-#define __KHUI_FS_H__
 
-#include <khui/types.h>
+#ifndef __STAT_H__
+#define __STAT_H__
 
-#define FILENAME_MAX (__size_t)256
+#include <khui/fs.h>
 
-struct udirentry {
-	char name[FILENAME_MAX];
-};
-
-struct stat {
-	unsigned long st_ino;
-	unsigned int st_dev;
-	unsigned int st_mode;
-	unsigned long st_size;
-};
+int stat(char *path, struct stat *buf);
 
 #endif
 
