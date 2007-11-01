@@ -57,12 +57,24 @@
 		return test; \
 	}
 
+#define ATOMIC_TEST_AND_SET(TYPE) \
+	static __inline TYPE \
+	atomic_test_and_set_##TYPE(atomic_##TYPE *p, volatile TYPE v) \
+	{ \
+		/*volatile TYPE t = v;*/ \
+		__asm__ __volatile__("xchgl %1, %0" \
+				: "=m"(p->v), "=r"(v) \
+				: "m"(p->v), "r"(v) : "memory"); \
+		return v; \
+	}
+
 /* u8 operations */
 ATOMIC_ASM(set,	     u8,   "orb %1,%0",   v)
 ATOMIC_ASM(clear,    u8,   "andb %1,%0", ~v)
 ATOMIC_ASM(add,	     u8,   "addb %1,%0",  v)
 ATOMIC_ASM(sub,      u8,   "subb %1,%0",  v)
 ATOMIC_SUB_AND_TEST_ASM(u8)
+ATOMIC_TEST_AND_SET(u8)
 #define atomic_inc_u8(p) atomic_add_u8(p, 1)
 #define atomic_dec_u8(p) atomic_sub_u8(p, 1)
 #define atomic_dec_and_test_u8(p) atomic_sub_and_test_u8(p, 1)
@@ -73,6 +85,7 @@ ATOMIC_ASM(clear,    u16,   "andw %1,%0", ~v)
 ATOMIC_ASM(add,	     u16,   "addw %1,%0",  v)
 ATOMIC_ASM(sub,      u16,   "subw %1,%0",  v)
 ATOMIC_SUB_AND_TEST_ASM(u16)
+ATOMIC_TEST_AND_SET(u16)
 #define atomic_inc_u16(p) atomic_add_u16(p, 1)
 #define atomic_dec_u16(p) atomic_sub_u16(p, 1)
 #define atomic_dec_and_test_u16(p) atomic_sub_and_test_u16(p, 1)
@@ -83,6 +96,7 @@ ATOMIC_ASM(clear,    u32,   "andl %1,%0", ~v)
 ATOMIC_ASM(add,	     u32,   "addl %1,%0",  v)
 ATOMIC_ASM(sub,      u32,   "subl %1,%0",  v)
 ATOMIC_SUB_AND_TEST_ASM(u32)
+ATOMIC_TEST_AND_SET(u32)
 #define atomic_inc_u32(p) atomic_add_u32(p, 1)
 #define atomic_dec_u32(p) atomic_sub_u32(p, 1)
 #define atomic_dec_and_test_u32(p) atomic_sub_and_test_u32(p, 1)

@@ -85,12 +85,23 @@
 		return test;                                   \
 	}
 
+#define ATOMIC_TEST_AND_SET(TYPE)                              \
+	static __inline TYPE                                   \
+	atomic_test_and_set_##TYPE(atomic_##TYPE *p, TYPE v)   \
+	{                                                      \
+		TYPE spare;                                    \
+		ATOMIC_PROLOGUE();                             \
+		spare = p->v; p->v = v; v = spare;             \
+		ATOMIC_EPILOGUE();                             \
+		return spare;                                  \
+	}
 
 ATOMIC_ADD(u8)
 ATOMIC_SUB(u8)
 ATOMIC_SET(u8)
 ATOMIC_CLEAR(u8)
 ATOMIC_SUB_AND_TEST(u8)
+ATOMIC_TEST_AND_SET(u8)
 #define atomic_inc_u8(p) atomic_add_u8(p, 1)
 #define atomic_dec_u8(p) atomic_add_u8(p, 1)
 #define atomic_dec_and_test_u8(p) atomic_sub_and_test_u8(p, 1)
@@ -100,6 +111,7 @@ ATOMIC_SUB(u16)
 ATOMIC_SET(u16)
 ATOMIC_CLEAR(u16)
 ATOMIC_SUB_AND_TEST(u16)
+ATOMIC_TEST_AND_SET(u16)
 #define atomic_inc_u16(p) atomic_add_u16(p, 1)
 #define atomic_dec_u16(p) atomic_add_u16(p, 1)
 #define atomic_dec_and_test_u16(p) atomic_sub_and_test_u16(p, 1)
@@ -109,6 +121,7 @@ ATOMIC_SUB(u32)
 ATOMIC_SET(u32)
 ATOMIC_CLEAR(u32)
 ATOMIC_SUB_AND_TEST(u32)
+ATOMIC_TEST_AND_SET(u32)
 #define atomic_inc_u32(p) atomic_add_u32(p, 1)
 #define atomic_dec_u32(p) atomic_add_u32(p, 1)
 #define atomic_dec_and_test_u32(p) atomic_sub_and_test_u32(p, 1)
