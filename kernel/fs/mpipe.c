@@ -41,6 +41,7 @@
 #include <slice.h>
 #include <khui/stat.h>
 #include <error.h>
+#include <mutex.h>
 
 /* list of processes sleeping on read() */
 static struct slice_pool *mpipe_pool;
@@ -50,6 +51,7 @@ struct mpipe_ctl {
 	size_t len;
 	u32 state;
 	struct thread_queue tq;
+	struct mutex mutex;
 };
 
 enum {
@@ -81,6 +83,8 @@ static int mpipe_write(struct file *file, char *buf, size_t len)
 	size_t done = 0;
 	size_t left = len;
 
+	mutex_lock(&mc->mutex);
+
 	do {
 		memory_copy(mc->buf, buf, MIN(mc->len, left));
 		done += mc->len;
@@ -93,6 +97,8 @@ static int mpipe_write(struct file *file, char *buf, size_t len)
 		while (mc->state != MC_READ_FROM)
 			scheduler_yield();
 	} while (done < len);
+
+	mutex_unlock(&mc->mutex);
 
 	return len;
 }
@@ -180,6 +186,7 @@ int mpipe_open(char *name)
 	mc->len = 0;
 	mc->buf = NULL;
 	mc->state = MC_OPENED;
+	mutex_init(&mc->mutex);
 
 	return file->f_fd;
 }
