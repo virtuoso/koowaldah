@@ -69,6 +69,10 @@ void map_pages(struct mapping *map, u32 virt, u32 phys, u32 n, u16 flags)
 {
 }
 
+void display_map(struct mapping *map)
+{
+}
+
 struct mapping root_map;
 
 void switch_map(struct mapping *from, struct mapping *to)
