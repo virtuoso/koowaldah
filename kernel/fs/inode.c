@@ -126,6 +126,7 @@ struct inode *new_inode(struct superblock *sb)
 	inode->i_ino = 0;
 	inode->i_mode = 0;
 	inode->i_dev = NODEV;
+	inode->i_ctl = NULL;
 	inode->i_size = 0;
 	inode->i_nlinks = 0;
 	inode->i_uid = inode->i_gid = 0;
