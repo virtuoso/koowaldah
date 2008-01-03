@@ -120,6 +120,8 @@ struct thread *thread_create(thread_t func, char *name, void *data)
 	/* use root memory mapping */
 	thread->map = &root_map;
 
+	bitmask_zero(thread->fdset, FS_MAX_FDS);
+
 	thread->krunq_head = NULL;
 	spin_lock_irqsave(&thread_list.lock, flags);
 	klist0_append(&thread->kthreads, &thread_list.threads);

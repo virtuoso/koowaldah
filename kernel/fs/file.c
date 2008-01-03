@@ -36,6 +36,7 @@
 #include <inode.h>
 #include <file.h>
 #include <page_alloc.h>
+#include <bitmask.h>
 #include <khui/stat.h>
 #include <khui/fcntl.h>
 #include <thread.h>
@@ -52,6 +53,7 @@ struct file *new_file()
 	if (!file)
 		return NULL;
 
+	KLIST0_INIT(&file->f_tlist);
 	file->f_offset = 0;
 	file->f_ops = NULL;
 	file->f_sb = NULL;
@@ -186,6 +188,29 @@ static struct file_operations generic_fops = {
 	.readdir = generic_readdir,
 };
 
+int alloc_fd(struct thread *thread)
+{
+	int fd;
+	
+	/* this looks like an off-by-one in bitmask code vvv */
+	fd = bitmask_seek_unset(thread->fdset, thread->last_fd + 1);
+	if (fd == -1)
+		return -EBADF; /* no more descriptors available */
+
+	if (fd == thread->last_fd && thread->last_fd < FS_MAX_FDS)
+		thread->last_fd++;
+
+	/* mark fd as occupied */
+	bitmask_bit_set(thread->fdset, fd);
+
+	return fd;
+}
+
+void free_fd(struct thread *thread, int fd)
+{
+	bitmask_bit_clear(thread->fdset, fd);
+}
+
 /*
  * Open a file with a given operation mode
  * @name -- full pathname of a file
@@ -224,7 +249,7 @@ int open(char *name, int flags, mode_t mode)
 	atomic_inc_u32(&dent->d_inode->i_refcnt);
 
 	klist0_append(&file->f_tlist, &thread->files);
-	file->f_fd = thread->last_fd++;
+	file->f_fd = alloc_fd(thread);
 	file->f_inode = dent->d_inode;
 	file->f_sb = dent->d_inode->i_sb;
 	file->f_offset = 0;
@@ -315,6 +340,7 @@ int close(fd)
 	if (!file)
 		return -EBADF;
 	release_inode(file->f_inode);
+	free_fd(CURRENT(), fd);
 	
 	return file->f_ops->close(file);
 }

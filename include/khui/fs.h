@@ -35,6 +35,7 @@
 #include <khui/types.h>
 
 #define FILENAME_MAX (__size_t)256
+#define FS_MAX_FDS 256
 
 struct udirentry {
 	char name[FILENAME_MAX];
