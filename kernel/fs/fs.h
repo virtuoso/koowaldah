@@ -33,6 +33,8 @@
 #ifndef __KERNEL_FS_FS_H__
 #define __KERNEL_FS_FS_H__
 
+#include <thread.h> /* for struct thread */
+
 /*
  * Some internal FS related things that are shared between objects.
  * Anyone outside this directory has absolutely no business even looking
@@ -42,6 +44,9 @@
 /* these come from ld script */
 extern char rootfs_start;
 extern char rootfs_end;
+
+int alloc_fd(struct thread *thread);
+void free_fd(struct thread *thread, int fd);
 
 int cpio_read();
 void fs_insert_entry(char *pathname, mode_t mode, dev_t dev, char *buf,

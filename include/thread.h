@@ -37,6 +37,7 @@
 #include <spinlock.h>
 #include <klist0.h>
 #include <namespace.h>
+#include <bitmask.h>
 
 #define THREAD_NAME_LEN 32
 #define MAX_THREADS 128
@@ -76,7 +77,10 @@ struct thread {
 	/* fs related */
 	struct namespace			*ns;
 	struct klist0_node			files; /* or array? */
+	
 	int					last_fd;
+	BITMASK(fdset, FS_MAX_FDS);
+
 	struct klist0_node                      mbox;
 };
 
