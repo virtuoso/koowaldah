@@ -1,5 +1,5 @@
 /*
- * kernel/init/tests.c
+ * kernel/init/test_pckdb.c
  *
  * Copyright (C) 2006 Alexey Zaytsev
  * Copyright (C) 2006 Alexander Shishkin
@@ -30,37 +30,56 @@
  * SUCH DAMAGE.
  * 
  */
-
 #include <koowaldah.h>
+#include <textio.h>
+#include <file.h>
+#include <console.h>
+#include <thread.h>
+#include <scheduler.h>
 
-void test_mm(void);
-void test_slice_alloc(void);
-void test_galloc(void);
-void test_kqueue(void);
-void test_threads(void);
-void test_pckbd(void);
-void test_serial(void);
-void test_irqs(void);
-void test_rootfs(void);
-void test_fslookup(void);
-void test_bug(void);
-void test_panic(void);
-void test_pf(void);
+#ifdef OPT_TEST_PCKBD
 
-void run_tests()
+static void kbd_reader()
 {
-	test_mm();
-	test_slice_alloc();
-	test_galloc();
-	test_kqueue();
-	test_threads();
-	test_pckbd();
-	test_serial();
-	test_irqs();
-	test_rootfs();
-	test_fslookup();
-	test_bug();
-	test_panic();
-	test_pf();
+	int fd;
+	u16 buf;
+
+	fd = open("/dev/pckbd", 0);
+	if (fd < 0) {
+		kprintf("Error opening /dev/pckbd: %d\n", fd);
+		bug();
+	}
+	kprintf("Keyboard input: ");
+	for (;;) {
+		if(2 != read(fd, (char *)&buf, 0)) bug();
+		console_put_char(buf >> 8);
+		//console_put_char(buf & 0xFF);
+	}
+}
+#endif /* OPT_TEST_PCKBD */
+
+void test_pckbd()
+{
+#ifdef OPT_TEST_PCKBD
+	struct thread *thread;
+	struct thread_queue q;
+
+	tq_init(&q);
+
+        thread = thread_create(&kbd_reader, "[keyboard]", NULL);
+        if (!thread) {
+                kprintf("failed to create thread\n");
+		bug();
+        }
+        kprintf("Thread keyboard created.\n");
+
+	tq_insert_head(thread, &q);
+
+        if (!scheduler_enqueue(&q)) {
+                kprintf("failed to add thread to run queue\n");
+		bug();
+        }
+        kprintf("Thread keyboard added to run queue.\n");
+#endif /* OPT_TEST_PCKBD */
 }
 

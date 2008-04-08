@@ -1,5 +1,5 @@
 /*
- * kernel/init/tests.c
+ * kernel/init/test_serial.c
  *
  * Copyright (C) 2006 Alexey Zaytsev
  * Copyright (C) 2006 Alexander Shishkin
@@ -30,37 +30,70 @@
  * SUCH DAMAGE.
  * 
  */
-
 #include <koowaldah.h>
+#include <textio.h>
+#include <bug.h>
+#include <thread.h>
+#include <scheduler.h>
 
-void test_mm(void);
-void test_slice_alloc(void);
-void test_galloc(void);
-void test_kqueue(void);
-void test_threads(void);
-void test_pckbd(void);
-void test_serial(void);
-void test_irqs(void);
-void test_rootfs(void);
-void test_fslookup(void);
-void test_bug(void);
-void test_panic(void);
-void test_pf(void);
-
-void run_tests()
+#ifdef OPT_TEST_SERIAL
+static void do_test_serial()
 {
-	test_mm();
-	test_slice_alloc();
-	test_galloc();
-	test_kqueue();
-	test_threads();
-	test_pckbd();
-	test_serial();
-	test_irqs();
-	test_rootfs();
-	test_fslookup();
-	test_bug();
-	test_panic();
-	test_pf();
-}
+	int fd;
+	int tmp;
+	char buffer[11];
 
+	kprintf("Serial driver test.\n");
+	fd = open("/dev/serial", 0);
+	if (fd < 0) {
+		kprintf("Error opening /dev/serial_8250: %d\n", fd);
+		bug();
+	}
+	
+	kprintf("Reading 10 bytes from the serial port.\n");
+	tmp = read(fd, buffer, 10);
+	kprintf("result = %d\n", tmp);
+	buffer[10] = '\0';
+
+	kprintf("Buffer = \"%s\"\n", buffer);
+
+	kprintf("Writing them back.\n");
+
+	tmp = write(fd, buffer, 10);
+
+	kprintf("result = %d\n", tmp);
+
+	kprintf("Serial Input: ");
+	for (;;) {
+		tmp = read(fd, buffer, 1);
+		if (tmp != 1)
+			bug();
+		buffer[1] = '\0';
+
+		kprintf("%s", buffer);
+	}
+
+	
+	kprintf("Done.\n");
+}
+#endif /* OPT_TEST_SERIAL */
+
+void test_serial()
+{
+#ifdef OPT_TEST_SERIAL
+	struct thread *thread;
+	struct thread_queue q;
+
+	tq_init(&q);
+
+	thread = thread_create(&do_test_serial, "[serial]", NULL);
+	if (!thread)
+		bug();
+
+	tq_insert_head(thread, &q);
+	if (!scheduler_enqueue(&q)) {
+		bug();
+	}
+#endif
+
+}

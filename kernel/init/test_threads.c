@@ -1,5 +1,5 @@
 /*
- * kernel/init/tests.c
+ * kernel/init/test_threads.c
  *
  * Copyright (C) 2006 Alexey Zaytsev
  * Copyright (C) 2006 Alexander Shishkin
@@ -30,37 +30,60 @@
  * SUCH DAMAGE.
  * 
  */
-
 #include <koowaldah.h>
+#include <textio.h>
+#include <thread.h>
+#include <scheduler.h>
+#include <timers.h>
 
-void test_mm(void);
-void test_slice_alloc(void);
-void test_galloc(void);
-void test_kqueue(void);
-void test_threads(void);
-void test_pckbd(void);
-void test_serial(void);
-void test_irqs(void);
-void test_rootfs(void);
-void test_fslookup(void);
-void test_bug(void);
-void test_panic(void);
-void test_pf(void);
-
-void run_tests()
+static void __future func1(void *data)
 {
-	test_mm();
-	test_slice_alloc();
-	test_galloc();
-	test_kqueue();
-	test_threads();
-	test_pckbd();
-	test_serial();
-	test_irqs();
-	test_rootfs();
-	test_fslookup();
-	test_bug();
-	test_panic();
-	test_pf();
+	for (;;) {
+		kprintf("A");
+		tsleep(50);
+	}
+
+}
+
+static void __future func2(void *data)
+{
+	for (;;) {
+		kprintf("B");
+		tsleep(70);
+	}
+}
+
+void test_threads()
+{
+#ifdef OPT_TEST_THREADS
+	struct thread *thread;
+	struct thread_queue q;
+
+	tq_init(&q);
+
+        thread = thread_create(&func1, "[thread A]", NULL);
+        if (!thread) {
+                kprintf("failed to create thread\n");
+		bug();
+        }
+        kprintf("Thread A created.\n");
+
+	tq_insert_head(thread, &q);
+        scheduler_enqueue(&q);
+
+        kprintf("Thread A added to run queue.\n");
+
+        thread = thread_create(&func2, "[thread B]", NULL);
+        if (!thread) {
+                kprintf("failed to create thread\n");
+		bug();
+        }
+        kprintf("Thread B created.\n");
+
+	tq_insert_head(thread, &q);
+
+        scheduler_enqueue(&q);
+        kprintf("Thread B added to run queue.\n");
+#endif /* OPT_TEST_THREADS */
 }
 

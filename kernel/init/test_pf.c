@@ -1,5 +1,5 @@
 /*
- * kernel/init/tests.c
+ * kernel/init/test_pf.c
  *
  * Copyright (C) 2006 Alexey Zaytsev
  * Copyright (C) 2006 Alexander Shishkin
@@ -30,37 +30,22 @@
  * SUCH DAMAGE.
  * 
  */
-
 #include <koowaldah.h>
+#include <textio.h>
+#include <bug.h>
 
-void test_mm(void);
-void test_slice_alloc(void);
-void test_galloc(void);
-void test_kqueue(void);
-void test_threads(void);
-void test_pckbd(void);
-void test_serial(void);
-void test_irqs(void);
-void test_rootfs(void);
-void test_fslookup(void);
-void test_bug(void);
-void test_panic(void);
-void test_pf(void);
-
-void run_tests()
+void test_pf()
 {
-	test_mm();
-	test_slice_alloc();
-	test_galloc();
-	test_kqueue();
-	test_threads();
-	test_pckbd();
-	test_serial();
-	test_irqs();
-	test_rootfs();
-	test_fslookup();
-	test_bug();
-	test_panic();
-	test_pf();
+#ifdef OPT_TEST_PF
+	u32 * address = (u32 *) 0xDEADBEEF;
+	
+	kprintf("We are going to have a page fault at 0x%x\n",
+		(u32) address);
+
+	*address = 0;
+
+	/* We should be already dead now. */
+	bug();
+#endif
 }
 

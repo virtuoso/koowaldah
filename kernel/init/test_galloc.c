@@ -1,5 +1,5 @@
 /*
- * kernel/init/tests.c
+ * kernel/init/test_bug.c
  *
  * Copyright (C) 2006 Alexey Zaytsev
  * Copyright (C) 2006 Alexander Shishkin
@@ -30,37 +30,62 @@
  * SUCH DAMAGE.
  * 
  */
-
 #include <koowaldah.h>
+#include <bug.h>
+#include <textio.h>
+#include <galloc.h>
 
-void test_mm(void);
-void test_slice_alloc(void);
-void test_galloc(void);
-void test_kqueue(void);
-void test_threads(void);
-void test_pckbd(void);
-void test_serial(void);
-void test_irqs(void);
-void test_rootfs(void);
-void test_fslookup(void);
-void test_bug(void);
-void test_panic(void);
-void test_pf(void);
+u32 * tmp[2044];
 
-void run_tests()
+void test_galloc()
 {
-	test_mm();
-	test_slice_alloc();
-	test_galloc();
-	test_kqueue();
-	test_threads();
-	test_pckbd();
-	test_serial();
-	test_irqs();
-	test_rootfs();
-	test_fslookup();
-	test_bug();
-	test_panic();
-	test_pf();
+#ifdef OPT_TEST_GALLOC
+
+	int i;
+
+	for (i = 0; i < 2044; i++) {
+		kprintf("Allocating chunk, size = %d\n", i);
+
+		tmp[i] = galloc(0, i);
+		if (!tmp[i]) {
+			kprintf("Failed!\n");
+			bug();
+		}
+	}
+
+	for (i = 0; i < 2044; i = i + 2) {
+
+		kprintf("Freeing chunk %d (0x%x) \n", i, (u32) tmp[i]);
+		
+
+		gfree(tmp[i]);
+	
+	}
+	for (i = 1; i < 2044; i = i + 2) {
+
+		kprintf("Freeing chunk %d\n", i);
+
+		gfree(tmp[i]);
+	
+	}
+
+	for (i = 0; i < 100; i++) {
+		tmp[i] = galloc(0, PAGE_SIZE * i);
+		if (!tmp[i]) {
+			kprintf("Failed\n");
+			bug();
+		}
+	}
+
+	for (i = 0; i < 100; i++) {
+		kprintf("Freeing chunk %d\n", i);
+		gfree(tmp[i]);
+	}
+
+	kprintf("Done.");
+
+
+
+#endif
 }
 

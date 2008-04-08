@@ -1,5 +1,5 @@
 /*
- * kernel/init/tests.c
+ * kernel/init/test_kqueue.c
  *
  * Copyright (C) 2006 Alexey Zaytsev
  * Copyright (C) 2006 Alexander Shishkin
@@ -30,37 +30,48 @@
  * SUCH DAMAGE.
  * 
  */
-
 #include <koowaldah.h>
+#include <textio.h>
+#include <kqueue.h>
 
-void test_mm(void);
-void test_slice_alloc(void);
-void test_galloc(void);
-void test_kqueue(void);
-void test_threads(void);
-void test_pckbd(void);
-void test_serial(void);
-void test_irqs(void);
-void test_rootfs(void);
-void test_fslookup(void);
-void test_bug(void);
-void test_panic(void);
-void test_pf(void);
-
-void run_tests()
+void test_kqueue()
 {
-	test_mm();
-	test_slice_alloc();
-	test_galloc();
-	test_kqueue();
-	test_threads();
-	test_pckbd();
-	test_serial();
-	test_irqs();
-	test_rootfs();
-	test_fslookup();
-	test_bug();
-	test_panic();
-	test_pf();
+#ifdef OPT_TEST_KQUEUE
+	struct kqueue_t *q;
+	/*
+	char p1 = 0xA1;
+	char p2 = 0xA2;
+	char p3 = 0xA3;
+	char p4 = 0xA4;
+	*/
+	int i, t;
+
+	q = kqueue_create();
+
+	kprintf("Pushing 10000 numbers into the queue.\n");
+	for (i = 0; i < 10000; i++) {
+		kprintf("%d ", i);
+
+		kqueue_push(q, (char*)&i, sizeof(int));
+	//	kqueue_info(q);
+	}
+	kqueue_info(q);
+
+
+	kprintf("\nDone.");
+
+	kprintf("Now getting them back.\n");
+
+	for (i = 0; i < 10000; i++) {
+		kqueue_pull_tail(q, (char*)&t, sizeof(int));
+		kprintf("%d ", t);
+	}
+
+	kprintf("\nDone.\n");
+	kqueue_info(q);
+
+	kqueue_destroy(q);
+
+#endif /* OPT_TEST_KQUEUE */
 }
 
