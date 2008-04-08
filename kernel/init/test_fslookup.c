@@ -1,5 +1,5 @@
 /*
- * kernel/init/tests.c
+ * kernel/init/test_fslookup.c
  *
  * Copyright (C) 2006 Alexey Zaytsev
  * Copyright (C) 2006 Alexander Shishkin
@@ -30,37 +30,40 @@
  * SUCH DAMAGE.
  * 
  */
-
 #include <koowaldah.h>
+#include <bug.h>
+#include <textio.h>
+#include <namespace.h>
+#include <lib.h>
 
-void test_mm(void);
-void test_slice_alloc(void);
-void test_galloc(void);
-void test_kqueue(void);
-void test_threads(void);
-void test_pckbd(void);
-void test_serial(void);
-void test_irqs(void);
-void test_rootfs(void);
-void test_fslookup(void);
-void test_bug(void);
-void test_panic(void);
-void test_pf(void);
-
-void run_tests()
+void test_fslookup()
 {
-	test_mm();
-	test_slice_alloc();
-	test_galloc();
-	test_kqueue();
-	test_threads();
-	test_pckbd();
-	test_serial();
-	test_irqs();
-	test_rootfs();
-	test_fslookup();
-	test_bug();
-	test_panic();
-	test_pf();
-}
+#ifdef OPT_TEST_FSLOOKUP
+	struct direntry *dent = lookup_path("/sbin/init");
+	int fd, l;
+	char buf[256];
+	
+	if (!dent)
+		bug();
 
+	kprintf("FS test found: %s\n", dent->d_name);
+
+	fd = open("/init", 0);
+	if (fd < 0) {
+		kprintf("Open failed! %d\n", fd);
+		return;
+	}
+	kprintf("Opened a file descriptor %d\n", fd);
+
+	memory_set(buf, 0, 256);
+	do {
+		l = read(fd, buf, 100);
+		if (l < 0) {
+			kprintf("Error %d occured\n", l);
+			return;
+		}
+		kprintf("Read %d bytes, [%s]\n", l, buf);
+		break;
+	} while (l == 100);
+#endif
+}
