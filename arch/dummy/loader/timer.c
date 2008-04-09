@@ -34,6 +34,7 @@
  */
 
 #include <stdlib.h>
+#include <stdio.h>
 #include <signal.h>
 #include <dlfcn.h>
 #include <sys/time.h>

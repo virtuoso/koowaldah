@@ -34,6 +34,7 @@
 #include <unistd.h>
 #include <dlfcn.h>
 #include <sys/mman.h>
+#include <execinfo.h>
 #include "loader.h"
 
 /*
