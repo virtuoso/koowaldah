@@ -44,6 +44,44 @@
 void *H;                   /* kernel so handle */
 void (*kern_start)();      /* kernel entry point */
 
+/* total sleep time during idle calls in microseconds */
+#define IDLE_TIMEOUT 5000
+
+/* idle function descriptor */
+struct idle_call_node {
+	idle_call_t           func;
+	int                   timeout;
+	void                  *data;
+	struct idle_call_node *next;
+};
+
+/* chain of functions to be called when the system is idle */
+static struct idle_call_node idle_head = { NULL, IDLE_TIMEOUT, NULL, NULL };
+
+/*
+ * Register a function within the chain of idle calls.
+ * The function is allowed to sleep at most timeout microseconds;
+ * all registered functions should total to no more than IDLE_TIMEOUT.
+ */
+PRIVATE void push_idle_call(idle_call_t fn, int timeout, void *data)
+{
+	struct idle_call_node *icn;
+
+	if (!fn || timeout > idle_head.timeout)
+		return;
+
+	icn = malloc(sizeof(struct idle_call_node));
+	if (!icn)
+		perror("malloc");
+
+	icn->func = fn;
+	icn->timeout = timeout;
+	icn->data = data;
+	icn->next = idle_head.next;
+	idle_head.next = icn;
+	idle_head.timeout -= timeout;
+}
+
 EXPORT void __attribute__((noreturn))  dummy_abort()
 {
 	/* clean up */
@@ -85,7 +123,14 @@ EXPORT void dummy_putc(char c)
 
 EXPORT void dummy_delay()
 {
-	usleep(5000);
+	struct idle_call_node *icn;
+	
+	for (icn = idle_head.next; icn; icn = icn->next) {
+		(*icn->func)(icn->data);
+	}
+
+	if (idle_head.timeout)
+		usleep(idle_head.timeout);
 }
 
 PRIVATE int main(int argc, const char **argv)
@@ -116,6 +161,7 @@ PRIVATE int main(int argc, const char **argv)
 	}
 
 	init_timers();
+	init_sysrq();
 	kern_start();
 
 	return 0;

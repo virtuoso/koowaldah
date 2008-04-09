@@ -1,7 +1,7 @@
 /*
- * arch/dummy/loader/loader.h
+ * arch/dummy/sysrq.c
  *
- * Copyright (C) 2007 Alexander Shishkin
+ * Copyright (C) 2008 Alexander Shishkin
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -29,25 +29,14 @@
  * SUCH DAMAGE.
  */
 
-#ifndef __ARCH_DUMMY_LOADER_H__
-#define __ARCH_DUMMY_LOADER_H__
+#include <koowaldah.h>
+#include <dummy/loader.h>
 
-/* EXPORT'ed symbols are allowed to be referenced by the kernel,
- * PRIVATE ones are loader-only visible */
-#define EXPORT __attribute__((used,visibility("protected")))
-#define PRIVATE __attribute__((visibility("internal")))
-
-extern void *H;
-
-int init_memory();
-int dummy_get_mem_size();
-
-void init_timers(void);
-void init_sysrq(void);
-
-typedef void (*idle_call_t)(void *);
-
-void push_idle_call(idle_call_t fn, int timeout, void *data);
-
+void dummy_sysrq_handler(int ch)
+{
+#ifdef OPT_SYSRQ_DEBUG
+	sysrq_hit(0xff);
+	sysrq_hit(ch);
 #endif
+}
 
