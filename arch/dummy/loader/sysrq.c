@@ -1,7 +1,7 @@
 /*
- * arch/dummy/loader/loader.h
+ * arch/dummy/loader/sysrq.c
  *
- * Copyright (C) 2007 Alexander Shishkin
+ * Copyright (C) 2008 Alexander Shishkin
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -29,25 +29,66 @@
  * SUCH DAMAGE.
  */
 
-#ifndef __ARCH_DUMMY_LOADER_H__
-#define __ARCH_DUMMY_LOADER_H__
+/*
+ * Invoking sysrq
+ */
 
-/* EXPORT'ed symbols are allowed to be referenced by the kernel,
- * PRIVATE ones are loader-only visible */
-#define EXPORT __attribute__((used,visibility("protected")))
-#define PRIVATE __attribute__((visibility("internal")))
+#include <stdlib.h>
+#include <stdio.h>
+#include <unistd.h>
+#include <signal.h>
+#include <dlfcn.h>
+#include <termios.h>
+#include <sys/poll.h>
+#include "loader.h"
 
-extern void *H;
+typedef int (*sysrq_handler_t)(int);
 
-int init_memory();
-int dummy_get_mem_size();
+static sysrq_handler_t sysrq_handler = NULL;
 
-void init_timers(void);
-void init_sysrq(void);
+static struct termios term_std, term_koo;
 
-typedef void (*idle_call_t)(void *);
+static void sysrq_idle(void *data)
+{
+	struct pollfd fds = { .fd = 0, .events = POLLIN };
+	int ch;
 
-void push_idle_call(idle_call_t fn, int timeout, void *data);
+	if (sysrq_handler) {
+		poll(&fds, 1, 5000);
 
-#endif
+		if (fds.revents & POLLIN) {
+			ch = getchar();
+
+			/* Control-A is our hit */
+			if (ch == 1) {
+				poll(&fds, 1, 0);
+
+				ch = getchar();
+				(*sysrq_handler)(ch);
+			}
+		}
+	} else
+		usleep(5000);
+}
+
+static void done_sysrq(void)
+{
+        tcsetattr(0, TCSANOW, &term_std);
+}
+
+PRIVATE void init_sysrq(void)
+{
+	tcgetattr(0, &term_std);
+	atexit(done_sysrq);
+
+        term_koo = term_std;
+        term_koo.c_lflag &= ~(ICANON | ECHO);
+        tcsetattr(0, TCSANOW, &term_koo);
+
+	/* don't check if dlsym() succeeded, since we can live
+	 * with sysrq_handler==NULL quite fine */
+	sysrq_handler = dlsym(H, "dummy_sysrq_handler");
+
+	push_idle_call(sysrq_idle, 5000, NULL);
+}
 

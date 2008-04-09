@@ -1,7 +1,12 @@
 # dummy architecture provides a so-called loader which is
 # a normal host executable
 loader     := $(PRJROOT)/kos-loader
-local_OBJS := $(OBJDIR)/main.oH $(OBJDIR)/memory.oH $(OBJDIR)/threads.oH $(OBJDIR)/timer.oH
+local_OBJS := \
+	$(OBJDIR)/main.oH    \
+	$(OBJDIR)/memory.oH  \
+	$(OBJDIR)/threads.oH \
+	$(OBJDIR)/timer.oH   \
+	$(OBJDIR)/sysrq.oH
 
 # kernel images
 kos_nosyms := $(OBJDIR)/kos-shared.0
@@ -14,7 +19,8 @@ SOURCES := \
 	   late_init.c \
 	   memory.c    \
 	   threads.c   \
-	   machine.c
+	   machine.c   \
+	   sysrq.c
 
 include $(PRJROOT)/tools/main.mk
 
@@ -40,7 +46,7 @@ $(OBJDIR)/%.oH:
 	@$(call DO_CC,$(patsubst $(OBJDIR)/%.oH,loader/%.c,$@),$@,-Wall)
 
 $(loader): $(local_OBJS)
-	$(CC) $(local_OBJS) -o $(loader) -Wl,-E -ldl
+	$(CC) $(local_OBJS) -o $(loader) -Wl,-E -ldl -lncurses
 
 LD_FLAGS := -shared
 include $(PRJROOT)/tools/link-kernel.mk
