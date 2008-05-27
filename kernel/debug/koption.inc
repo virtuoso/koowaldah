@@ -22,7 +22,7 @@ KOPTION(
 	"Check spin locks and associated counters",
 	"",
 	KOPT_BOOL,
-	'N'
+	'Y'
 ),
 KOPTION(
 	"SYSRQ_DEBUG",
