@@ -95,13 +95,11 @@ EXPORT void dummy_noreturn()
 }
 
 #define TRACE_FRAMES 32
-EXPORT void dummy_bug(const char *file, const int line)
+EXPORT void dummy_dump_stack(void)
 {
 	void *bt[TRACE_FRAMES];
 	int total, i;
 	char **buf;
-
-	printf("Kernel bug at %s:%d\n", file, line);
 
 	total = backtrace(bt, TRACE_FRAMES);
 	buf = backtrace_symbols(bt, total);
@@ -112,7 +110,13 @@ EXPORT void dummy_bug(const char *file, const int line)
 
 		free(buf);
 	}
+}
 
+EXPORT void dummy_bug(const char *file, const int line)
+{
+	printf("Kernel bug at %s:%d\n", file, line);
+
+	dummy_dump_stack();
 	dummy_abort();
 }
 

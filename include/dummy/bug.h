@@ -37,6 +37,7 @@
 #include <arch/asm.h>
 
 void dummy_abort();
+void dummy_dump_stack(void);
 void dummy_bug(const char *file, const int line);
 void dummy_delay();
 
@@ -52,7 +53,7 @@ void dummy_delay();
 #define arch_display_stack() do {} while (0)
 
 #define arch_dump_stack(s) \
-	dummy_bug(__FILE__, __LINE__);
+	dummy_dump_stack();
 
 #define __HAVE_ARCH_BUG
 
