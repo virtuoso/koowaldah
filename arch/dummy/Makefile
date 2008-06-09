@@ -6,7 +6,8 @@ local_OBJS := \
 	$(OBJDIR)/memory.oH  \
 	$(OBJDIR)/threads.oH \
 	$(OBJDIR)/timer.oH   \
-	$(OBJDIR)/sysrq.oH
+	$(OBJDIR)/sysrq.oH   \
+	$(OBJDIR)/dl_user.oH
 
 # kernel images
 kos_nosyms := $(OBJDIR)/kos-shared.0
@@ -20,7 +21,8 @@ SOURCES := \
 	   memory.c    \
 	   threads.c   \
 	   machine.c   \
-	   sysrq.c
+	   sysrq.c     \
+	   syscalls.c
 
 include $(PRJROOT)/tools/main.mk
 

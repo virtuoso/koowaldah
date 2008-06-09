@@ -138,11 +138,26 @@ EXPORT void dummy_delay()
 		usleep(idle_head.timeout);
 }
 
+char *init_path = NULL;
+
+EXPORT void dummy_load_from_cpio(const char *path)
+{
+	if (!init_path)
+		return;
+
+	dummy_load_so(init_path);
+}
+
 PRIVATE int main(int argc, const char **argv)
 {
-	if (argc != 2) {
+	if (argc != 2 && argc != 3) {
 		fprintf(stderr, "Missing argument: kernel shared object\n");
 		exit(EXIT_FAILURE);
+	}
+
+	if (argc == 3) {
+		init_path = argv[2];
+		printf("Using init %s\n", init_path);
 	}
 
 	printf("Starting koowaldah 'dummy' execution realm\n");

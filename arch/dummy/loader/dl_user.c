@@ -1,7 +1,7 @@
 /*
- * include/dummy/thread.h
+ * arch/dummy/loader/dl_init.c
  *
- * Copyright (C) 2006, 2007 Alexander Shishkin
+ * Copyright (C) 2008 Alexander Shishkin
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -27,35 +27,59 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
- *
  */
 
-#ifndef __ARCH_THREAD_H__
-#define __ARCH_THREAD_H__
+#include <stdlib.h>
+#include <stdio.h>
+#include <dlfcn.h>
+#include "loader.h"
 
-int dummy_load_so(const char *path);
-void dummy_load_from_cpio(const char *path);
+/*
+ * Load dynamically linked program using host's libdl
+ */
+EXPORT int dummy_load_so(const char *path)
+{
+	void *__H;
+	void (*so_start)();
+	void **sys_call_gate;
+	void *sys_call;
 
-struct thread_context {
-	char placeholder[UCONTEXT_SIZE];
-	u32 stack_base;
-	u32 esp;
-};
+	/* open each shared object in a new namespace */
+	__H = dlmopen(-1, path, RTLD_NOW);
+	if (!__H) {
+		fprintf(stderr, "Init load failed: %s\n", dlerror());
+		return -1;
+	}
 
-#define THREAD_STACK_LIMIT PAGE_SIZE
+	/* obtain program's entry point */
+	so_start = dlsym(__H, "main");
+	if (!so_start) {
+		fprintf(stderr, "Init exec failed: %s\n", dlerror());
+		return -1;
+	}
 
-#define THREAD(s) ( { \
-		        unsigned long __q = (unsigned long)s; \
-		        __q &= ~(PAGE_SIZE - 1); \
-		        __q = __q + PAGE_SIZE - sizeof(struct thread); \
-		        (struct thread *) __q; } )
+	/* in-program address of system call trampoline */
+	sys_call_gate = dlsym(__H, "_sys_call");
+	if (!sys_call_gate) {
+		fprintf(stderr, "Init exec failed: %s\n", dlerror());
+		return -1;
+	}
 
-#define CURRENT() ( { \
-		        unsigned long __r = (unsigned long)__builtin_frame_address(0); \
-		        THREAD(__r); } )
+	/* obtain kernel's system call gate */
+	sys_call = dlsym(H, "sys_call");
+	if (!sys_call) {
+		fprintf(stderr, "Can't find kernel's sys_call_gate.\n");
+		return -1;
+	}
 
-#define reset_stack() \
-	do { CURRENT()->context.esp = (u32)CURRENT() - 4; } while (0);
+	/* patch program's system call entry function to kernel's
+	 * sys_call gate: this requires _sys_call symbol exported
+	 * from the program (assumingly by libc) */
+	*sys_call_gate = sys_call;
 
-#endif
+	/* start the program */
+	so_start();
+
+	return 0;
+}
 
