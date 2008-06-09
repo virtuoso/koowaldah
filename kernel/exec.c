@@ -65,6 +65,7 @@ static void __noreturn user_thread(void *data)
  */
 int thread_exec_new(struct thread *thread, struct inode *inode)
 {
+#ifndef OPT_CPU_ARCH_DUMMY
 	struct mapping *map = thread->map;
 	int ret;
 
@@ -84,6 +85,7 @@ int thread_exec_new(struct thread *thread, struct inode *inode)
 	map->m_mma[map->m_nmma] = mem_area_alloc_new(map,
 			USERMEM_HEAP, 1, MMA_RW | MMA_GROWS);
 	map->m_nmma++;
+#endif
 
 	return 0;
 }

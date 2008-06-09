@@ -102,12 +102,6 @@ EXPORT void dummy_switch_context(ucontext_t *ucp_from, ucontext_t *ucp_to)
  */
 EXPORT void dummy_start_user(unsigned long pc, unsigned long sp)
 {
-	jmp_buf env;
-
-	setjmp(env);
-#warning Messing with jmpbuf is a bad idea
-	env[0].__jmpbuf[0] = sp;
-	env[0].__jmpbuf[1] = pc;
-	longjmp(env, 0);
+	dummy_load_from_cpio(NULL);
 }
 
