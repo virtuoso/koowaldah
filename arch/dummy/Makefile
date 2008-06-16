@@ -17,7 +17,6 @@ pre-compile: $(PRJROOT)/confdefs
 
 # architecture-specific kernel code
 SOURCES := \
-	   late_init.c \
 	   memory.c    \
 	   threads.c   \
 	   machine.c   \

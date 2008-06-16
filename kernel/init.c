@@ -98,8 +98,15 @@ void __init kern_start()
 	bug();
 }
 
+#ifndef OPT_CPU_ARCH_DUMMY
 extern initfn late_init_start;
 extern initfn late_init_end;
+#else
+extern initfn __start_InitLate;
+extern initfn __stop_InitLate;
+#define late_init_start __start_InitLate
+#define late_init_end   __stop_InitLate
+#endif
 
 void __noprof call_late_init()
 {
