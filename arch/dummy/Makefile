@@ -49,7 +49,7 @@ $(OBJDIR)/%.oH:
 	@$(call DO_CC,$(patsubst $(OBJDIR)/%.oH,loader/%.c,$@),$@,-Wall)
 
 $(loader): $(local_OBJS)
-	$(CC) $(local_OBJS) -o $(loader) -Wl,-E -ldl -lncurses
+	$(CC) $(local_OBJS) -o $(loader) -Wl,-E -ldl
 
 LD_FLAGS := -shared
 include $(PRJROOT)/tools/link-kernel.mk
