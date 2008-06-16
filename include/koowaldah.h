@@ -76,7 +76,7 @@ extern u8 kernel_started;
 typedef int (*initfn)(void);
 
 #define late_init(f) \
-	__attribute__((section(".init.late"))) initfn __ ##f## _late = f;
+	__attribute__((section("InitLate"))) initfn __ ##f## _late = f;
 
 #include <debug.h>
 
