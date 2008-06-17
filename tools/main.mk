@@ -3,9 +3,10 @@
 
 # Defines rules and functions that do most of the work.
 
--include $(PRJROOT)/konfig.mk
-include $(PRJROOT)/tools/vars.mk
-include $(PRJROOT)/tools/verbosity.mk
+TOOLSDIR ?= $(PRJROOT)
+-include $(TOOLSDIR)/konfig.mk
+include $(TOOLSDIR)/tools/vars.mk
+include $(TOOLSDIR)/tools/verbosity.mk
 
 # some variables useful for building stuff
 # ----------------------------------------
