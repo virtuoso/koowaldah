@@ -45,14 +45,14 @@ EXPORT int dummy_load_so(const char *path)
 	void *sys_call;
 
 	/* open each shared object in a new namespace */
-	__H = dlmopen(-1, path, RTLD_NOW);
+	__H = dlmopen(-1, path, RTLD_NOW|RTLD_DEEPBIND);
 	if (!__H) {
 		fprintf(stderr, "Init load failed: %s\n", dlerror());
 		return -1;
 	}
 
 	/* obtain program's entry point */
-	so_start = dlsym(__H, "main");
+	so_start = dlsym(__H, "__libc_init");
 	if (!so_start) {
 		fprintf(stderr, "Init exec failed: %s\n", dlerror());
 		return -1;

@@ -168,7 +168,7 @@ PRIVATE int main(int argc, const char **argv)
 		exit(EXIT_FAILURE);
 	}
 
-	H = dlopen(argv[1], RTLD_LAZY | RTLD_GLOBAL);
+	H = dlopen(argv[1], RTLD_LAZY | RTLD_GLOBAL | RTLD_DEEPBIND);
 	if (!H) {
 		perror(dlerror());
 		exit(EXIT_FAILURE);
