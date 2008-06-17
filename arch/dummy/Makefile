@@ -22,7 +22,8 @@ SOURCES := \
 	   threads.c   \
 	   machine.c   \
 	   sysrq.c     \
-	   syscalls.c
+	   syscalls.c  \
+	   serial.c
 
 include $(PRJROOT)/tools/main.mk
 
