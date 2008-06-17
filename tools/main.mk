@@ -122,7 +122,7 @@ $(OBJDIR)/%.d:
 	@if [ -f "$(subst .c,.S,$(call DEP2SRC,$@))" ]; then \
 		echo "$(@:.d=.o): $(subst .c,.S,$(call DEP2SRC,$@))" > $@; \
 	else \
-		$(call DO_GENDEPS,$(call DEP2SRC,$@),$@,-I$(PRJROOT)/include -ffreestanding); \
+		$(call DO_GENDEPS,$(call DEP2SRC,$@),$@,$(CC_FLAGS) -I$(PRJROOT)/include -ffreestanding); \
 	fi
 
 ifneq ($(NODEPS),1)
