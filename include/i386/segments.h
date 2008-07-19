@@ -277,6 +277,11 @@ struct gatedesc {
 #endif
 
 /*
+ * I/O permission table size
+ */
+#define IOPERMSZ 2048
+
+/*
  * TSS segment
  */
 #ifndef __ASSEMBLY__
@@ -306,10 +311,10 @@ struct tss_segment {
 	u32 fs;
 	u32 gs;
 	u32 ldt;
-	u32 trap;
-	u32 iobase;
-/* u8_t iomap[0]; */
-};
+	u16 trap;
+	u16 iobase;
+	u8  iomap[IOPERMSZ];
+} __attribute__((packed));
 #endif
 
 /*
