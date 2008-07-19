@@ -55,7 +55,7 @@ u32 __regparm(0) sys_call_gate(u32 eax, u32 ebx, u32 ecx, u32 edx,
 			return 0;
 
 		case __SYS_open:
-			return open((char *)ebx, (u32)ecx);
+			return open((char *)ebx, (u32)ecx, (u32)edx);
 
 		case __SYS_close:
 			return close((int)ebx);

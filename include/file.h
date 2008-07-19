@@ -62,7 +62,7 @@ void kill_file(struct file *file);
 int generic_open(struct file *file);
 int generic_close(struct file *file);
 
-int open(char *name, mode_t mode);
+int open(char *name, int flags, mode_t mode);
 int close(int fd);
 int read(int fd, char *buf, size_t len);
 int write(int fd, char *buf, size_t len);
