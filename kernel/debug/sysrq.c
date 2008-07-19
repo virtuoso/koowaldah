@@ -68,6 +68,10 @@ int sysrq_hit(char n)
 		sysrq_acq++;
 	else if (sysrq_acq) {
 		switch (n) {
+			case 'f':
+				dump_inodes();
+				break;
+
 			case 'm':
 				flags = LIST_MAPPING;
 			case 'P':
