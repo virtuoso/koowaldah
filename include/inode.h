@@ -91,6 +91,7 @@ struct inode *new_inode(struct superblock *sb);
 void free_inode(struct inode *inode);
 struct inode *get_inode(struct superblock *sb, ino_t ino);
 void release_inode(struct inode *inode);
+void dump_inodes();
 
 #endif
 

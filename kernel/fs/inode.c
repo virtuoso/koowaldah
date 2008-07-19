@@ -221,6 +221,36 @@ void release_inode(struct inode *inode)
 		free_inode(inode);
 }
 
+void dump_inodes()
+{
+	struct klist0_node *ti, *td;
+	struct inode *inode;
+	struct direntry *dent;
+	struct superblock *sb = get_super(ROOTFSDEV);
+
+scan:
+	klist0_for_each(ti, &sb->s_ilist) {
+		inode = klist0_entry(ti, struct inode, i_sblist);
+
+		kprintf("ino %d: refcnt=%d sz=%d nl=%d names:",
+				inode->i_ino, atomic_read(&inode->i_refcnt),
+				inode->i_size, inode->i_nlinks);
+
+		klist0_for_each(td, &inode->i_dent) {
+			dent = klist0_entry(td, struct direntry, d_idlist);
+
+			kprintf(" %s", dent->d_name);
+		}
+
+		kprintf("\n");
+	}
+
+	if (sb->s_dev == ROOTFSDEV) {
+		sb = get_super(VIRTFSDEV);
+		goto scan;
+	}
+}
+
 /*
  * Do all the necessary things to get inode caches work.
  */
