@@ -191,6 +191,34 @@ int mpipe_open(char *name)
 	return file->f_fd;
 }
 
+int mpipe_open2(int fd)
+{
+	struct file *file;
+	struct mpipe_ctl *mc;
+
+	mc = slice_alloc(mpipe_pool);
+	if (!mc)
+		return -ENOMEM;
+
+	file = fd2file(fd);
+	if (!file)
+		return -EBADF;
+
+	file->f_ops = &mpipe_fops; /* for successive calls on this fd */
+	file->f_inode->i_size = 1; /* something's broken up there */
+	file->f_inode->i_fops = &mpipe_fops; /* for clients */
+	file->f_inode->i_ctl = mc;
+
+	/* initialize the control structure */
+	tq_init(&mc->tq);
+	mc->len = 0;
+	mc->buf = NULL;
+	mc->state = MC_OPENED;
+	mutex_init(&mc->mutex);
+
+	return 0;
+}
+
 void __init fs_mpipe_init()
 {
 	mpipe_pool = slice_pool_create(0, sizeof(struct mpipe_ctl));

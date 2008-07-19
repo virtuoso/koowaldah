@@ -109,6 +109,9 @@ u32 __regparm(0) sys_call_gate(u32 eax, u32 ebx, u32 ecx, u32 edx,
 		case __SYS_stat:
 			return stat((char *)ebx, (struct stat *)ecx);
 
+		case __SYS_mpipe_open2:
+			return mpipe_open2((int)ebx);
+
 		default:
 			kprintf("syscall %d not implemented\n", eax);
 			display_thread();

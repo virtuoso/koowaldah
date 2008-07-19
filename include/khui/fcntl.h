@@ -44,6 +44,7 @@
 #define O_CREAT         0x00000200      /* create if nonexistent */
 #define O_TRUNC         0x00000400      /* truncate to zero length */
 #define O_EXCL          0x00000800      /* error if already exists */
+#define O_FORCE         0x10000000      /* force open in ENODEV condition */
 
 /*
  * Constants used for fcntl(2)

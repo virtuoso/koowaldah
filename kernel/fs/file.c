@@ -37,7 +37,9 @@
 #include <file.h>
 #include <page_alloc.h>
 #include <khui/stat.h>
+#include <khui/fcntl.h>
 #include <thread.h>
+#include "fs.h"
 
 /*
  * FS file operations.
@@ -197,13 +199,16 @@ int open(char *name, int flags, mode_t mode)
 	struct file_operations *fops = NULL;
 	struct thread *thread = CURRENT();
 
+	if (flags & O_CREAT) /* this will only work for rootfs */
+		fs_insert_entry(name, mode, NODEV, NULL, 0);
+
 	dent = lookup_path(name);
 	if (!dent)
 		return -ENOENT;
 
 	/* if it's a device file, look it up and hook its fops to
 	 * our file */
-	if (dent->d_inode->i_dev != NODEV) {
+	if (dent->d_inode->i_dev != NODEV && !(flags & O_FORCE)) {
 		device = get_device(dent->d_inode->i_dev);
 		if (!device)
 			return -ENODEV;
@@ -239,7 +244,7 @@ int open(char *name, int flags, mode_t mode)
 /*
  * Find file object by given descriptor
  */
-static struct file *fd2file(int fd)
+struct file *fd2file(int fd)
 {
 	struct thread *thread = CURRENT();
 	struct klist0_node *t;

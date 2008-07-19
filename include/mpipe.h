@@ -33,5 +33,6 @@
 #define __MPIPE_H__
 
 int mpipe_open(char *name);
+int mpipe_open2(int fd);
 
 #endif

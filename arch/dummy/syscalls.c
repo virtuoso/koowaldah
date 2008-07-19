@@ -112,6 +112,9 @@ unsigned int sys_call(
 		case __SYS_stat:
 			return stat((char *)arg0, (struct stat *)arg1);
 
+		case __SYS_mpipe_open2:
+			return mpipe_open2((int)arg0);
+
 		default:
 			kprintf("syscall %d not implemented\n", sys);
 			display_thread();

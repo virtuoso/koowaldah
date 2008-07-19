@@ -57,6 +57,7 @@
 #define __SYS_sbrk 15
 #define __SYS_brk 16
 #define __SYS_stat 17
+#define __SYS_mpipe_open2 18
 
 int __sys_debug(const char *str);
 int __sys_open(const char *name, unsigned int flags, unsigned int mode);
@@ -75,6 +76,7 @@ void __attribute__((noreturn)) __sys_exit(int code);
 void *__sys_sbrk(unsigned int inc);
 unsigned long __sys_brk(unsigned long end);
 int __sys_stat(const char *, void *);
+int __sys_mpipe_open2(int fd);
 
 #endif /* __KHUI_I386_SYSCALLS_H__ */
 
