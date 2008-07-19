@@ -58,7 +58,7 @@ unsigned int sys_call(
 			return 0;
 
 		case __SYS_open:
-			return open((char *)arg0, (u32)arg1);
+			return open((char *)arg0, (u32)arg1, (u32)arg2);
 
 		case __SYS_close:
 			return close((int)arg0);

@@ -59,7 +59,7 @@
 #define __SYS_stat 17
 
 int __sys_debug(const char *str);
-int __sys_open(const char *name, unsigned int mode);
+int __sys_open(const char *name, unsigned int flags, unsigned int mode);
 int __sys_close(int fd);
 int __sys_read(int fd, const char *buf, unsigned int len);
 int __sys_write(int fd, const char *buf, unsigned int len);
