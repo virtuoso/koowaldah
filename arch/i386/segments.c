@@ -115,7 +115,11 @@ void __init init_root_tss()
 {
 	root_tss.ss0 = KERN_DATA;
 
-	syssegdesc_init(TSS, (u32)&root_tss, 104, GT_FREE_TSS, DPL_KERN);
+	root_tss.iobase = offsetof(struct tss_segment, iomap);
+	root_tss.iomap[IOPERMSZ - 1] = 0xff;
+
+	syssegdesc_init(TSS, (u32)&root_tss, sizeof(struct tss_segment),
+			GT_FREE_TSS, DPL_KERN);
 	write_tr(TSS);
 }
 
