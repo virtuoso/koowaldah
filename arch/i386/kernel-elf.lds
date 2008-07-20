@@ -19,7 +19,7 @@ SECTIONS
 	.rodata ALIGN (0x1000) :
 	{
 		late_init_start = .;
-		*(.init.late)
+		*(InitLate)
 		late_init_end = .;
 		*(.rodata*)
 	}
