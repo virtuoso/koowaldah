@@ -71,6 +71,7 @@ deps: $(DEPS)
 		$(MAKE) deps \
 			PRJROOT=$(PRJROOT) \
 			OBJDIR=$(OBJDIR) \
+			ARCH=$(ARCH) \
 			CC=$(CC) \
 			LD=$(LD) \
 			ASM=$(ASM) \
@@ -84,6 +85,7 @@ objects: $(OBJECTS) $(SUBDIRS)
 		$(MAKE) build \
 			PRJROOT=$(PRJROOT) \
 			OBJDIR=$(OBJDIR) \
+			ARCH=$(ARCH) \
 			CC=$(CC) \
 			LD=$(LD) \
 			ASM=$(ASM) \
@@ -103,6 +105,7 @@ clean:
 		$(MAKE) clean \
 			PRJROOT=$(PRJROOT) \
 			OBJDIR=$(OBJDIR) \
+			ARCH=$(ARCH) \
 			CC=$(CC) \
 			LD=$(LD) \
 			ASM=$(ASM) \
@@ -112,6 +115,7 @@ clean:
 	@$(MAKE) clean-local \
 			PRJROOT=$(PRJROOT) \
 			OBJDIR=$(OBJDIR) \
+			ARCH=$(ARCH) \
 			CC=$(CC) \
 			LD=$(LD) \
 			ASM=$(ASM) \
@@ -148,6 +152,7 @@ printobjs:
 		$(MAKE) printobjs \
 			PRJROOT=$(PRJROOT) \
 			OBJDIR=$(OBJDIR) \
+			ARCH=$(ARCH) \
 			CC=$(CC) \
 			LD=$(LD) \
 			ASM=$(ASM) \
