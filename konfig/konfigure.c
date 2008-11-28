@@ -80,7 +80,7 @@ void init()
 	/* scan through and allocate KOPT array */
 	while (p < (void *)&__stop_KPTR) {
 		kopt = DEREF(p, koption_t);
-		ksec = DEREF(p + 4, ksection_t);
+		ksec = DEREF(p + sizeof(struct koption *), ksection_t);
 		n = ksec->items;
 
 		for (i = 0; i < n; i++) {
@@ -96,7 +96,7 @@ void init()
 			kopt++;
 			total_kopts++;
 		}
-		p += 8;
+		p += (sizeof(struct koption *) + sizeof(struct ksection *));
 	}
 }
 
