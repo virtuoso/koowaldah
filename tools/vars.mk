@@ -5,6 +5,8 @@
 CROSS_COMPILE  ?=
 
 HOSTCC          = gcc
+HOSTCC_FLAGS	= -Wall -g
+
 
 CC              = $(CROSS_COMPILE)gcc
 ifndef CC_FLAGS
