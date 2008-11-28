@@ -46,7 +46,7 @@ include/arch:
 	ln -sf $(ARCH) $@
 
 KONFIG: konfig/konfigure
-	
+
 include/koptions.h $(PRJROOT)/konfig.mk: KONFIG
 	konfig/konfigure
 	mkdir -p $(OBJDIR)
@@ -54,10 +54,10 @@ include/koptions.h $(PRJROOT)/konfig.mk: KONFIG
 	cat KONFIG
 
 konfig/konfigure: konfig/konfigure.c
-	$(HOSTCC) -Wall -Ikonfig -I. -o konfig/konfigure.o -c konfig/konfigure.c
-	$(HOSTCC) -Wall -Ikonfig -I. -o konfig/kout.o -c konfig/kout.c
-	$(HOSTCC) -Wall -Ikonfig -I. -o konfig/ktree.o -c konfig/ktree.c
-	$(HOSTCC) -Wall -Ikonfig -I. -o konfig/kuser.o -c konfig/kuser.c
+	$(HOSTCC) $(HOSTCC_FLAGS) -Ikonfig -I. -o konfig/konfigure.o -c konfig/konfigure.c
+	$(HOSTCC) $(HOSTCC_FLAGS) -Ikonfig -I. -o konfig/kout.o -c konfig/kout.c
+	$(HOSTCC) $(HOSTCC_FLAGS) -Ikonfig -I. -o konfig/ktree.o -c konfig/ktree.c
+	$(HOSTCC) $(HOSTCC_FLAGS) -Ikonfig -I. -o konfig/kuser.o -c konfig/kuser.c
 	$(HOSTCC) -o $@ konfig/*.o
 
 pre-compile:
