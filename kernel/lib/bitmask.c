@@ -50,7 +50,7 @@ int bitmask_seek_set(unsigned long * dst, int limit)
 			tmp = 0;
 			dst++;
 		}
-		if ((*dst) & (1 << tmp))
+		if ((*dst) & (1UL << tmp))
 			return bit;
 
 	}
@@ -70,7 +70,7 @@ int bitmask_seek_unset(unsigned long * dst, int limit)
 			tmp = 0;
 			dst++;
 		}
-		if (!((*dst) & (1 << tmp)))
+		if (!((*dst) & (1UL << tmp)))
 			return bit;
 
 	}

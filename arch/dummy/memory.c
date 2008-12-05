@@ -47,7 +47,7 @@ void arch_init_boot_zone(struct mem_zone *zone, struct mem_zone *user)
 	mem_zone_init(zone);
 
 	user->total_pages = (total_mem >> PAGE_SHIFT) - zone->total_pages;
-	user->base = (u32 *)((u32)zone->base + (zone->total_pages << PAGE_SHIFT));
+	user->base = (u32 *)((unsigned long)zone->base + (zone->total_pages << PAGE_SHIFT));
 
 	kprintf("Total pages: %d, base: %x\n", user->total_pages, user->base);
 	mem_zone_init(user);

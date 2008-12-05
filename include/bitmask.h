@@ -32,18 +32,18 @@
  */
 
  /*
-  * Bitmasks are represented as arrays of type unsigned long, with 
-  * redudant bits ignored. The bits inside a single ulong are 
+  * Bitmasks are represented as arrays of type unsigned long, with
+  * redundant bits ignored. The bits inside a single ulong are
   * numbered starting from the least significant one.
   *
   * 0x00                       0x04                       0x08
   * | . | . | .... | . | . |   | . | . | .... | . | . |   | . | ...
   *  31  30         01  00      63  62         33  32      95
-  *  
+  *
   *
   * This implementation is hidden from the user, and even bitmask_print
   * lists the bits from left to right. This may be a subject to change, so
-  * don't touch the redudant bits.
+  * don't touch the redundant bits.
   */
 
 #ifndef __BITMASK_H__
@@ -64,10 +64,10 @@
 /*
  * Clear a number of bits starting from zero.
  */
-static __inline void bitmask_zero(unsigned long * dst, int bits) 
+static __inline void bitmask_zero(unsigned long * dst, int bits)
 {
 	while (bits >= BITS_PER_ULONG) {
-		*dst++ = 0;
+		*dst++ = 0UL;
 		bits -= BITS_PER_ULONG;
 	}
 	*dst = *dst & (~0UL << bits);
@@ -90,8 +90,8 @@ static __inline void bitmask_fill(unsigned long * dst, int bits)
  */
 static __inline void bitmask_bit_set(unsigned long * dst, int bit)
 {
-	dst[bit / BITS_PER_ULONG] = 
-		dst[bit / BITS_PER_ULONG] | 1 << (bit % BITS_PER_ULONG);
+	dst[bit / BITS_PER_ULONG] =
+		dst[bit / BITS_PER_ULONG] | 1UL << (bit % BITS_PER_ULONG);
 }
 
 /*
@@ -100,7 +100,7 @@ static __inline void bitmask_bit_set(unsigned long * dst, int bit)
 static __inline void bitmask_bit_clear(unsigned long * dst, int bit)
 {
 	dst[bit / BITS_PER_ULONG] =
-		dst[bit / BITS_PER_ULONG] & ~(1 << (bit % BITS_PER_ULONG));
+		dst[bit / BITS_PER_ULONG] & ~(1UL << (bit % BITS_PER_ULONG));
 }
 
 /*
@@ -108,7 +108,7 @@ static __inline void bitmask_bit_clear(unsigned long * dst, int bit)
  */
 static __inline int bitmask_bit_get(unsigned long * dst, int bit)
 {
-	return dst[bit / BITS_PER_ULONG] & (1 << (bit % BITS_PER_ULONG));
+	return dst[bit / BITS_PER_ULONG] & (1UL << (bit % BITS_PER_ULONG));
 }
 
 

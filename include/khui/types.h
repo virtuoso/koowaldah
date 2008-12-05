@@ -41,7 +41,7 @@ typedef __u32 __gid_t;
 typedef __u32 __uid_t;
 typedef __u32 __mode_t;
 typedef __s64 __off_t;
-typedef __u32 __size_t;
+typedef unsigned long __size_t;
 typedef __s32 __pid_t;
 
 #endif
