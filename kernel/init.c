@@ -74,8 +74,8 @@ void __init kern_start()
 
 	mach_start();
 
-	kprintf("Starting Koowaldah kernel.\n");
-	
+	kprintf("Starting Koowaldah v%s kernel.\n", VERSION_STRING);
+
 	/* memory allocation machinery */
 	init_mem_info();
 	paging_init();
