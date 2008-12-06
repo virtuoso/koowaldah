@@ -34,8 +34,6 @@
 #ifndef __CONSOLE_H__
 #define __CONSOLE_H__
 
-#include <config.h>
-
 /* console-like device driver structure */
 struct console {
 	int  (*init)();
