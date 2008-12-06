@@ -35,7 +35,7 @@
 #define __KOOWALDAH_H__
 
 #include <types.h>
-#include <config.h>
+#include <koptions.h>
 
 extern u64 __volatile__ jiffies;
 extern u8 kernel_started;
