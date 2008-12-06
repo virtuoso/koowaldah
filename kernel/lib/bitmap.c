@@ -1,6 +1,6 @@
 
 /*
- * kernel/bitmask.c
+ * bitmap.c
  *
  * Copyright (C) 2006 Alexey Zaytsev
  *
@@ -33,12 +33,12 @@
 
 #include <koowaldah.h>
 #include <textio.h>
-#include <bitmask.h>
+#include <bitmap.h>
 
 /*
  * Find the first set bit.
  */
-int bitmask_seek_set(unsigned long * dst, int limit)
+int bitmap_seek_set(unsigned long * dst, int limit)
 {
 	/* Later we may use some arch-specific instructions for
 	 * finding set bits. */
@@ -46,7 +46,7 @@ int bitmask_seek_set(unsigned long * dst, int limit)
 	int tmp = 0;
 
 	for (bit = 0; bit < limit; bit++, tmp++) {
-		if (tmp == BITS_PER_ULONG) {
+		if (tmp == BITS_PER_LONG) {
 			tmp = 0;
 			dst++;
 		}
@@ -60,13 +60,13 @@ int bitmask_seek_set(unsigned long * dst, int limit)
 /*
  * Find the first unset bit.
  */
-int bitmask_seek_unset(unsigned long * dst, int limit)
+int bitmap_seek_unset(unsigned long * dst, int limit)
 {
 	int bit = 0;
 	int tmp = 0;
 
 	for (bit = 0; bit < limit; bit++, tmp++) {
-		if (tmp == BITS_PER_ULONG) {
+		if (tmp == BITS_PER_LONG) {
 			tmp = 0;
 			dst++;
 		}
@@ -80,51 +80,51 @@ int bitmask_seek_unset(unsigned long * dst, int limit)
 /*
  * Check if all bits are set.
  */
-int bitmask_all_set(unsigned long * dst, int limit)
+int bitmap_all_set(unsigned long * dst, int limit)
 {
-	while (limit >= BITS_PER_ULONG) {
+	while (limit >= BITS_PER_LONG) {
 		if (*dst++ != ~0UL) {
 			return 0;
 		}
-		limit -= BITS_PER_ULONG;
+		limit -= BITS_PER_LONG;
 	}
 
-	return limit ? (!(~(*dst) & (~0UL >> (BITS_PER_ULONG - limit)))) : 1;
+	return limit ? !(~(*dst) & (~0UL >> (BITS_PER_LONG - limit))) : 1;
 }
 
 
 /*
  * Check if all bits are unset.
  */
-int bitmask_all_unset(unsigned long * dst, int limit)
+int bitmap_all_unset(unsigned long * dst, int limit)
 {
-	while (limit >= BITS_PER_ULONG) {
+	while (limit >= BITS_PER_LONG) {
 		if (*dst++)
 			return 0;
-		limit -= BITS_PER_ULONG;
+		limit -= BITS_PER_LONG;
 	}
 
-	return limit ? (!((*dst) & (~0UL >> (BITS_PER_ULONG - limit)))) : 1;
+	return limit ? !((*dst) & (~0UL >> (BITS_PER_LONG - limit))) : 1;
 }
 
-static __inline void bitmask_print_ulong(unsigned long data, int nbits)
+static __inline void bitmap_print_ulong(unsigned long data, int nbits)
 {
 	int i;
 	for (i = 0; i < nbits; i++)
-		kprintf("%d", (data & (1 << i )) ? 1 : 0);
+		kprintf("%d", (data & (1UL << i)) ? 1 : 0);
 	kprintf(" ");
 }
 
 /*
- * Print the bitmask out.
+ * Print the bitmap out.
  */
-void bitmask_print(unsigned long *dst, int bits)
+void bitmap_print(unsigned long *dst, int bits)
 {
-	while (bits >= BITS_PER_ULONG){
-		bitmask_print_ulong(*dst++, BITS_PER_ULONG);
-		bits -= BITS_PER_ULONG;
+	while (bits >= BITS_PER_LONG){
+		bitmap_print_ulong(*dst++, BITS_PER_LONG);
+		bits -= BITS_PER_LONG;
 	}
-	bitmask_print_ulong(*dst, bits);
-
+	bitmap_print_ulong(*dst, bits);
 	kprintf("\n");
 }
+

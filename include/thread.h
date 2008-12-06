@@ -33,11 +33,12 @@
 
 #ifndef __THREAD_H__
 #define __THREAD_H__
+
 #include <arch/thread.h>
 #include <spinlock.h>
 #include <klist0.h>
 #include <namespace.h>
-#include <bitmask.h>
+#include <bitmap.h>
 
 #define THREAD_NAME_LEN 32
 #define MAX_THREADS 128
@@ -79,7 +80,7 @@ struct thread {
 	struct klist0_node			files; /* or array? */
 	
 	int					last_fd;
-	BITMASK(fdset, FS_MAX_FDS);
+	BITMAP(fdset, FS_MAX_FDS);
 
 	struct klist0_node                      mbox;
 };

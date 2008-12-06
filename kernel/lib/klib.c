@@ -28,17 +28,17 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
- * 
+ *
  */
 
 
 #include <koowaldah.h>
-#include <lib.h> 
+#include <lib.h>
 
 
 size_t memory_set(void *s, char c, size_t n)
 {
-	
+
 	size_t t = n;
 	while (t-- > 0)
 		((char *)s)[t] = (char)c;
@@ -58,10 +58,12 @@ size_t memory_copy(void *dest, void *src, size_t n)
 	else
 		for (i = n; i > 0; i--)
 			((char *)dest)[i-1] = ((char *)src)[i-1];
-				
+
 	return n;
 }
 
+/* XxX: Whoever made it u32 deserves a slow death. Isn't the
+ * thing called str-to-unsigned-long? */
 /* nicked from NetBSD C library 'strtoull' */
 u32 strtoul(char *nptr)
 {
