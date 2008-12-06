@@ -36,7 +36,7 @@
 #include <inode.h>
 #include <file.h>
 #include <page_alloc.h>
-#include <bitmask.h>
+#include <bitmap.h>
 #include <khui/stat.h>
 #include <khui/fcntl.h>
 #include <thread.h>
@@ -192,8 +192,8 @@ int alloc_fd(struct thread *thread)
 {
 	int fd;
 	
-	/* this looks like an off-by-one in bitmask code vvv */
-	fd = bitmask_seek_unset(thread->fdset, thread->last_fd + 1);
+	/* this looks like an off-by-one in bitmap code vvv */
+	fd = bitmap_seek_unset(thread->fdset, thread->last_fd + 1);
 	if (fd == -1)
 		return -EBADF; /* no more descriptors available */
 
@@ -201,14 +201,14 @@ int alloc_fd(struct thread *thread)
 		thread->last_fd++;
 
 	/* mark fd as occupied */
-	bitmask_bit_set(thread->fdset, fd);
+	bitmap_bit_set(thread->fdset, fd);
 
 	return fd;
 }
 
 void free_fd(struct thread *thread, int fd)
 {
-	bitmask_bit_clear(thread->fdset, fd);
+	bitmap_bit_clear(thread->fdset, fd);
 }
 
 /*

@@ -33,7 +33,7 @@
 
 #include <koowaldah.h>
 #include <klist0.h>
-#include <bitmask.h>
+#include <bitmap.h>
 #include <mm_zone.h>
 #include <page_alloc.h>
 #include <slice.h>
@@ -73,7 +73,7 @@ static void slice_page_info(struct page *pg, int obj_size)
 	kprintf("Page: 0x%x, addr: 0x%x\n", (u32) pg, (u32) pg_addr);
 	kprintf("Bitmask (starts at 0x%x, %d bytes long): \n",
 		(u32) bmask, nobjs / 8);
-	bitmask_print(bmask, nobjs);
+	bitmap_print(bmask, nobjs);
 	
 	
 }
@@ -88,7 +88,7 @@ void slice_pool_info(struct slice_pool *slice)
 
 	kprintf("Object size: 0x%x (%d)\n",
 		slice->obj_size, slice->obj_size);
-	kprintf("Objects per page (including used for bitmasking): %d\n",
+	kprintf("Objects per page (including used for bitmaping): %d\n",
 		PAGE_SIZE / slice->obj_size);
 	
 	kprintf("Inactive pages:\n");
@@ -142,7 +142,7 @@ void slice_pool_shrink(struct slice_pool *pool)
 	struct klist0_node *t, *tmp;;
 	struct page *pg;
 	unsigned long *bmask;
-	int bitmask_size;
+	int bitmap_size;
 	int nobjs;
 		
 	
@@ -155,12 +155,12 @@ void slice_pool_shrink(struct slice_pool *pool)
 			+ PAGE_SIZE - BITS_TO_LONGS(nobjs)
 			* sizeof(unsigned long));
 		
-		bitmask_size = BITS_TO_LONGS(nobjs) * sizeof(unsigned long);
+		bitmap_size = BITS_TO_LONGS(nobjs) * sizeof(unsigned long);
 		
-		if (bitmask_size > PAGE_SIZE - nobjs * pool->obj_size) {
+		if (bitmap_size > PAGE_SIZE - nobjs * pool->obj_size) {
 			/* We need to use some bytes from the
-			 * slice pool for the bitmask. */
-			int consumed_bytes = bitmask_size -
+			 * slice pool for the bitmap. */
+			int consumed_bytes = bitmap_size -
 				(PAGE_SIZE - nobjs * pool->obj_size);
 
 			nobjs -= consumed_bytes / pool->obj_size + 
@@ -170,7 +170,7 @@ void slice_pool_shrink(struct slice_pool *pool)
 		DPRINT("page = 0x%x, nobjs = %d, bmask = 0x%x\n", 
 			(u32) page_to_addr(pg), nobjs, (u32) bmask);
 
-		if (bitmask_all_unset(bmask, nobjs)) {
+		if (bitmap_all_unset(bmask, nobjs)) {
 			tmp = t;
 			t = t->next;
 			klist0_unlink(tmp);
@@ -208,7 +208,7 @@ void *slice_alloc(struct slice_pool *pool)
 
 	if (klist0_empty(&pool->pages_active)) {
 
-		int bitmask_size;
+		int bitmap_size;
 		unsigned long *bmask;
 		u32 *pg_addr;
 		struct page *pg;
@@ -219,8 +219,8 @@ void *slice_alloc(struct slice_pool *pool)
 		pg_addr = page_to_addr(pg);
 		DPRINT("Allocating a new page: 0x%x\n", (u32) pg_addr);
 
-		bitmask_size = BITS_TO_LONGS(nobjs) * sizeof(unsigned long);
-		DPRINT("Bitmask size: %d\n", bitmask_size);
+		bitmap_size = BITS_TO_LONGS(nobjs) * sizeof(unsigned long);
+		DPRINT("Bitmask size: %d\n", bitmap_size);
 		DPRINT("nobjs = %d, (%d) longs\n", nobjs, BITS_TO_LONGS(nobjs));
 		
 		bmask = (unsigned long *) (((char *)pg_addr) + PAGE_SIZE -
@@ -229,14 +229,14 @@ void *slice_alloc(struct slice_pool *pool)
 		DPRINT("bmask = 0x%x\n", (u32) bmask);
 		
 		/* Mark all slices as used. */
-		bitmask_fill(bmask, nobjs);
-		/* bitmask_print(bmask, 1024); */
+		bitmap_fill(bmask, nobjs);
+		/* bitmap_print(bmask, 1024); */
 
-		/* If the bitmask does not fit in the tail gap. */
-		if (bitmask_size > PAGE_SIZE - nobjs * pool->obj_size) {
+		/* If the bitmap does not fit in the tail gap. */
+		if (bitmap_size > PAGE_SIZE - nobjs * pool->obj_size) {
 			/* We need to use some bytes from the
-			 * slice pool for the bitmask. */
-			int consumed_bytes = bitmask_size -
+			 * slice pool for the bitmap. */
+			int consumed_bytes = bitmap_size -
 				(PAGE_SIZE - nobjs * pool->obj_size);
 			DPRINT("consumed bytes = %d\n", consumed_bytes);
 
@@ -245,13 +245,13 @@ void *slice_alloc(struct slice_pool *pool)
 		}
 
 		/* Mark all the left slices as free. */
-		bitmask_zero(bmask, nobjs);
+		bitmap_zero(bmask, nobjs);
 		DPRINT("nobjs = %d\n", nobjs);
-		/* bitmask_print(bmask, 1024); */
+		/* bitmap_print(bmask, 1024); */
 
 		/* use the last avaliable slice to make further allocations
 		 * a bit faster.*/
-		bitmask_bit_set(bmask, nobjs - 1);
+		bitmap_bit_set(bmask, nobjs - 1);
 
 		klist0_append(&pg->list, &pool->pages_active);
 
@@ -271,16 +271,16 @@ void *slice_alloc(struct slice_pool *pool)
 			PAGE_SIZE - BITS_TO_LONGS(nobjs) * sizeof(unsigned long));
 
 		DPRINT("bmask = 0x%x\n", bmask);
-		/* bitmask_print(bmask, nobjs); */
+		/* bitmap_print(bmask, nobjs); */
 
-		number = bitmask_seek_unset(bmask, nobjs);
+		number = bitmap_seek_unset(bmask, nobjs);
 		DPRINT("number = %d\n", number);
 	
 		bug_on(number == -1);
 
-		bitmask_bit_set(bmask, number);
+		bitmap_bit_set(bmask, number);
 
-		if (bitmask_all_set(bmask, nobjs)) {
+		if (bitmap_all_set(bmask, nobjs)) {
 			
 			klist0_unlink(&pg->list);
 			klist0_append(&pg->list, &pool->pages_inactive);
@@ -328,7 +328,7 @@ void slice_free(void *slice, struct slice_pool *pool)
 
 			DPRINT("bmask = 0x%x\n", (u32) bmask);
 
-			bitmask_bit_clear(bmask, slice_idx);
+			bitmap_bit_clear(bmask, slice_idx);
 
 			return;
 		}
@@ -351,7 +351,7 @@ void slice_free(void *slice, struct slice_pool *pool)
 
 			DPRINT("bmask = 0x%x\n", (u32) bmask);
 
-			bitmask_bit_clear(bmask, slice_idx);
+			bitmap_bit_clear(bmask, slice_idx);
 
 			/* Maybe, try to shrink this page. */
 			
