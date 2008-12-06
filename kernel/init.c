@@ -120,6 +120,7 @@ void __noprof call_late_init()
 
 static void load_init()
 {
+#ifndef OPT_DONT_CALL_INIT
 	int s = spawn("/sbin/init");
 	if (s)  spawn("/bin/init");
 	if (s)  spawn("/kosrc");
@@ -127,6 +128,7 @@ static void load_init()
 		kprintf("Failed to execute init. Bye-bye!\n");
 		panic();
 	}
+#endif
 }
 
 void __noprof kernel_main_thread(void *data)
