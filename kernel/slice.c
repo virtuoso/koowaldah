@@ -3,7 +3,7 @@
  * kernel/slice.c
  *
  * Copyright (C) 2006 Alexey Zaytsev
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -28,7 +28,7 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
- * 
+ *
  */
 
 #include <koowaldah.h>
@@ -64,18 +64,17 @@ static void slice_page_info(struct page *pg, int obj_size)
 	unsigned long *bmask;
 	char *pg_addr;
 	int nobjs = PAGE_SIZE / obj_size;
-	
+
 	pg_addr = (char *) page_to_addr(pg);
 
-	bmask = (unsigned long *) ((pg_addr) + PAGE_SIZE -
-		BITS_TO_LONGS(nobjs) * sizeof(unsigned long));
+	bmask = (unsigned long *) ((pg_addr) + PAGE_SIZE - BITMAP_SIZE(nobjs));
 
 	kprintf("Page: 0x%x, addr: 0x%x\n", (u32) pg, (u32) pg_addr);
 	kprintf("Bitmask (starts at 0x%x, %d bytes long): \n",
 		(u32) bmask, nobjs / 8);
 	bitmap_print(bmask, nobjs);
-	
-	
+
+
 }
 
 /*
@@ -90,13 +89,13 @@ void slice_pool_info(struct slice_pool *slice)
 		slice->obj_size, slice->obj_size);
 	kprintf("Objects per page (including used for bitmaping): %d\n",
 		PAGE_SIZE / slice->obj_size);
-	
+
 	kprintf("Inactive pages:\n");
 	klist0_for_each(tmp, &slice->pages_inactive) {
 		slice_page_info(klist0_entry(tmp, struct page, list),
 			slice->obj_size);
 	}
-	
+
 	kprintf("Active pages:\n");
 	klist0_for_each(tmp, &slice->pages_active) {
 		slice_page_info(klist0_entry(tmp, struct page, list),
@@ -104,12 +103,12 @@ void slice_pool_info(struct slice_pool *slice)
 	}
 }
 
-struct slice_pool *slice_pool_create(u32 flags, int obj_size) 
+struct slice_pool *slice_pool_create(u32 flags, int obj_size)
 {
 	struct slice_pool *slice;
 
 	if (obj_size > PAGE_SIZE / 2 - sizeof(unsigned long)) {
-		/* 
+		/*
 		 * Can't allocate slices that big, maybe fall back to the
 		 * page allocator, later.
 		 */
@@ -126,10 +125,10 @@ struct slice_pool *slice_pool_create(u32 flags, int obj_size)
 		(u32) pg, (u32) addr_to_page(pg), addr_to_page(pg)->private.order);
 
 	KLIST0_INIT(&slice->slice_list);
-	
+
 	KLIST0_INIT(&slice->pages_inactive);
 	KLIST0_INIT(&slice->pages_active);
-	
+
 	slice->obj_size = obj_size;
 	slice->flags = flags;
 	klist0_append(&slice->slice_list, &boot_slice_swamp.slices);
@@ -144,30 +143,29 @@ void slice_pool_shrink(struct slice_pool *pool)
 	unsigned long *bmask;
 	int bitmap_size;
 	int nobjs;
-		
-	
+
+
 	t = pool->pages_active.next;
 
 	while (t != &pool->pages_active) {
 		nobjs = PAGE_SIZE / pool->obj_size;
 		pg = klist0_entry(t, struct page, list);
 		bmask = (unsigned long *) (((char *)page_to_addr(pg))
-			+ PAGE_SIZE - BITS_TO_LONGS(nobjs)
-			* sizeof(unsigned long));
-		
-		bitmap_size = BITS_TO_LONGS(nobjs) * sizeof(unsigned long);
-		
+			+ PAGE_SIZE - BITMAP_SIZE(nobjs));
+
+		bitmap_size = BITMAP_SIZE(nobjs);
+
 		if (bitmap_size > PAGE_SIZE - nobjs * pool->obj_size) {
 			/* We need to use some bytes from the
 			 * slice pool for the bitmap. */
 			int consumed_bytes = bitmap_size -
 				(PAGE_SIZE - nobjs * pool->obj_size);
 
-			nobjs -= consumed_bytes / pool->obj_size + 
+			nobjs -= consumed_bytes / pool->obj_size +
 				((consumed_bytes % pool->obj_size)? 1 : 0);
 		}
 
-		DPRINT("page = 0x%x, nobjs = %d, bmask = 0x%x\n", 
+		DPRINT("page = 0x%x, nobjs = %d, bmask = 0x%x\n",
 			(u32) page_to_addr(pg), nobjs, (u32) bmask);
 
 		if (bitmap_all_unset(bmask, nobjs)) {
@@ -188,7 +186,7 @@ void slice_pool_recycle(struct slice_pool *pool)
 		slice_pool_info(pool);
 		bug();
 	}
-	
+
 	slice_pool_shrink(pool);
 
 	if (!klist0_empty(&pool->pages_active)){
@@ -212,22 +210,23 @@ void *slice_alloc(struct slice_pool *pool)
 		unsigned long *bmask;
 		u32 *pg_addr;
 		struct page *pg;
-		
+
 		pg = alloc_page(0);
 		if (!pg)
 			return NULL;
 		pg_addr = page_to_addr(pg);
 		DPRINT("Allocating a new page: 0x%x\n", (u32) pg_addr);
 
-		bitmap_size = BITS_TO_LONGS(nobjs) * sizeof(unsigned long);
+		bitmap_size = BITMAP_SIZE(nobjs);
 		DPRINT("Bitmask size: %d\n", bitmap_size);
-		DPRINT("nobjs = %d, (%d) longs\n", nobjs, BITS_TO_LONGS(nobjs));
-		
-		bmask = (unsigned long *) (((char *)pg_addr) + PAGE_SIZE -
-			BITS_TO_LONGS(nobjs) * sizeof(unsigned long));
+		DPRINT("nobjs = %d, (%d) longs\n", nobjs,
+			BITMAP_SIZE(nobjs) / (sizeof(unsigned long)));
+
+		bmask = (unsigned long *) (((char *)pg_addr) + PAGE_SIZE
+			- BITMAP_SIZE(nobjs));
 
 		DPRINT("bmask = 0x%x\n", (u32) bmask);
-		
+
 		/* Mark all slices as used. */
 		bitmap_fill(bmask, nobjs);
 		/* bitmap_print(bmask, 1024); */
@@ -240,7 +239,7 @@ void *slice_alloc(struct slice_pool *pool)
 				(PAGE_SIZE - nobjs * pool->obj_size);
 			DPRINT("consumed bytes = %d\n", consumed_bytes);
 
-			nobjs -= consumed_bytes / pool->obj_size + 
+			nobjs -= consumed_bytes / pool->obj_size +
 				((consumed_bytes % pool->obj_size)? 1 : 0);
 		}
 
@@ -268,27 +267,27 @@ void *slice_alloc(struct slice_pool *pool)
 		DPRINT("pg = 0x%x, addr = 0x%x\n", pg, pg_addr);
 
 		bmask = (unsigned long *) (((char *)pg_addr) +
-			PAGE_SIZE - BITS_TO_LONGS(nobjs) * sizeof(unsigned long));
+			PAGE_SIZE - BITMAP_SIZE(nobjs));
 
 		DPRINT("bmask = 0x%x\n", bmask);
 		/* bitmap_print(bmask, nobjs); */
 
 		number = bitmap_seek_unset(bmask, nobjs);
 		DPRINT("number = %d\n", number);
-	
+
 		bug_on(number == -1);
 
 		bitmap_bit_set(bmask, number);
 
 		if (bitmap_all_set(bmask, nobjs)) {
-			
+
 			klist0_unlink(&pg->list);
 			klist0_append(&pg->list, &pool->pages_inactive);
 		}
 
 		return (char *)(((char *)pg_addr) + number * pool->obj_size);
 	}
-	
+
 	return NULL;
 }
 
@@ -300,7 +299,7 @@ void slice_free(void *slice, struct slice_pool *pool)
 	int slice_idx;
 	int nobjs;
 	unsigned long *bmask;
-	
+
 	nobjs = PAGE_SIZE / pool->obj_size;
 
 	DPRINT("Free. slice = 0x%x, pool = 0x%x, nobjs = %d\n",
@@ -324,7 +323,7 @@ void slice_free(void *slice, struct slice_pool *pool)
 			DPRINT("slice idx = %d\n", slice_idx);
 
 			bmask = (unsigned long *) (((char *)pg_addr) + PAGE_SIZE -
-				BITS_TO_LONGS(nobjs) * sizeof(unsigned long));
+				BITMAP_SIZE(nobjs));
 
 			DPRINT("bmask = 0x%x\n", (u32) bmask);
 
@@ -347,14 +346,14 @@ void slice_free(void *slice, struct slice_pool *pool)
 			DPRINT("slice idx = %d\n", slice_idx);
 
 			bmask = (unsigned long *) (((char *)pg_addr) + PAGE_SIZE -
-				BITS_TO_LONGS(nobjs) * sizeof(unsigned long));
+				BITMAP_SIZE(nobjs));
 
 			DPRINT("bmask = 0x%x\n", (u32) bmask);
 
 			bitmap_bit_clear(bmask, slice_idx);
 
 			/* Maybe, try to shrink this page. */
-			
+
 			return;
 		}
 	}
