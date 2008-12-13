@@ -34,7 +34,7 @@
  *
  */
 
-#ifndef CONFIG_X86
+#ifndef OPT_CPU_ARCH_I386
 #error Never, ever include this file on non-x86 architectures.
 #endif
 #ifndef __i386__
