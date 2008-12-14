@@ -1,4 +1,4 @@
-KOPTIONS_START(ARCH, "Dummy architecture configuration", 2)
+KOPTIONS_START(ARCH_DUMMY, "Dummy architecture configuration", 2)
 KOPTION(
         "UCONTEXT_SIZE",
         "ucontext_t size",
