@@ -43,25 +43,25 @@ extern void early_vga_init(void);
  */
 void __init early_console_init()
 {
-#if CONFIG_SERIAL_CONSOLE
+#ifdef OPT_EARLY_SERIAL_CONSOLE
 	early_serial_init();
-#endif /* CONFIG_SERIAL_CONSOLE */
+#endif
 
-#if CONFIG_VGA_CONSOLE
+#ifdef OPT_EARLY_VGA_CONSOLE
 	early_vga_init();
-#endif /* CONFIG_VGA_CONSOLE */
+#endif
 }
 
 extern void early_serial_put_char(char c);
 extern void early_vga_put_char(char c);
 void console_put_char(char c)
-{	
-#if CONFIG_SERIAL_CONSOLE
+{
+#ifdef OPT_EARLY_SERIAL_CONSOLE
 	early_serial_put_char(c);
-#endif /* CONFIG_SERIAL_CONSOLE */
+#endif
 
-#if CONFIG_VGA_CONSOLE
+#ifdef OPT_EARLY_VGA_CONSOLE
 	early_vga_put_char(c);
-#endif /* CONFIG_VGA_CONSOLE */
+#endif
 }
-	
+
