@@ -44,6 +44,13 @@ DO_GENDEPS = \
 # echo -n "  CC  $(1)... ";
 DO_CC = \
 	$(call OUTPUT,$(CC) $(3) -c $(1) -o $(2),CC $(1)... )
+# call host compiler to generate an object file
+# $(1) -- .c source
+# $(2) -- .o output
+# $(3) -- CFLAGS to use
+# echo -n "  HOSTCC  $(1)... ";
+DO_HOSTCC = \
+	$(call OUTPUT,$(HOSTCC) $(3) -c $(1) -o $(2),HOSTCC $(1)... )
 # call linker
 # $(1) -- list of objects to link
 # $(2) -- output
@@ -134,6 +141,11 @@ ifneq ($(DEPS),)
 -include $(DEPS)
 endif
 endif
+
+# to shut gmake's attempts to compile a defs.mk from sysdeps
+# should it not exist
+%/defs.mk:
+	@true
 
 $(OBJDIR)/%.o:
 	@if [ "$(subst .c,,$<)" != "$<" ]; then \

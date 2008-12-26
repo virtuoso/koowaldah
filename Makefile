@@ -6,23 +6,6 @@ MAKEFLAGS      := --no-print-directory -rR
 
 include tools/main.mk
 
-#### CONFIGURATION SECTION START ####
-
-ifeq ($(MK_CPU_ARCH_DUMMY),Y)
-ARCH := dummy
-endif
-ifeq ($(MK_CPU_ARCH_I386),Y)
-ARCH := i386
-endif
-ifeq ($(MK_CPU_ARCH_POWERPC),Y)
-ARCH := powerpc
-endif
-ifeq ($(MK_CPU_ARCH_ARM),Y)
-ARCH := arm
-endif
-
-#### CONFIGURATION SECTION END ####
-
 ifeq ($(MK_GLOBAL_DEBUG),Y)
   CC_FLAGS += -DDEBUG=1
 endif

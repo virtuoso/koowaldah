@@ -24,18 +24,22 @@ SOURCES := \
 	   syscalls.c  \
 	   serial.c
 
+LD_FLAGS += -shared
+
 include $(PRJROOT)/tools/main.mk
 
 $(PRJROOT)/confdefs: tests/ucontext_size.c tests/page_shift.c
 	: > $@
 ifeq ($(MK_UCONTEXT_SIZE),0)
-	$(CC) tests/ucontext_size.c -o $(OBJDIR)/ucontext_size
+	$(HOSTCC) $(HOSTCC_FLAGS) $(HOSTLD_FLAGS) tests/ucontext_size.c \
+		-o $(OBJDIR)/ucontext_size
 	$(OBJDIR)/ucontext_size > $@
 else
 	echo -n " -DUCONTEXT_SIZE=$(MK_UCONTEXT_SIZE)" > $@
 endif
 ifeq ($(MK_PAGE_SHIFT),0)
-	$(CC) tests/page_shift.c -o $(OBJDIR)/page_shift
+	$(HOSTCC) $(HOSTCC_FLAGS) $(HOSTLD_FLAGS) tests/page_shift.c \
+		-o $(OBJDIR)/page_shift
 	$(OBJDIR)/page_shift >> $@
 else
 	echo -n " -DPAGE_SHIFT=$(MK_PAGE_SHIFT)" >> $@
@@ -45,12 +49,11 @@ endif
 $(local_OBJS): $(patsubst $(OBJDIR)/%.oH,loader/%.c,$(local_OBJS))
 
 $(OBJDIR)/%.oH:
-	@$(call DO_CC,$(patsubst $(OBJDIR)/%.oH,loader/%.c,$@),$@,-Wall)
+	@$(call DO_HOSTCC,$(patsubst $(OBJDIR)/%.oH,loader/%.c,$@),$@,$(HOSTCC_FLAGS))
 
 $(loader): $(local_OBJS)
-	$(CC) $(local_OBJS) -o $(loader) -Wl,-E -ldl
+	$(HOSTLD) $(HOSTLD_FLAGS) $(local_OBJS) -o $(loader) -Wl,-E -ldl
 
-LD_FLAGS := -shared
 include $(PRJROOT)/tools/link-kernel.mk
 
 link-kernel: $(loader)
