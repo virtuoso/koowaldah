@@ -1,13 +1,20 @@
 include $(PRJROOT)/tools/main.mk
 
-build-local: $(OBJDIR)/rootfs.o
+#SUBDIRS := klibc
+
+build-local: $(OBJDIR)/libc.a $(OBJDIR)/rootfs.o
+
+$(OBJDIR)/libc.a:
+	$(MAKE) PRJROOT=$(PRJROOT) \
+		MODULE=klibc \
+		OBJDIR=$(OBJDIR) all -C klibc
 
 $(OBJDIR)/rootfs.cpio:
 	( cd $(MK_ROOTFS_DIR); find . | cpio -o ) > $@
 
 $(OBJDIR)/rootfs.o: $(OBJDIR)/rootfs.cpio
 	$(CC) $(CC_FLAGS) -DROOTFS_CPIO=\"$(OBJDIR)/rootfs.cpio\" -c rootfs.S -o $(OBJDIR)/rootfs.o
-	echo $(OBJDIR)/rootfs.o >> $(OBJDIR)/OBJECTS
+	echo $(OBJDIR)/rootfs.o >> $(OBJDIR)/$(OBJLIST)
 
 clean-local:
 	rm -f $(OBJDIR)/rootfs.cpio
