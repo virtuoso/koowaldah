@@ -1,5 +1,6 @@
 PRJROOT := $(shell echo $(CURDIR))
 DESTDIR ?= /tmp
+MODULE := kernel
 
 # GNU make's default rules make debugging lots harder
 MAKEFLAGS      := --no-print-directory -rR
@@ -45,6 +46,7 @@ konfig/konfigure: konfig/konfigure.c
 
 pre-compile:
 	$(MAKE) pre-compile -C arch/$(ARCH) \
+		MODULE=$(MODULE) \
 		PRJROOT="$(PRJROOT)" \
 		OBJDIR="$(OBJDIR)"
 
@@ -55,6 +57,7 @@ SUBDIRS := arch/$(ARCH) kernel drivers/keyboard drivers/serial usr
 
 kernel-elf: deps objects printobjs
 	$(MAKE) link-kernel -C $(PRJROOT)/arch/$(ARCH) \
+		MODULE=$(MODULE) \
 		PRJROOT="$(PRJROOT)" \
 		OBJDIR="$(OBJDIR)"
 

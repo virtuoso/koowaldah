@@ -3,6 +3,9 @@
 
 # Defines rules and functions that do most of the work.
 
+ifeq ($(MODULE),)
+MODULE ?= koowaldah
+endif
 TOOLSDIR ?= $(PRJROOT)
 -include $(TOOLSDIR)/konfig.mk
 include $(TOOLSDIR)/tools/vars.mk
@@ -20,6 +23,8 @@ OBJS := $(subst .S,.o,$(FULLSOURCES:.c=.o))
 OBJECTS := $(patsubst %,$(OBJDIR)/%,$(subst /,+,$(OBJS)))
 # list of source dependency files in $(OBJDIR)
 DEPS := $(OBJECTS:.o=.d)
+
+OBJLIST := OBJECTS-$(MODULE)
 
 # function for converting object file names into source file name
 OBJ2SRC = $(subst .o,.c,$(subst $(OBJDIR)/$(subst /,+,$(THISDIR))+,,$(1)))
@@ -76,6 +81,7 @@ build: build-local deps objects
 deps: $(DEPS)
 	@for d in $(SUBDIRS); do \
 		$(MAKE) deps \
+			MODULE=$(MODULE) \
 			PRJROOT=$(PRJROOT) \
 			OBJDIR=$(OBJDIR) \
 			ARCH=$(ARCH) \
@@ -90,6 +96,7 @@ deps: $(DEPS)
 objects: $(OBJECTS) $(SUBDIRS)
 	@for d in $(SUBDIRS); do \
 		$(MAKE) build \
+			MODULE=$(MODULE) \
 			PRJROOT=$(PRJROOT) \
 			OBJDIR=$(OBJDIR) \
 			ARCH=$(ARCH) \
@@ -110,6 +117,7 @@ clean:
 	@rm -f $(OBJECTS) $(DEPS) $(CLEAN_FILES)
 	@for d in $(SUBDIRS); do \
 		$(MAKE) clean \
+			MODULE=$(MODULE) \
 			PRJROOT=$(PRJROOT) \
 			OBJDIR=$(OBJDIR) \
 			ARCH=$(ARCH) \
@@ -120,6 +128,7 @@ clean:
 			-C $$d; \
 	done
 	@$(MAKE) clean-local \
+			MODULE=$(MODULE) \
 			PRJROOT=$(PRJROOT) \
 			OBJDIR=$(OBJDIR) \
 			ARCH=$(ARCH) \
@@ -160,9 +169,10 @@ $(OBJDIR)/%.o:
 	fi
 
 printobjs:
-	@[ -n "$(OBJECTS)" ] && echo $(OBJECTS) >> $(OBJDIR)/OBJECTS || :
+	@[ -n "$(OBJECTS)" ] && echo $(OBJECTS) >> $(OBJDIR)/$(OBJLIST) || :
 	@for d in $(SUBDIRS); do \
 		$(MAKE) printobjs \
+			MODULE=$(MODULE) \
 			PRJROOT=$(PRJROOT) \
 			OBJDIR=$(OBJDIR) \
 			ARCH=$(ARCH) \
@@ -175,7 +185,7 @@ printobjs:
 	done
 
 killobjs:
-	rm -f $(OBJDIR)/OBJECTS
+	rm -f $(OBJDIR)/$(OBJLIST)
 
 debugmakevars:
 	$(foreach v,$(V),$(warning $v = $($v)))
