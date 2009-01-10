@@ -78,7 +78,9 @@ static __inline int idx_order(u32 index)
 extern struct mem_zone boot_zone;
 extern struct mem_zone user_zone;
 
-struct mem_info global_mem_info;
+struct mem_info global_mem_info = {
+	.zone_list = KLIST0_EMPTY(global_mem_info.zone_list)
+};
 
 /*
  * Print out all allocation levels of a given zone
