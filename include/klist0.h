@@ -61,8 +61,11 @@ struct klist0_node {
 	struct klist0_node *prev, *next;
 };
 
+#define KLIST0_EMPTY(list) \
+	{ &(list), &(list) }
+
 #define KLIST0_DECLARE(list) \
-	struct klist0_node list = { &(list), &(list) };
+	struct klist0_node list = KLIST0_EMPTY(list);
 
 #define KLIST0_INIT(list) \
 	do { (list)->next = (list)->prev = (list); } while (0);
