@@ -83,6 +83,7 @@ KOPTION_FULL(
 ),
 KOPTIONS_END
 #include "kernel/koption.inc"
+#include "drivers/koption.inc"
 #include "arch/i386/koption.inc"
 #include "arch/dummy/koption.inc"
 
