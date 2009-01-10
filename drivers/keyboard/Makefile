@@ -1,4 +1,4 @@
-ifneq ($(ARCH),dummy)
+ifeq ($(MK_PCKBD),Y)
 SOURCES := \
 	pc-kbd.c
 endif
