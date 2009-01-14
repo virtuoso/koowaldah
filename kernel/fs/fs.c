@@ -138,7 +138,7 @@ void fs_insert_entry(char *pathname, mode_t mode, dev_t dev, char *buf,
 	else {
 		dent = lookup_path(dir);
 		if (!dent) {
-			kprintf("directory %s not found\n");
+			kprintf("directory %s not found\n", dir);
 			bug();
 		}
 		inode = dent->d_inode;
