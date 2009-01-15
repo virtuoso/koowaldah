@@ -142,9 +142,10 @@ ifneq ($(DEPS),)
 endif
 endif
 
-# to shut gmake's attempts to compile a defs.mk from sysdeps
-# should it not exist
-%/defs.mk:
+
+# For some unknown reason make tries to generate missing .mk files
+# from .mk.o when -incude file.mk is used. Any idea, why?
+%.mk:
 	@true
 
 $(OBJDIR)/%.o:
