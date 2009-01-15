@@ -24,9 +24,9 @@ SOURCES := \
 	   syscalls.c  \
 	   serial.c
 
-LD_FLAGS += -shared
 
 include $(PRJROOT)/tools/main.mk
+LD_FLAGS += -shared
 
 $(PRJROOT)/confdefs: tests/ucontext_size.c tests/page_shift.c
 	: > $@

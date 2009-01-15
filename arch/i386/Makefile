@@ -39,6 +39,7 @@ LO_SOURCES :=                \
 	loader/moowaldah.c
 
 LO_CFLAGS :=                 \
+	-m32                 \
 	-nostdinc            \
 	-march=i386          \
 	-fno-unit-at-a-time  \
@@ -96,6 +97,6 @@ $(loader): $(local_OBJS)
 
 link-kernel: $(loader)
 
-LD_FLAGS := -T kernel-elf.lds -z defs
+LD_FLAGS += -T kernel-elf.lds -z defs
 include $(PRJROOT)/tools/link-kernel.mk
 
