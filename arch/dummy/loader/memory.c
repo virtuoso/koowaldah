@@ -23,6 +23,7 @@
 #include "loader.h"
 
 static unsigned long mem_size = 8 * 1024 * 1024;
+static void *mem_base = NULL;
 
 /*
  * Return the amount of 'physical' memory
@@ -32,17 +33,20 @@ EXPORT int dummy_get_mem_size()
 	return mem_size;
 }
 
+EXPORT void *dummy_get_mem_base(void)
+{
+	return mem_base;
+}
+
 /*
  * mmap required amount of 'physical' memory
  */
 PRIVATE int init_memory()
 {
-	void *p;
-
-	p = mmap(NULL, mem_size,
+	mem_base = mmap(mem_base, mem_size,
 			PROT_READ | PROT_WRITE,
-			MAP_SHARED | MAP_ANONYMOUS | MAP_FIXED, 0, 0);
-	if (p == MAP_FAILED) {
+			MAP_SHARED | MAP_ANONYMOUS, 0, 0);
+	if (mem_base == MAP_FAILED) {
 		perror("mmap");
 		return -1;
 	}

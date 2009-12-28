@@ -28,7 +28,7 @@ void arch_init_boot_zone(struct mem_zone *zone, struct mem_zone *user)
 	kprintf("Got %dM (0x%x) bytes of memory\n",
 			phys_mem >> 20, total_mem);
 
-	zone->base = NULL;
+	zone->base = dummy_get_mem_base();
 	zone->total_pages = 0xf0000 >> PAGE_SHIFT;
 	kprintf("Total pages: %d\n", zone->total_pages);
 

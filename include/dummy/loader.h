@@ -33,6 +33,7 @@
  * by loader for the kernel, in bytes
  */
 int dummy_get_mem_size();
+void *dummy_get_mem_base();
 
 /*
  * this comes right from libc: outputs a single char to stdout
