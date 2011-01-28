@@ -18,11 +18,12 @@
  */
 
 #include <stdio.h>
-#include <asm/page.h>
+#include <string.h>
+#include <unistd.h>
 
 int main()
 {
-	printf(" -DPAGE_SHIFT=%d", PAGE_SHIFT);
+	printf(" -DPAGE_SHIFT=%d", ffs(sysconf(_SC_PAGESIZE)) - 1);
 	return 0;
 }
 
