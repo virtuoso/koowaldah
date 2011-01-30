@@ -17,7 +17,7 @@ KLIBCDEFS += -D__KLIBC__=$(KLIBCMAJOR)	\
 	-D_BITSIZE=$(KLIBCBITSIZE)
 
 KLIBCINCLUDES :=  -I$(PRJROOT)/usr/include/bits$(KLIBCBITSIZE) -I$(PRJROOT)/usr/include/arch/$(KLIBCARCH) -I$(KOOWALDAH_DIR)/include -I$(PRJROOT)/usr/include -I$(PRJROOT)/include/khui
-CC_FLAGS := -Wall -g -ffreestanding -fno-stack-protector -nostdinc -nostdlib $(KLIBCINCLUDES) $(KLIBCDEFS) -O2 -std=gnu89 -funsigned-bitfields -funsigned-char
+SYS_CC_FLAGS := -Wall -g -ffreestanding -fno-stack-protector -nostdinc -nostdlib $(KLIBCINCLUDES) $(KLIBCDEFS) -O2 -std=gnu89 -funsigned-bitfields -funsigned-char
 
 SOURCES :=                           \
 	arch/$(KLIBCARCH)/setjmp.S   \

@@ -6,6 +6,7 @@ build-local: $(OBJDIR)/libc.a $(OBJDIR)/rootfs.o
 
 $(OBJDIR)/libc.a:
 	$(MAKE) PRJROOT=$(PRJROOT) \
+		TOOLSDIR=$(TOOLSDIR) \
 		MODULE=klibc \
 		OBJDIR=$(OBJDIR) all -C klibc
 
