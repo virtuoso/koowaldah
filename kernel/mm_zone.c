@@ -26,7 +26,7 @@
 
 extern void arch_init_boot_zone(struct mem_zone *zone, struct mem_zone *user);
 void __init mma_init();
-	
+
 struct mem_zone boot_zone;
 struct mem_zone user_zone;
 
