@@ -66,7 +66,7 @@ struct thread {
 	/* fs related */
 	struct namespace			*ns;
 	struct klist0_node			files; /* or array? */
-	
+
 	int					last_fd;
 	BITMAP(fdset, FS_MAX_FDS);
 
