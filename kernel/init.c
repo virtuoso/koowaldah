@@ -45,7 +45,6 @@ void scheduler_init(void);
 void fs_init(void);
 
 void init_mem_info(void);
-void slice_init(void);
 void galloc_init(void);
 void paging_init(void);
 void kqueue_init(void);
@@ -64,10 +63,9 @@ void __init kern_start()
 
 	kprintf("Starting Koowaldah v%s kernel.\n", VERSION_STRING);
 
-	/* memory allocation machinery */
+	/* memory allocation machinery: zones, buddy allocator, slices */
 	init_mem_info();
 	paging_init();
-	slice_init();
 	galloc_init();
 
 	kqueue_init();

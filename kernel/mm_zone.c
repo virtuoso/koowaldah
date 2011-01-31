@@ -27,6 +27,8 @@
 extern void arch_init_boot_zone(struct mem_zone *zone, struct mem_zone *user);
 void __init mma_init();
 
+void slice_init(void);
+
 struct mem_zone boot_zone;
 struct mem_zone user_zone;
 
@@ -39,6 +41,8 @@ void __init init_mem_info()
 	KLIST0_INIT(&user_zone.list);
 
 	arch_init_boot_zone(&boot_zone, &user_zone);
+
+	slice_init();
 
 	klist0_append(&boot_zone.list, &memory_info.zone_list);
 	klist0_append(&user_zone.list, &memory_info.zone_list);
