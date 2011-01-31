@@ -322,7 +322,7 @@ int write(int fd, char *buf, size_t len)
 	return file->f_ops->write(file, buf, len);
 }
 
-int close(fd)
+int close(int fd)
 {
 	struct file *file;
 
