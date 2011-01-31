@@ -49,7 +49,7 @@ EXPORT void dummy_create_thread(void *threadptr, ucontext_t *ucp,
 	unsigned long stackaddr = (unsigned long)threadptr & 0xfffff000;
 
 	memset(ucp, 0, sizeof(ucontext_t));
-	ucp->uc_stack.ss_sp = (void *)stackaddr;
+	ucp->uc_stack.ss_sp = (unsigned int *)threadptr - 1;
 	ucp->uc_stack.ss_size = (unsigned long)threadptr - stackaddr;
 	ucp->uc_link = NULL;
 	makecontext(ucp, func, 1, data);
