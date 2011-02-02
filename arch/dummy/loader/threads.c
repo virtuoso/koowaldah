@@ -51,7 +51,14 @@ EXPORT void dummy_create_thread(void *threadptr, ucontext_t *ucp,
 	memset(ucp, 0, sizeof(ucontext_t));
 	/* it's required to call getcontext() even if you don't need it */
 	getcontext(ucp);
-	ucp->uc_stack.ss_sp = (unsigned int *)threadptr - 1;
+
+	/*
+	 * uc_stack.ss_sp is actually a pointer to the stack base, not the
+	 * top of it like might have thought;
+	 * we should seriously get a replacement for these *context()
+	 * madness.
+	 */
+	ucp->uc_stack.ss_sp = stackaddr;
 	ucp->uc_stack.ss_size = (unsigned long)threadptr - stackaddr;
 	ucp->uc_link = NULL;
 	makecontext(ucp, func, 1, data);
