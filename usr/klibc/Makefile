@@ -124,15 +124,16 @@ all-local: deps printobjs objects $(OBJDIR)/libc.a
 $(OBJDIR)/libc.a: $(OBJDIR)/OBJECTS-$(MODULE)
 	$(AR) cru $@ $(shell cat $(OBJDIR)/OBJECTS-$(MODULE))
 
-install: libc.a
+install: $(OBJDIR)/libc.a
 	@echo "Installing klibc to $(DESTDIR)"
 	@[ -d "$(DESTDIR)/include" ] || mkdir -p $(DESTDIR)/include
 	@[ -d "$(DESTDIR)/lib" ] || mkdir -p $(DESTDIR)/lib
 	@[ -d "$(DESTDIR)/ldscripts" ] || mkdir -p $(DESTDIR)/ldscripts
 	@( cd $(KLIBCDIR)/usr; tar cf - include ) | ( cd $(DESTDIR); tar xf - )
 	@cp -a $(KOOWALDAH_DIR)/include/khui $(DESTDIR)/include/
-	@cp $(KLIBCDIR)/koowaldah-aout.lds $(DESTDIR)/ldscripts
-	@cp $(KLIBCDIR)/usr/klibc/libc.a $(DESTDIR)/lib
+	@cp koowaldah-aout.lds $(DESTDIR)/ldscripts
+	@cp koowaldah-elf.lds $(DESTDIR)/ldscripts
+	@cp $(OBJDIR)/libc.a $(DESTDIR)/lib
 	@cp $(OBJDIR)/usr+klibc+arch+$(KLIBCARCH)+crt0.o $(DESTDIR)/lib/crt0.o
 
 clean-local:

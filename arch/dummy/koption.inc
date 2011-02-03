@@ -1,4 +1,4 @@
-KOPTIONS_START(ARCH_DUMMY, "Dummy architecture configuration", 2)
+KOPTIONS_START(ARCH_DUMMY, "Dummy architecture configuration", 3)
 KOPTION(
         "UCONTEXT_SIZE",
         "ucontext_t size",
@@ -18,5 +18,12 @@ KOPTION(
 	"specified value instead. Set to zero if unsure.",
         KOPT_INT,
         0
+),
+KOPTION(
+        "DUMMY_USE_DLOPEN",
+        "Use host libdl for userspace",
+        "The easiest way to have userspace in dummy is to use host libdl.",
+        KOPT_BOOL,
+        'Y'
 ),
 KOPTIONS_END
