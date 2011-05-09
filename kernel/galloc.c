@@ -41,16 +41,13 @@ struct chunk_info {
 #define FROM_SLICE 1
 #define FROM_PAGES 2
 
-
-/* 
- * Chunk Info is places before the returned chunk to
+/*
+ * Chunk Info is placed before the returned chunk to
  * let gfree() know from where it came.
  */
 #define CI_SIZE (((sizeof (struct chunk_info) + 3) & ~3))
 
-
 #define NPOOLS 9
-
 
 static struct slice_pool *galloc_sp[NPOOLS];
 
@@ -82,10 +79,8 @@ static __inline u32 *galloc_from_slice(u32 flags, size_t size)
 
 static __inline u32 *galloc_from_pages(u32 flags, size_t size)
 {
-
 	int i;
 	struct chunk_info *ci;
-
 
 	for (i = 0; i < MAX_ORDER; i++) {
 		if (size + CI_SIZE <= (PAGE_SIZE << i)) {
@@ -106,11 +101,10 @@ static __inline u32 *galloc_from_pages(u32 flags, size_t size)
 	bug();
 
 	return NULL;
-
 }
 
 
-u32 * galloc(u32 flags, size_t size)
+u32 *galloc(u32 flags, size_t size)
 {
 	DPRINT("galloc(0x%x)\n", size);
 
@@ -121,7 +115,7 @@ u32 * galloc(u32 flags, size_t size)
 	if (size <= (4 << (NPOOLS - 1))) {
 		return galloc_from_slice(flags, size);
 	}
-		
+
 	return galloc_from_pages(flags, size);
 
 }
@@ -147,7 +141,7 @@ void gfree(u32 *chunk)
 	}
 }
 
-void galloc_init()
+void galloc_init(void)
 {
 	int i;
 
@@ -156,8 +150,7 @@ void galloc_init()
 			(4 << i) + CI_SIZE);
 		galloc_sp[i] = slice_pool_create(0, (4 << i) + CI_SIZE);
 		if (!galloc_sp[i])
-			panic("Alarma!");
+			panic("Failed to allocate slice pool");
 	}
 }
-
 
