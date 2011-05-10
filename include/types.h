@@ -41,6 +41,9 @@ typedef __off_t off_t;
 typedef __size_t size_t;
 typedef __pid_t pid_t;
 
+typedef long intptr_t;
+typedef unsigned long uintptr_t;
+
 #define NULL ((void *) 0)
 
 #endif
