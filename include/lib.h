@@ -44,6 +44,12 @@ static __inline unsigned long log2(unsigned long n)
 	return n & NMASK(l - 1) ? l : l - 1;
 }
 
+/*
+ * Round up x by base; base should be a power of 2
+ */
+#define roundup_l2(x, base)			\
+	(((x) + ((base) - 1)) & ~((base) - 1))
+
 static __inline char *kstrchr(char *str, char c)
 {
 	char *p = str;
