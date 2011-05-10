@@ -52,7 +52,7 @@
 
 #include <debug.h>
 
-static __inline int idx_order(u32 index)
+static int idx_order(int index)
 {
 	int i;
 

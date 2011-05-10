@@ -32,7 +32,7 @@
 struct mem_zone;
 
 struct page {
-	u32 index;
+	int index;
 	unsigned long virt;
 	struct klist0_node list;
 	struct klist0_node area_list;
