@@ -20,6 +20,7 @@
  */
 
 #include <koowaldah.h>
+#include <lib.h>
 #include <page_alloc.h>
 #include <slice.h>
 #include <galloc.h>
@@ -38,91 +39,84 @@ struct chunk_info {
 	u16 info;
 };
 
-#define FROM_SLICE 1
-#define FROM_PAGES 2
+/* origins */
+enum {
+	FROM_SLICE,
+	FROM_PAGES,
+};
 
 /*
  * Chunk Info is placed before the returned chunk to
  * let gfree() know from where it came.
  */
-#define CI_SIZE (((sizeof (struct chunk_info) + 3) & ~3))
+#define CI_SIZE roundup_l2((sizeof(struct chunk_info)), GALLOC_MIN_CHUNK)
 
 #define NPOOLS 9
 
 static struct slice_pool *galloc_sp[NPOOLS];
 
-static __inline u32 *galloc_from_slice(u32 flags, size_t size)
+#define POOL_SIZE(pool) ((GALLOC_MIN_CHUNK << (pool)) + CI_SIZE)
+
+static void *galloc_from_slice(unsigned int flags, size_t size)
 {
 	int i;
 	struct chunk_info *ci;
 
-	for (i = 0; i < NPOOLS; i++) {
-		if (size <= (4 << i)) {
-			DPRINT("Allocating from the %d pool.\n",
-				(4 << i) + CI_SIZE);
+	/* slice_pool == GALLOC_MIN_CHUNK * 2^i */
+	i = log2(size / GALLOC_MIN_CHUNK);
+	if (i > NPOOLS)
+		return NULL;
 
-			ci = (struct chunk_info *) slice_alloc(galloc_sp[i]);
-			if (!ci)
-				return NULL;
+	DPRINT("Allocating %d from the %d pool.\n", size, POOL_SIZE(i));
 
-			ci->origin = FROM_SLICE;
-			ci->info = i;
+	ci = slice_alloc(galloc_sp[i]);
+	if (!ci)
+		return NULL;
 
-			return (u32 *) (++ci);
-		}
-	}
+	ci->origin = FROM_SLICE;
+	ci->info = i;
 
-	bug();
-
-	return NULL;
+	return ++ci;
 }
 
-static __inline u32 *galloc_from_pages(u32 flags, size_t size)
+static void *galloc_from_pages(unsigned int flags, size_t size)
 {
 	int i;
 	struct chunk_info *ci;
 
-	for (i = 0; i < MAX_ORDER; i++) {
-		if (size + CI_SIZE <= (PAGE_SIZE << i)) {
-			DPRINT("Allocating from level %d.\n", i);
+	i = log2(INPAGES(size + CI_SIZE));
+	ci = get_pages(flags, i);
+	if (!ci)
+		return NULL;
 
-			ci = (struct chunk_info *) get_pages(0, i);
-			if (!ci)
-				return NULL;
+	ci->origin = FROM_PAGES;
+	ci->info = i;
 
-			ci->origin = FROM_PAGES;
-
-			ci->info = i;
-
-			return (u32 *) (++ci);
-		}
-	}
-
-	bug();
-
-	return NULL;
+	return ++ci;
 }
 
 
-u32 *galloc(u32 flags, size_t size)
+void *galloc(unsigned int flags, size_t size)
 {
-	DPRINT("galloc(0x%x)\n", size);
+	void *ret = NULL;
 
-	size = (size + 3) & ~3;
+	if (!size)
+		size = GALLOC_MIN_CHUNK;
+	size = roundup_l2(size, GALLOC_MIN_CHUNK);
 
 	DPRINT("size = 0x%x\n", size);
 
-	if (size <= (4 << (NPOOLS - 1))) {
-		return galloc_from_slice(flags, size);
-	}
+	/* first, try slices, then pages */
+	ret = galloc_from_slice(flags, size);
+	if (!ret)
+		ret = galloc_from_pages(flags, size);
 
-	return galloc_from_pages(flags, size);
-
+	return ret;
 }
 
-void gfree(u32 *chunk)
+void gfree(void *chunk)
 {
-	struct chunk_info *ci = (struct chunk_info *) chunk;
+	struct chunk_info *ci = chunk;
 
 	ci--;
 
@@ -130,10 +124,10 @@ void gfree(u32 *chunk)
 
 	switch(ci->origin) {
 		case FROM_SLICE:
-			slice_free((u32 *) ci, galloc_sp[ci->info]);
+			slice_free(ci, galloc_sp[ci->info]);
 			break;
 		case FROM_PAGES:
-			put_pages((u32 *) ci);
+			put_pages(ci);
 			break;
 
 		default:
@@ -146,9 +140,8 @@ void galloc_init(void)
 	int i;
 
 	for (i = 0; i < NPOOLS; i++) {
-		DPRINT("Creating a slice pool of size %d\n",
-			(4 << i) + CI_SIZE);
-		galloc_sp[i] = slice_pool_create(0, (4 << i) + CI_SIZE);
+		DPRINT("Creating a slice pool of size %d\n", POOL_SIZE(i));
+		galloc_sp[i] = slice_pool_create(0, POOL_SIZE(i));
 		if (!galloc_sp[i])
 			panic("Failed to allocate slice pool");
 	}

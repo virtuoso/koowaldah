@@ -22,11 +22,13 @@
 #ifndef __GALLOC_H__
 #define __GALLOC_H__
 
-u32 * galloc(u32 flags, size_t size);
-void gfree(u32 * chunk);
+#define GALLOC_MIN_CHUNK 4
 
-#define gobj_alloc(__t)                  \
-	((__t *) galloc(0, sizeof(__t)))
-#define gobj_free(__p) (gfree((u32 *)__p))
+void *galloc(unsigned int flags, size_t size);
+void gfree(void *chunk);
+
+#define gobj_alloc(__t)				\
+	(galloc(0, sizeof(__t)))
+#define gobj_free(__p) (gfree((__p)))
 
 #endif /* __GALLOC_H__ */
