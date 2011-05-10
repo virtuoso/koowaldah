@@ -37,9 +37,9 @@
 #include <page_alloc.h>
 
 /* omgwtf */
-u32 get_free_pid()
+pid_t get_free_pid()
 {
-	static u32 i = 0;
+	static pid_t i = 0;
 	return i++;
 }
 
@@ -77,7 +77,7 @@ struct thread *thread_create(thread_t func, char *name, void *data)
 {
 	void *page;
 	struct thread *thread;
-	u32 flags;
+	unsigned long flags;
 
 	/* allocate stack space */
 	page = get_pages(/*THREAD_STACK_LIMIT/PAGE_SIZE*/0, 0);
