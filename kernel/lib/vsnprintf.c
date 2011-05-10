@@ -90,6 +90,7 @@ int __noprof vsnprintf(char *buf, size_t size, const char *format, va_list args)
 	char fill_tag = 0;
 	int fill_num = 0;
 	/* args */
+	void *a_p;
 	long a_x;
 	char a_c;
 	char sbuf[12]; /* <-- this is evil also */
@@ -145,6 +146,23 @@ reswitch:
 				 * characters */
 				for (; fill_num - a_x > 0; fill_num--)
 					*pos++ = fill_tag;
+
+				pos += memory_copy(pos, sbuf, a_x);
+				fill_tag = fill_num = 0;
+				break;
+
+			case 'p':
+				memory_set(sbuf, 0, 12);
+				a_p = va_arg(args, void *);
+				a_x = sprint_int_unsigned(sbuf, (uintptr_t)a_p, 16);
+
+				*pos++ = '0';
+				*pos++ = 'x';
+
+				/* pad output with zeroes to address width */
+				fill_num = sizeof(uintptr_t) / 4;
+				for (; fill_num - a_x > 0; fill_num--)
+					*pos++ = '0';
 
 				pos += memory_copy(pos, sbuf, a_x);
 				fill_tag = fill_num = 0;
