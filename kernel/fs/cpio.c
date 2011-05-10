@@ -55,10 +55,7 @@ typedef struct {
 #define cpio2ru16(s, f) ((u16)s->f[0] << 8 | s->f[1])
 #define cpio2u16(s, f) (reverse ? cpio2ru16(s,f) : cpio2su16(s,f))
 
-#define ALIGN2(x) ({ \
-		unsigned long __r = ((unsigned long)(x) + 1) & ~1; \
-		(__typeof__ (x))__r; \
-	})
+#define ALIGN2(x) roundup_l2((x), 2)
 
 #define _cast(x) ((HD_BCPIO *)x)
 
