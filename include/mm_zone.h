@@ -29,9 +29,9 @@
 #define ZONE_USER 0x1
 
 struct mem_zone {
-	u32 *base;
-	u32 total_pages;
-	u32 free_pages;
+	void *base;
+	unsigned long total_pages;
+	unsigned long free_pages;
 	struct klist0_node alloc_levels[MAX_ORDER];
 	struct klist0_node list;
 };

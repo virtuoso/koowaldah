@@ -42,10 +42,10 @@ struct page {
 	struct mem_zone *zone;
 };
 
-struct page *alloc_pages(u32 flags, u32 order);
-u32 *get_pages(u32 flags, u32 order);
+struct page *alloc_pages(unsigned int flags, int order);
+void *get_pages(unsigned int flags, int order);
 void *page_to_addr(struct page *page);
-struct page *addr_to_page(u32 *page);
+struct page *addr_to_page(void *addr);
 
 #define INPAGES(x) \
 	(roundup_l2((x), PAGE_SIZE) >> PAGE_SHIFT)

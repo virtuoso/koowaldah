@@ -22,7 +22,7 @@
 
 void arch_init_boot_zone(struct mem_zone *zone, struct mem_zone *user)
 {
-	u32 phys_mem, total_mem;
+	size_t phys_mem, total_mem;
 
 	phys_mem = total_mem = dummy_get_mem_size();
 	kprintf("Got %dM (0x%x) bytes of memory\n",
@@ -35,7 +35,7 @@ void arch_init_boot_zone(struct mem_zone *zone, struct mem_zone *user)
 	mem_zone_init(zone);
 
 	user->total_pages = (total_mem >> PAGE_SHIFT) - zone->total_pages;
-	user->base = (u32 *)((unsigned long)zone->base + (zone->total_pages << PAGE_SHIFT));
+	user->base = (char *)zone->base + zone->total_pages * PAGE_SIZE;
 
 	kprintf("Total pages: %d, base: %x\n", user->total_pages, user->base);
 	mem_zone_init(user);

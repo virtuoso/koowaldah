@@ -87,8 +87,8 @@ void print_alloc_info(struct mem_zone *zone)
 		klist0_for_each(tmp, &zone->alloc_levels[i]) {
 			pg = klist0_entry(tmp, struct page, list);
 			kprintf(" [0x%x - 0x%x(lvl %d)]",
-				(u32)zone->base + pg->index * PAGE_SIZE,
-				(u32)zone->base + (pg->index + (1 << i) - 1) * PAGE_SIZE,
+				(uintptr_t)zone->base + pg->index * PAGE_SIZE,
+				(uintptr_t)zone->base + (pg->index + (1 << i) - 1) * PAGE_SIZE,
 				idx_order(pg->index));
 
 			if (pg->private.order != i)
@@ -114,8 +114,8 @@ void print_alloc_info(struct mem_zone *zone)
  */
 void mem_zone_init(struct mem_zone *zone)
 {
-	u32 i;
-	u32 consumed_pages;
+	unsigned long i;
+	unsigned long consumed_pages;
 	struct page *p_pool = (struct page *) zone->base;
 
 	/*
@@ -181,7 +181,7 @@ void mem_zone_init(struct mem_zone *zone)
 /*
  * Allocate a 2^order pages from a given zone.
  */
-struct page *__alloc_pages(u32 flags, struct mem_zone *zone, u32 order)
+struct page *__alloc_pages(unsigned int flags, struct mem_zone *zone, int order)
 {
 	int i = order;
 	struct page *pile;
@@ -210,8 +210,8 @@ struct page *__alloc_pages(u32 flags, struct mem_zone *zone, u32 order)
 	};
 
 	pile->private.order = order;
-	DPRINT("Returning %d pages starting from 0x%x (struct page = 0x%x)\n",
-		1 << order, pile->index * PAGE_SIZE, (u32) pile);
+	DPRINT("Returning %d pages starting from 0x%x (struct page = %p)\n",
+		1 << order, pile->index * PAGE_SIZE, pile);
 
 	return pile;
 }
@@ -219,7 +219,7 @@ struct page *__alloc_pages(u32 flags, struct mem_zone *zone, u32 order)
 /*
  * Allocate 2^order pages.
  */
-__inline struct page *alloc_pages(u32 flags, u32 order)
+__inline struct page *alloc_pages(unsigned int flags, int order)
 {
 	struct mem_zone *zone = (flags & ZONE_USER) ? &user_zone : &boot_zone;
 	return __alloc_pages(flags, zone, order);
@@ -230,13 +230,13 @@ __inline struct page *alloc_pages(u32 flags, u32 order)
  */
 void *page_to_addr(struct page *page)
 {
-	return (u32 *) (((char *) page->zone->base) + page->index * PAGE_SIZE);
+	return (void *)((uintptr_t)page->zone->base + page->index * PAGE_SIZE);
 }
 
 /*
  * Obtain page object ptr by a page frame address
  */
-struct page *addr_to_page(u32 *addr)
+struct page *addr_to_page(void *addr)
 {
 	struct klist0_node *tmp;
 	struct mem_zone *zone;
@@ -247,11 +247,12 @@ struct page *addr_to_page(u32 *addr)
 	klist0_for_each(tmp, &global_mem_info.zone_list) {
 		zone = klist0_entry(tmp, struct mem_zone, list);
 		if (addr > zone->base &&
-		    ((char *)addr) < (((char *)zone->base) + zone->total_pages * PAGE_SIZE)) {
+		    (uintptr_t)addr < ((uintptr_t)zone->base +
+				       zone->total_pages * PAGE_SIZE)) {
 
-			return (struct page *) ((char *)zone->base) +
+			return (struct page *)zone->base +
 				((((char *)addr) - ((char *)zone->base)) / PAGE_SIZE);
-			}
+		}
 	}
 
 	return NULL;
@@ -260,7 +261,7 @@ struct page *addr_to_page(u32 *addr)
 /*
  * Allocate 2^order pages and return page frame address of the first one.
  */
-u32 *get_pages(u32 flags, u32 order)
+void *get_pages(unsigned int flags, int order)
 {
 	return page_to_addr(alloc_pages(flags, order));
 }
