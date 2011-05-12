@@ -24,6 +24,7 @@
 
 #include <koowaldah.h>
 #include <klist0.h>
+#include <lib.h>
 #include <arch/pages.h>
 
 #define MAX_ORDER 11
@@ -48,6 +49,11 @@ struct page *addr_to_page(u32 *page);
 
 #define INPAGES(x) \
 	(roundup_l2((x), PAGE_SIZE) >> PAGE_SHIFT)
+
+static inline void *get_pages_to_fit(unsigned int flags, size_t size)
+{
+	return get_pages(flags, log2(INPAGES(size)));
+}
 
 #define alloc_page(flags) alloc_pages(flags, 0) 
 #define get_page(flags) get_pages(flags, 0)
