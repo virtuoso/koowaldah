@@ -45,6 +45,25 @@ static void __noreturn user_thread(void *data)
 }
 
 /*
+ * Load a binary: stub for trying to load different binary formats
+ */
+static int binary_load(struct inode *inode, struct mapping *map)
+{
+	int ret = -ENOEXEC;
+
+	/*
+	 * dummy doesn't support non-relocatable executables and
+	 * koowaldah doesn't support relocatable aouts
+	 */
+#ifdef OPT_AOUT_SUPPORT
+	if (ret)
+		ret = aout_load(inode, map);
+#endif
+
+	return ret;
+}
+
+/*
  * Load a binary with given path into a thread
  * @thread -- thread to be blessed
  * @inode  -- inode containing the executable
@@ -53,13 +72,12 @@ static void __noreturn user_thread(void *data)
  */
 int thread_exec_new(struct thread *thread, struct inode *inode)
 {
-#ifndef OPT_CPU_ARCH_DUMMY
 	struct mapping *map = thread->map;
 	int ret;
 
 	/* load the binary
 	 * this normally allocates 2 mmas: .text and .data [0] [1] */
-	ret = aout_load(inode, map);
+	ret = binary_load(inode, map);
 	if (ret)
 		return ret;
 	
@@ -73,7 +91,6 @@ int thread_exec_new(struct thread *thread, struct inode *inode)
 	map->m_mma[map->m_nmma] = mem_area_alloc_new(map,
 			USERMEM_HEAP, 1, MMA_RW | MMA_GROWS);
 	map->m_nmma++;
-#endif
 
 	return 0;
 }

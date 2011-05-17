@@ -1,7 +1,7 @@
 include $(PRJROOT)/tools/main.mk
 
-ifeq ($(MK_DUMMY_USE_DLOPEN),Y)
-  CFLAGS   := -m32 -fno-stack-protector
+ifneq ($(MK_AOUT_SUPPORT),Y)
+  CFLAGS   := -m32 -fpie -fno-stack-protector
   LDSCRIPT := -T$(OBJDIR)/klibc/ldscripts/koowaldah-elf.lds
   LDOPTS   := -shared -melf_i386 -z defs -z now --sort-common
 else

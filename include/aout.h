@@ -85,7 +85,9 @@ struct exec {
 #define AOUT_STROFF(h)                 \
 	(AOUT_SYMOFF(h) + h->a_syms)
 
+#ifdef OPT_AOUT_SUPPORT
 int aout_load(struct inode *inode, struct mapping *map);
+#endif
 
 #endif /* __AOUT_H__ */
 

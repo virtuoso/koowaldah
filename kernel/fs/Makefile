@@ -12,8 +12,12 @@ SOURCES := \
 	virtfs.c \
 	virtfs_proc.c \
 	virtfs_dev.c \
-	aout.c \
 	cpio.c
+
+-include $(PRJROOT)/konfig.mk
+ifeq ($(MK_AOUT_SUPPORT),Y)
+SOURCES += aout.c
+endif
 
 include $(PRJROOT)/tools/main.mk
 
