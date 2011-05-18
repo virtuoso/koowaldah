@@ -25,8 +25,13 @@
 #include <klist0.h>
 #include <mem_area.h>
 
-#define ZONE_BOOT 0x0
-#define ZONE_USER 0x1
+enum zone_type {
+	ZONE_BOOT = 0,
+	ZONE_USER,
+	ZONE_VMAP,
+	NUM_ZONES,
+};
+
 
 struct mem_zone {
 	void *base;
@@ -35,6 +40,8 @@ struct mem_zone {
 	struct klist0_node alloc_levels[MAX_ORDER];
 	struct klist0_node list;
 };
+
+extern struct mem_zone mem_zone[NUM_ZONES];
 
 struct mem_info {
 	struct klist0_node zone_list;

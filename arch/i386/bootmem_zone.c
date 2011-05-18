@@ -30,10 +30,10 @@ extern u32 kernel_end; /* kerlen-elf.lds */
 extern u32 phys_mem;
 extern u32 phys_pgs;
 
-void arch_init_boot_zone(struct mem_zone *zone, struct mem_zone *user)
+void arch_init_boot_zone(struct mem_zone *mem_zone)
 {
 	size_t total_mem;
-	zone->base = &kernel_end;
+	mem_zone[ZONE_BOOT].base = &kernel_end;
 
 	phys_mem =
 	total_mem = multiboot_info->mem_upper * 1024;
@@ -44,15 +44,18 @@ void arch_init_boot_zone(struct mem_zone *zone, struct mem_zone *user)
 	kprintf("Got %dM (0x%x) bytes of memory\n",
 		phys_mem >> 20, total_mem);
 
-	zone->total_pages = (total_mem / PAGE_SIZE) / KERN_ALLOWANCE;
+	mem_zone[ZONE_BOOT].total_pages = (total_mem / PAGE_SIZE) / KERN_ALLOWANCE;
 	phys_pgs = phys_mem / PAGE_SIZE;
-	kprintf("Total pages: %d, phys_pgs: %d\n", zone->total_pages, phys_pgs);
+	kprintf("Total pages: %d, phys_pgs: %d\n", mem_zone[ZONE_BOOT].total_pages, phys_pgs);
 
-	mem_zone_init(zone);
+	mem_zone_init(&mem_zone[ZONE_BOOT]);
 
-	user->total_pages = (total_mem / PAGE_SIZE) - zone->total_pages;
-	user->base = (char *)zone->base + zone->total_pages * PAGE_SIZE;
-	kprintf("Total pages: %d, base: %x\n", user->total_pages, user->base);
-	mem_zone_init(user);
+	mem_zone[ZONE_USER].total_pages = (total_mem / PAGE_SIZE) -
+		mem_zone[ZONE_BOOT].total_pages;
+	mem_zone[ZONE_USER].base = (char *)mem_zone[ZONE_BOOT].base +
+		mem_zone[ZONE_BOOT].total_pages * PAGE_SIZE;
+	kprintf("Total pages: %d, base: %x\n", mem_zone[ZONE_USER].total_pages,
+		mem_zone[ZONE_USER].base);
+	mem_zone_init(&mem_zone[ZONE_USER]);
 }
 

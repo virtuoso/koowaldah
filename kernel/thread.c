@@ -126,10 +126,12 @@ struct thread *thread_create_user(thread_t func, char *name, void *data)
 	struct thread *thread;
 
 	thread = thread_create(func, name, data);
+#ifndef OPT_CPU_ARCH_DUMMY
 	if (thread) {
 		thread->map = gobj_alloc(struct mapping);
 		clone_map(thread->map, &root_map);
 	}
+#endif
 
 	return thread;
 }

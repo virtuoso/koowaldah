@@ -49,8 +49,11 @@ struct mem_area *mem_area_alloc(struct mapping *map, unsigned long start,
 	struct mem_area *mma;
 	struct klist0_node *tmp;
 
-	bug_on(in_kernel(start));
-	bug_on(map == &root_map);
+	/*
+	 * we currently reuse mmas for in-kernel mappings on mmuless dummy
+	 */
+	/*bug_on(in_kernel(start));
+	bug_on(map == &root_map);*/
 
 	mma = slice_alloc(mma_pool);
 	if (!mma)
@@ -109,14 +112,24 @@ void mem_area_attach(struct mapping *dst, struct mem_area *mma)
 struct mem_area *mem_area_alloc_new(struct mapping *map, unsigned long start,
 		u32 pages, u32 flags)
 {
+	int zone = ZONE_USER;
+
 	bug_on(pages < 0);
+
+	if (map == &root_map) {
+		zone = ZONE_VMAP;
+		start = NOPAGE_ADDR;
+	}
 
 	KLIST0_DECLARE(pg_list);
 
 	while(pages--) {
-		struct page *pg = alloc_page(ZONE_USER);
+		struct page *pg = alloc_page(zone);
 		bug_on(!pg); /* XXX Try to recover here. */
 		klist0_append(&pg->area_list, &pg_list);
+
+		if (zone == ZONE_VMAP && start > (uintptr_t)page_to_addr(pg))
+			start = (uintptr_t)page_to_addr(pg);
 	}
 
 	return mem_area_alloc(map, start, &pg_list, flags);

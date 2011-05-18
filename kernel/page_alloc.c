@@ -61,10 +61,6 @@ static int idx_order(int index)
 	return i;
 }
 
-
-extern struct mem_zone boot_zone;
-extern struct mem_zone user_zone;
-
 struct mem_info global_mem_info = {
 	.zone_list = KLIST0_EMPTY(global_mem_info.zone_list)
 };
@@ -118,6 +114,9 @@ void mem_zone_init(struct mem_zone *zone)
 	unsigned long consumed_pages;
 	struct page *p_pool = (struct page *) zone->base;
 
+#ifdef OPT_CPU_ARCH_DUMMY
+	bug_on(zone == &mem_zone[ZONE_USER]);
+#endif
 	/*
 	 * Init a struct page for each page in the zone.
 	 * A number of pages is consumed to hold the array
@@ -186,6 +185,10 @@ struct page *__alloc_pages(unsigned int flags, struct mem_zone *zone, int order)
 	int i = order;
 	struct page *pile;
 
+#ifdef OPT_CPU_ARCH_DUMMY
+	bug_on(zone == &mem_zone[ZONE_USER]);
+#endif
+
 	do { /* Find an non-empty level with sufficiently big piles in it. */
 		if (i >= MAX_ORDER) {
 			kprintf("Page allocation of order %d failed!\n", order);
@@ -221,7 +224,7 @@ struct page *__alloc_pages(unsigned int flags, struct mem_zone *zone, int order)
  */
 __inline struct page *alloc_pages(unsigned int flags, int order)
 {
-	struct mem_zone *zone = (flags & ZONE_USER) ? &user_zone : &boot_zone;
+	struct mem_zone *zone = &mem_zone[flags & ZONE_MASK];
 	return __alloc_pages(flags, zone, order);
 }
 

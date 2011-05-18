@@ -42,6 +42,9 @@ struct page {
 	struct mem_zone *zone;
 };
 
+/* mask in flags for enum zone_type */
+#define ZONE_MASK	0x3
+
 struct page *alloc_pages(unsigned int flags, int order);
 void *get_pages(unsigned int flags, int order);
 void *page_to_addr(struct page *page);

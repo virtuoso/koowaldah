@@ -20,7 +20,7 @@
 #include <koowaldah.h>
 #include <dummy/loader.h>
 
-void arch_init_boot_zone(struct mem_zone *zone, struct mem_zone *user)
+void arch_init_boot_zone(struct mem_zone *mem_zone)
 {
 	size_t phys_mem, total_mem;
 
@@ -28,17 +28,21 @@ void arch_init_boot_zone(struct mem_zone *zone, struct mem_zone *user)
 	kprintf("Got %dM (0x%x) bytes of memory\n",
 			phys_mem >> 20, total_mem);
 
-	zone->base = dummy_get_mem_base();
-	zone->total_pages = 0xf0000 >> PAGE_SHIFT;
-	kprintf("Total pages: %d\n", zone->total_pages);
+	mem_zone[ZONE_BOOT].base = dummy_get_mem_base();
+	mem_zone[ZONE_BOOT].total_pages = 0xf0000 >> PAGE_SHIFT;
+	kprintf("Total pages: %d\n", mem_zone[ZONE_BOOT].total_pages);
 
-	mem_zone_init(zone);
+	mem_zone_init(&mem_zone[ZONE_BOOT]);
 
-	user->total_pages = (total_mem >> PAGE_SHIFT) - zone->total_pages;
-	user->base = (char *)zone->base + zone->total_pages * PAGE_SIZE;
+	mem_zone[ZONE_VMAP].total_pages = (total_mem >> PAGE_SHIFT) -
+		mem_zone[ZONE_BOOT].total_pages;
+	mem_zone[ZONE_VMAP].base = (char *)mem_zone[ZONE_BOOT].base +
+		mem_zone[ZONE_BOOT].total_pages * PAGE_SIZE;
 
-	kprintf("Total pages: %d, base: %x\n", user->total_pages, user->base);
-	mem_zone_init(user);
+	kprintf("Total pages: %d, base: %x\n",
+		mem_zone[ZONE_VMAP].total_pages,
+		mem_zone[ZONE_VMAP].base);
+	mem_zone_init(&mem_zone[ZONE_VMAP]);
 }
 
 void paging_init()

@@ -33,9 +33,6 @@
 
 #include <debug.h>
 
-
-extern struct mem_zone boot_zone;
-
 struct slice_swamp {
 	struct mem_zone *zone;
 	struct klist0_node slices;
@@ -43,7 +40,7 @@ struct slice_swamp {
 
 void slice_init()
 {
-	boot_slice_swamp.zone = &boot_zone;
+	boot_slice_swamp.zone = &mem_zone[ZONE_BOOT];
 	KLIST0_INIT(&boot_slice_swamp.slices);
 }
 

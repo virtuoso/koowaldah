@@ -24,28 +24,29 @@
 #include <mm_zone.h>
 #include <bug.h>
 
-extern void arch_init_boot_zone(struct mem_zone *zone, struct mem_zone *user);
+extern void arch_init_boot_zone(struct mem_zone *);
 void __init mma_init();
 
 void slice_init(void);
 
-struct mem_zone boot_zone;
-struct mem_zone user_zone;
+struct mem_zone mem_zone[NUM_ZONES];
 
 struct mem_info memory_info;
 
 void __init init_mem_info()
 {
-	KLIST0_INIT(&memory_info.zone_list);
-	KLIST0_INIT(&boot_zone.list);
-	KLIST0_INIT(&user_zone.list);
+	int i;
 
-	arch_init_boot_zone(&boot_zone, &user_zone);
+	KLIST0_INIT(&memory_info.zone_list);
+	for (i = 0; i < NUM_ZONES; i++)
+		KLIST0_INIT(&mem_zone[i].list);
+
+	arch_init_boot_zone(mem_zone);
 
 	slice_init();
 
-	klist0_append(&boot_zone.list, &memory_info.zone_list);
-	klist0_append(&user_zone.list, &memory_info.zone_list);
+	for (i = 0; i < NUM_ZONES; i++)
+		klist0_append(&mem_zone[i].list, &memory_info.zone_list);
 
 	mma_init();
 }
