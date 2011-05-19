@@ -35,7 +35,12 @@ struct mem_area {
 	u32                m_users;    /* how many threads share this area */
 	u32                m_prot;     /* protection */
 	u32                m_flags;    /* this area's flags */
-	struct klist0_node m_plist;    /* list of struct page objects */
+	union {
+		/* linked pages */
+		struct klist0_node	m_plist;
+		/* original mma in case of MMA_CLONE */
+		struct mem_area		*m_original;
+	};
 	struct mapping     *m_map;     /* our mapping */
 };
 
@@ -47,18 +52,30 @@ struct mem_area {
 #define MMA_GROWS (0x02) /* mem_area can grow up */
 #define MMA_STACK (0x04) /* mem_area can grow down (stack) */
 #define MMA_EXEC  (0x08) /* executable */
+#define MMA_CONT  (0x10) /* physically contiguous */
+#define MMA_CLONE (0x20) /* this mma is a clone of another one */
 
 struct mem_area *mem_area_alloc(struct mapping *map, unsigned long start,
 		struct klist0_node *page_list, u32 flags);
 struct mem_area *mem_area_alloc_new(struct mapping *map, unsigned long start,
 		u32 pages, u32 flags);
 struct mem_area *mem_area_clone(struct mapping *map, struct mem_area *mma);
+struct mem_area *mem_area_copy(struct mapping *map, struct mem_area *mma);
+void mem_area_remap(struct mem_area *mma, unsigned int flags);
 void mem_area_grow(struct mem_area *mma, u32 pages);
-void mem_area_attach(struct mapping *dst, struct mem_area *mma);
-void mem_area_kill(struct mem_area *mma, struct mapping *map);
-void mem_area_put(struct mem_area *mma, struct mapping *map);
+void mem_area_put(struct mem_area *mma);
 void mem_area_add_page(struct mem_area *mma, struct page *pg);
 void mem_area_remove_page(struct mem_area *mma, struct page *pg);
+
+static __inline struct mem_area *mma_original(struct mem_area *mma)
+{
+	struct mem_area *org = mma;
+
+	for (org = mma; org->m_flags & MMA_CLONE; org = org->m_original)
+		;
+
+	return org;
+}
 
 static __inline void  __mem_area_add_page(struct mem_area *mma, struct page *pg)
 {

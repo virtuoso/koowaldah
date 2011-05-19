@@ -157,7 +157,7 @@ int thread_exec(struct thread *thread, char *path)
 
 	/* get rid of current memory areas */
 	for (i = 0; i < thread->map->m_nmma; i++) {
-		mem_area_put(thread->map->m_mma[i], thread->map);
+		mem_area_put(thread->map->m_mma[i]);
 		thread->map->m_mma[i] = NULL;
 	}
 

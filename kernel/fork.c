@@ -49,10 +49,10 @@ pid_t fork()
 	if (!thread)
 		return -ENOMEM;
 
-	mem_area_attach(thread->map, me->map->m_mma[0]);
-	thread->map->m_mma[1] = mem_area_clone(thread->map, me->map->m_mma[1]);
-	thread->map->m_mma[2] = mem_area_clone(thread->map, me->map->m_mma[2]);
-	thread->map->m_mma[3] = mem_area_clone(thread->map, me->map->m_mma[3]);
+	thread->map->m_mma[0] = mem_area_clone(thread->map, me->map->m_mma[0]);
+	thread->map->m_mma[1] = mem_area_copy(thread->map, me->map->m_mma[1]);
+	thread->map->m_mma[2] = mem_area_copy(thread->map, me->map->m_mma[2]);
+	thread->map->m_mma[3] = mem_area_copy(thread->map, me->map->m_mma[3]);
 	thread->map->m_nmma = 4;
 
 	prepare_fork(thread);

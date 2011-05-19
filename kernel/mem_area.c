@@ -38,16 +38,49 @@ void kill_user_map(struct mapping *map)
 	int i = 0;
 
 	while (map->m_mma[i])
-		mem_area_put(map->m_mma[i], map);
+		mem_area_put(map->m_mma[i]);
 
 	free_map(map);
+}
+
+static void mma_map_pages(struct mem_area *mma, int add)
+{
+	struct klist0_node *tmp;
+	struct mem_area *org;
+
+	org = mma_original(mma);
+
+	klist0_for_each(tmp, &org->m_plist) {
+		struct page *pg =
+			klist0_entry(tmp, struct page, area_list);
+		if (mma->m_flags & MMA_STACK)
+			map_page(mma->m_map,
+				 add ? mma->m_start - PAGE_SIZE : pg->virt,
+				 (uintptr_t)page_to_addr(pg), mma->m_prot);
+		else
+			map_page(mma->m_map, add ? mma->m_end : pg->virt,
+				 (uintptr_t)page_to_addr(pg), mma->m_prot);
+
+		if (add)
+			__mem_area_add_page(mma, pg);
+	}
+}
+
+void mem_area_remap(struct mem_area *mma, unsigned int flags)
+{
+	mma->m_flags &= ~(MMA_RW|MMA_EXEC);
+	mma->m_flags |= flags & (MMA_RW|MMA_EXEC);
+	mma->m_prot  = (flags & MMA_RW) ? PTF_RW : 0;
+	if (flags & MMA_EXEC)
+		mma->m_prot |= PTF_EXEC;
+
+	mma_map_pages(mma, 0);
 }
 
 struct mem_area *mem_area_alloc(struct mapping *map, unsigned long start,
 		struct klist0_node *page_list, u32 flags)
 {
 	struct mem_area *mma;
-	struct klist0_node *tmp;
 
 	/*
 	 * we currently reuse mmas for in-kernel mappings on mmuless dummy
@@ -67,70 +100,43 @@ struct mem_area *mem_area_alloc(struct mapping *map, unsigned long start,
 	mma->m_users = 1;
 	mma->m_flags = flags;
 	mma->m_prot  = (flags & MMA_RW) ? PTF_RW : 0;
+	if (flags & MMA_EXEC)
+		mma->m_prot |= PTF_EXEC;
 
-	if (klist0_empty(page_list))
+	if (!page_list || klist0_empty(page_list))
 		return mma;
 
 	klist0_reparent(page_list, &mma->m_plist);
 
-	klist0_for_each(tmp, &mma->m_plist) {
-		struct page *pg =
-			klist0_entry(tmp, struct page, area_list);
-		if (mma->m_flags & MMA_STACK)
-			map_page(map, mma->m_start - PAGE_SIZE,
-					(u32) page_to_addr(pg), mma->m_prot);
-		else
-			map_page(map, mma->m_end,
-					(u32) page_to_addr(pg), mma->m_prot);
-		__mem_area_add_page(mma, pg);
-	}
+	mma_map_pages(mma, 1);
 
 	return mma;
 
 }
 
-void mem_area_attach(struct mapping *dst, struct mem_area *mma)
-{
-	struct klist0_node *tmp;
-	struct page *pg;
-
-	if (dst->m_nmma >= MMA_MAX) {
-		kprintf("Cannot add more mem_areas to this map\n");
-		return;
-	}
-
-	dst->m_mma[dst->m_nmma++] = mma;
-	mma->m_users++;
-
-	klist0_for_each(tmp, &mma->m_plist) {
-		pg = klist0_entry(tmp, struct page, area_list);
-
-		map_page(dst, pg->virt, (u32)page_to_addr(pg), mma->m_prot);
-	}
-}
-
 struct mem_area *mem_area_alloc_new(struct mapping *map, unsigned long start,
 		u32 pages, u32 flags)
 {
-	int zone = ZONE_USER;
+	int ret, zone = ZONE_USER;
+	uintptr_t start_phys = 0;
 
 	bug_on(pages < 0);
 
-	if (map == &root_map) {
+	if (map == &root_map)
 		zone = ZONE_VMAP;
-		start = NOPAGE_ADDR;
-	}
 
 	KLIST0_DECLARE(pg_list);
 
-	while(pages--) {
-		struct page *pg = alloc_page(zone);
-		bug_on(!pg); /* XXX Try to recover here. */
-		klist0_append(&pg->area_list, &pg_list);
+	if (flags & MMA_CONT)
+		ret = alloc_pagelist_contig(zone, pages, &start_phys, &pg_list);
+	else
+		ret = alloc_pagelist_sparse(zone, pages, &start_phys, &pg_list);
 
-		if (zone == ZONE_VMAP && start > (uintptr_t)page_to_addr(pg))
-			start = (uintptr_t)page_to_addr(pg);
-	}
+	if (ret)
+		return NULL;
+
+	if (zone == ZONE_VMAP)
+		start = start_phys;
 
 	return mem_area_alloc(map, start, &pg_list, flags);
 }
@@ -143,6 +149,7 @@ void mem_area_grow(struct mem_area *mma, u32 pages)
 	if (pages < 0)
 		return;
 
+	/* XXX: MMA_CLONE? */
 	while(pages--) {
 		struct page *pg = alloc_page(ZONE_USER);
 		bug_on(!pg); /* XXX Try to recover here. */
@@ -157,68 +164,101 @@ void mem_area_grow(struct mem_area *mma, u32 pages)
 struct mem_area *mem_area_clone(struct mapping *map, struct mem_area *mma)
 {
 	struct mem_area *ret;
-	struct klist0_node *tmp1, *tmp2;
-	struct page *pg1, *pg2;
 
-	ret = mem_area_alloc_new(map, mma->m_start, mma->m_pages,
-			mma->m_flags & ~MMA_STACK);
+	bug_on(mma->m_flags & (MMA_STACK|MMA_GROWS));
+
+	ret = mem_area_alloc(map, mma->m_start, NULL, mma->m_flags);
 	if (!ret)
 		return NULL;
 
-	tmp2 = ret->m_plist.next;
-	klist0_for_each(tmp1, &mma->m_plist) {
-		pg1 = klist0_entry(tmp1, struct page, area_list);
-		pg2 = klist0_entry(tmp2, struct page, area_list);
-
-		/* we know that pages in both areas go in the very same order,
-		 * so we can copy just like this */
-		memory_copy((void *)page_to_addr(pg2),
-				(void *)page_to_addr(pg1), PAGE_SIZE);
-		tmp2 = tmp2->next;
-	}
-
+	mma->m_users++;
+	ret->m_prot = mma->m_prot;
+	ret->m_pages = mma->m_pages;
+	ret->m_flags |= MMA_CLONE;
+	ret->m_original = mma;
 	ret->m_sizelim = mma->m_sizelim;
+
+	mma_map_pages(ret, 1);
 
 	return ret;
 }
 
-void mem_area_unmap(struct mem_area *mma, struct mapping *map, int free)
+struct mem_area *mem_area_copy(struct mapping *map, struct mem_area *mma)
 {
-	struct klist0_node *tmp = mma->m_plist.next;
+	struct mem_area *ret;
+	struct klist0_node *lsrc, *ldst;
+
+	ret = mem_area_alloc_new(map, mma->m_start, mma->m_pages,
+				 (mma->m_flags | MMA_RW) & ~MMA_STACK);
+	if (!ret)
+		return NULL;
+
+	ldst = ret->m_plist.next;
+	klist0_for_each(lsrc, &mma->m_plist) {
+		struct page *pgsrc, *pgdst;
+
+		bug_on(ldst == &ret->m_plist);
+
+		pgsrc = klist0_entry(lsrc, struct page, area_list);
+		pgdst = klist0_entry(ldst, struct page, area_list);
+		memory_copy(page_to_addr(pgdst), page_to_addr(pgsrc),
+			    PAGE_SIZE);
+
+		ldst = ldst->next;
+	}
+
+	ret->m_flags |= mma->m_flags & MMA_STACK;
+	ret->m_sizelim = mma->m_sizelim;
+
+	if (!(mma->m_flags & MMA_RW))
+		mem_area_remap(ret, mma->m_flags);
+
+	return ret;
+}
+
+static void mem_area_unmap(struct mem_area *mma)
+{
+	struct mem_area *org = mma_original(mma);
+	struct klist0_node *tmp = org->m_plist.next;
 	struct klist0_node *dtmp;
 	struct page *pg;
 
 	while (tmp != &mma->m_plist) {
 		pg = klist0_entry(tmp, struct page, area_list);
 
-		unmap_page(map, pg->virt);
+		unmap_page(mma->m_map, pg->virt);
 		dtmp = tmp->next;
 
-		if (free) {
-			free_pages(pg);
-			pg->virt = NOPAGE_ADDR;
-		}
 		tmp = dtmp;
 	}
 
 	slice_free(mma, mma_pool);
 }
 
-void mem_area_kill(struct mem_area *mma, struct mapping *map)
+static void mem_area_kill(struct mem_area *mma)
 {
 	struct klist0_node *tmp = mma->m_plist.next;
 	struct klist0_node *dtmp;
 	struct page *pg;
 
-	while (tmp != &mma->m_plist) {
-		pg = klist0_entry(tmp, struct page, area_list);
+	bug_on(mma->m_flags & MMA_CLONE);
 
-		unmap_page(map, pg->virt);
-		pg->virt = NOPAGE_ADDR;
-		dtmp = tmp->next;
+	if (!klist0_empty(&mma->m_plist)) {
+		while (tmp != &mma->m_plist) {
+			pg = klist0_entry(tmp, struct page, area_list);
 
-		free_pages(pg);
-		tmp = dtmp;
+			unmap_page(mma->m_map, pg->virt);
+			pg->virt = NOPAGE_ADDR;
+			dtmp = tmp->next;
+
+			tmp = dtmp;
+		}
+
+		if (mma->m_flags & MMA_CONT)
+			free_pages(klist0_entry(mma->m_plist.next, struct page,
+						area_list));
+		else
+			free_pagelist(&mma->m_plist);
 	}
 
 	slice_free(mma, mma_pool);
@@ -242,11 +282,13 @@ void mem_area_remove_page(struct mem_area *mma, struct page *page)
 	__mem_area_remove_page(mma, page);
 }
 
-void mem_area_put(struct mem_area *mma, struct mapping *map)
+void mem_area_put(struct mem_area *mma)
 {
-	if (!--mma->m_users)
-		mem_area_unmap(mma, map, 1);
+	struct mem_area *org = mma_original(mma);
+
+	if (!--org->m_users)
+		mem_area_kill(mma);
 	else
-		mem_area_unmap(mma, map, 0);
+		mem_area_unmap(mma);
 }
 
