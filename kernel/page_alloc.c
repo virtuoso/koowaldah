@@ -44,6 +44,7 @@
 #include <textio.h>
 #include <mm_zone.h>
 #include <page_alloc.h>
+#include <error.h>
 #include <bug.h>
 
 #if 0
@@ -259,6 +260,66 @@ struct page *addr_to_page(void *addr)
 	}
 
 	return NULL;
+}
+
+
+int alloc_pagelist_sparse(unsigned int flags, size_t npages, uintptr_t *startp,
+			  struct klist0_node *pg_list)
+{
+	int zone = flags & ZONE_MASK;
+
+	*startp = NOPAGE_ADDR;
+
+	while(npages--) {
+		struct page *pg = alloc_page(zone);
+
+		if (!pg) {
+			free_pagelist(pg_list);
+			return -ENOMEM;
+		}
+
+		klist0_append(&pg->area_list, pg_list);
+
+		if (*startp > (uintptr_t)page_to_addr(pg))
+			*startp = (uintptr_t)page_to_addr(pg);
+	}
+
+	return 0;
+}
+
+int alloc_pagelist_contig(unsigned int flags, size_t npages, uintptr_t *startp,
+			  struct klist0_node *pg_list)
+{
+	int order, i, zone = flags & ZONE_MASK;
+	struct page *pg;
+
+	order = log2(npages);
+	pg = alloc_pages(zone, order);
+	if (!pg)
+		return -ENOMEM;
+
+	for (i = 0; i < 1 << order; i++)
+		klist0_append(&pg[i].area_list, pg_list);
+
+	*startp = (uintptr_t)page_to_addr(pg);
+
+	return 0;
+}
+
+void free_pagelist(struct klist0_node *pg_list)
+{
+	struct klist0_node *tmp = pg_list->next;
+	struct klist0_node *dtmp;
+	struct page *pg;
+
+	while (tmp != pg_list) {
+		pg = klist0_entry(tmp, struct page, area_list);
+
+		free_pages(pg);
+
+		dtmp = tmp->next;
+		tmp = dtmp;
+	}
 }
 
 /*

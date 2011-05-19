@@ -61,6 +61,12 @@ static inline void *get_pages_to_fit(unsigned int flags, size_t size)
 #define alloc_page(flags) alloc_pages(flags, 0) 
 #define get_page(flags) get_pages(flags, 0)
 
+int alloc_pagelist_sparse(unsigned int flags, size_t npages, uintptr_t *startp,
+		       struct klist0_node *pg_list);
+int alloc_pagelist_contig(unsigned int flags, size_t npages, uintptr_t *startp,
+		       struct klist0_node *pg_list);
+void free_pagelist(struct klist0_node *pg_list);
+
 void free_pages(struct page *pg);
 void put_pages(void *addr);
 
