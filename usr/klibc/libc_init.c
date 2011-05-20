@@ -45,7 +45,8 @@ void debug_exit()
 	__sys_debug("atexit()");
 }
 
-__noreturn __libc_init(uintptr_t * elfdata, void (*onexit) (void))
+extern void *_sys_call;
+__noreturn __libc_init(uintptr_t * elfdata, void (*onexit) (void), void *__syscall)
 {
 	extern int main(int, char **, char **);
 	static struct atexit at_exit;
@@ -54,6 +55,8 @@ __noreturn __libc_init(uintptr_t * elfdata, void (*onexit) (void))
 	char *argv[] = {"init", NULL};
 	char buf[80];
 
+	if (__syscall)
+		_sys_call = __syscall;
 	//sprintf(buf, "__bss_start=%08x, __bss_end=%08x\n", &__bss_start, &__bss_end);
 	//__sys_debug(buf);
 	memset(&__bss_start, 0, &__bss_end - &__bss_start);

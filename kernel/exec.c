@@ -34,10 +34,11 @@
  */
 static void __noreturn user_thread(void *data)
 {
+	uintptr_t start = CURRENT()->map->m_mma[0]->m_start;
 	/* disregard everything on the current stack
 	 * as start_user() never returns */
 	reset_stack();
-	start_user(USERMEM_START,
+	start_user(start,
 			USERMEM_STACK - 4,
 			USERMEM_STACK - 4,
 			0);

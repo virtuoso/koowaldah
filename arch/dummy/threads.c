@@ -24,9 +24,21 @@ void display_thread()
 {
 }
 
+extern unsigned int sys_call(
+	unsigned int sys,
+	unsigned int arg0,
+	unsigned int arg1,
+	unsigned int arg2,
+	unsigned int arg3,
+	unsigned int arg4,
+	unsigned int arg5
+	);
+
 void start_user(u32 eip, u32 ebp, u32 esp, u32 val)
 {
-	dummy_start_user(eip, esp);
+	void (*func)(void *, void *, void *) __regparm(3) = (void *)eip;
+	func(&sys_call, &sys_call, &sys_call);
+	for (;;);
 }
 
 void thread_init_stack(struct thread *t, thread_t func, void *data)

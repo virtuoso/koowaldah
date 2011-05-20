@@ -21,6 +21,7 @@ _start:
 	push %ebp		# Keep gdb from getting confused
 	# Push the arguments and called __libc_init()
 #ifndef _REGPARM
+	push %ecx
 	push %edx		# atexit() function
 	push %eax		# ELF array
 #endif
