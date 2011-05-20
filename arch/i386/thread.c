@@ -138,5 +138,6 @@ void thread_switch_to(struct thread *thread)
 	kprintf("esp[3] = 0x%x\n", *((u32 *)tctx(thread).esp + 3));
 */
 	do_thread_switch_to((u32 *)thread->context.esp);
+	for (;;);
 }
 

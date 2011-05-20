@@ -56,5 +56,6 @@ void thread_switch_context(struct thread *from, struct thread *to)
 void thread_switch_to(struct thread *thread)
 {
 	dummy_start((void *)thread->context.placeholder);
+	for (;;);
 }
 
