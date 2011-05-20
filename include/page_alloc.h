@@ -46,6 +46,9 @@ u32 *get_pages(u32 flags, u32 order);
 void *page_to_addr(struct page *page);
 struct page *addr_to_page(u32 *page);
 
+#define INPAGES(x) \
+	(roundup_l2((x), PAGE_SIZE) >> PAGE_SHIFT)
+
 #define alloc_page(flags) alloc_pages(flags, 0) 
 #define get_page(flags) get_pages(flags, 0)
 
