@@ -46,6 +46,7 @@ struct mem_area {
 #define MMA_RW    (0x01) /* read-write protection; readonly otherwise */
 #define MMA_GROWS (0x02) /* mem_area can grow up */
 #define MMA_STACK (0x04) /* mem_area can grow down (stack) */
+#define MMA_EXEC  (0x08) /* executable */
 
 struct mem_area *mem_area_alloc(struct mapping *map, unsigned long start,
 		struct klist0_node *page_list, u32 flags);
@@ -129,7 +130,7 @@ void clone_map(struct mapping *dst, struct mapping *map);
 void switch_map(struct mapping *from, struct mapping *to);
 void map_page(struct mapping *map, u32 virt, u32 phys, u16 flags);
 void unmap_page(struct mapping *map, u32 virt);
-void map_pages(struct mapping *map, u32 virt, u32 phys, u32 n, u16 flags);
+void map_pages(struct mapping *map, void *virt, u32 phys, u32 n, u16 flags);
 void free_map(struct mapping *map);
 
 /* brk.c */

@@ -198,12 +198,13 @@ void unmap_page(struct mapping *map, u32 virt)
  * @n     -- amount of pages to be mapped
  * @flags -- read/write markers
  */
-void map_pages(struct mapping *map, u32 virt, u32 phys, u32 n, u16 flags)
+void map_pages(struct mapping *map, void *virt, u32 phys, u32 n, u16 flags)
 {
 	u32 i;
 
 	for (i = 0; i < n; i++)
-		map_page(map, virt + PAGE_SIZE*i, phys + PAGE_SIZE*i, flags);
+		map_page(map, (uintptr_t)virt + PAGE_SIZE*i, phys + PAGE_SIZE*i,
+			 flags);
 }
 
 /*

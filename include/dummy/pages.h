@@ -30,15 +30,8 @@
 #define NOPAGE_MASK ~(PAGE_MASK)
 #define NOPAGE_ADDR (~0UL)
 
-#define PTF_PRESENT  (1 << 0)  /* page/pte is present    */
-#define PTF_RW       (1 << 1)  /* write access available */
-#define PTF_USER     (1 << 2)  /* accessible by user     */
-#define PTF_PWT      (1 << 3)  /* prevent write-through  */
-#define PTF_PCD      (1 << 4)  /* cache disable          */
-#define PTF_ACCESSED (1 << 5)  /* page has been accessed */
-#define PTF_DIRTY    (1 << 6)  /* page is dirty          */
-#define PTF_PGSIZE   (1 << 7)  /* page size = 4M         */
-#define PTF_GLOBAL   (1 << 8)  /* global (for TLB)       */
+#define PTF_RW		(0x3)  /* PROT_READ | PROT_WRITE */
+#define PTF_EXEC	(0x4)  /* PROT_EXEC */
 
 static __inline u32 __virt2physpg(u32 pgaddr)
 {

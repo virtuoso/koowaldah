@@ -19,6 +19,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdint.h>
 #include <sys/mman.h>
 #include "loader.h"
 
@@ -36,6 +37,14 @@ EXPORT int dummy_get_mem_size()
 EXPORT void *dummy_get_mem_base(void)
 {
 	return mem_base;
+}
+
+EXPORT int dummy_map_pages(void *virt, uintptr_t phys, size_t n,
+			   unsigned int flags)
+{
+	int prot = flags & (PROT_READ|PROT_WRITE|PROT_EXEC);
+
+	return mprotect(virt, n, prot);
 }
 
 /*

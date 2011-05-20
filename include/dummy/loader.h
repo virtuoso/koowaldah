@@ -75,5 +75,7 @@ void dummy_start(void *tc);
  */
 void dummy_switch_context(void *tc_old, void *tc_new);
 
+int dummy_map_pages(void *virt, uintptr_t phys, size_t n, unsigned int flags);
+
 #endif
 

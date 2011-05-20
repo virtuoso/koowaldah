@@ -47,14 +47,16 @@ void paging_init()
 
 void map_page(struct mapping *map, u32 virt, u32 phys, u16 flags)
 {
+	dummy_map_pages((void *)virt, phys, PAGE_SIZE, flags);
 }
 
 void unmap_page(struct mapping *map, u32 virt)
 {
 }
 
-void map_pages(struct mapping *map, u32 virt, u32 phys, u32 n, u16 flags)
+void map_pages(struct mapping *map, void *virt, u32 phys, u32 n, u16 flags)
 {
+	dummy_map_pages((void *)virt, phys, n << PAGE_SHIFT, flags);
 }
 
 void display_map(struct mapping *map)

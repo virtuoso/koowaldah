@@ -41,6 +41,7 @@
 #define PGTIDX(addr) (((addr) & PGT_MASK) >> PGT_SHIFT)
 
 /* page table flags                                      */
+#define PTF_EXEC     (0)       /* for compatibility      */
 #define PTF_PRESENT  (1 << 0)  /* page/pte is present    */
 #define PTF_RW       (1 << 1)  /* write access available */
 #define PTF_USER     (1 << 2)  /* accessible by user     */
