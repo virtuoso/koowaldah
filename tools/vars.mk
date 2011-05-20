@@ -33,7 +33,7 @@ SYS_CC_FLAGS ?= -Werror -Wall -ffreestanding -nostdinc -nostdlib \
 		-g -O2 -std=gnu99 -fno-strict-aliasing -funsigned-bitfields \
 		-funsigned-char -fno-asm -fno-builtin -fno-cond-mismatch \
 		-fno-force-addr -finline-limit=1200 -fno-omit-frame-pointer \
-		-DVERSION_STRING=\"$(VERSION_STRING)\" \
+		-DVERSION_STRING=\"$(VERSION_STRING)\" -D__KERNEL__ \
 		$(shell [ ! -f $(PRJROOT)/confdefs ] || cat $(PRJROOT)/confdefs)
 SYS_LD_FLAGS =
 SYS_ASM_FLAGS = -Wall -ffreestanding -nostdinc -nostdlib -g
